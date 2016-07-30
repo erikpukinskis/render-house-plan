@@ -1,0 +1,200 @@
+<body></body>
+
+<style>
+  body {
+    font-size: 0.4em;
+  }
+</style>
+
+<script src="../build/element.js"></script>
+<script src="../build/add-html.js"></script>
+
+<script>
+
+STUD_WIDTH = 1.25
+STUD_DEPTH = 2.5
+PLYWOOD_THICKNESS = 3/8
+
+var stud = element.template(
+  ".stud",
+  element.style({
+    "width": STUD_DEPTH+"em",
+    "height": STUD_WIDTH+"em",
+    "box-sizing": "border-box",
+    "border": "0.4em solid gray",
+    "border-top": "none",
+    "border-radius": "0.2em",
+    "position": "absolute"
+  }),
+  function(options) {
+    switch(options.orientation) {
+      case "south":
+        this.attributes.style = "transform: rotate(180deg)"
+        break;
+      case "east":
+        this.attributes.style = "transform: rotate(90deg); transform-origin: "+(STUD_WIDTH/2)+"em "+(STUD_WIDTH/2)+"em"
+        break;
+      case "west":
+        this.attributes.style = "transform: rotate(-90deg); transform-origin: "+(STUD_WIDTH)+"em "+(STUD_WIDTH)+"em"
+        break;
+      default:
+        this.attributes.style = ""    
+    }
+
+    if (options.top) {
+      this.attributes.style += "; top: "+options.top+"em"
+    }
+    if (options.left) {
+      this.attributes.style += "; left: "+options.left+"em"
+    }
+  }
+)
+
+var plywood = element.template(
+  ".plywood",
+  element.style({
+    "background": "#fdb",
+    "box-sizing": "border-box",
+    "border-color": "#da7",
+    "border-style": "solid",
+    "border-width": "0.2em 0.2em 0 0",
+    "width": PLYWOOD_THICKNESS+"em",
+    "height": PLYWOOD_THICKNESS+"em",
+    "position": "absolute",
+    "top": "0"
+  }),
+  function(options) {
+    if (options.rotate == 90) {
+      this.attributes.style = "width: "+options.length+"em"
+    } else {
+      this.attributes.style = "height: "+options.length+"em"
+    }
+
+    if (options.left) {
+      this.attributes.style += "; left: "+options.left+"em"
+    }
+    if (options.top) {
+      this.attributes.style += "; top: "+options.top+"em"
+    }
+  }
+)
+
+var section = element.template(
+  ".section",
+  element.style({
+    "position": "absolute",
+    "transform-origin": "50% 50% 0"
+  }),
+  function(options) {
+    this.attributes.style = "left: "+(options.left+5)+"em; top: "+(options.top+5)+"em"
+
+    if (options.rotate) {
+      this.attributes.style += "; transform: rotate("+options.rotate+"deg)"
+    }
+  }
+)
+
+
+
+addHtml(element.stylesheet(
+  stud,
+  plywood,
+  section
+).html())
+
+
+
+// LEFT WALL
+
+function sideWall(position) {
+
+  var long = section(position)
+
+  long.children.push(
+    stud({top: 0, orientation: "south"}),
+    stud({top: 16-STUD_WIDTH/2}),
+    stud({top: 16*2-STUD_WIDTH/2}),
+    stud({top: 16*3-STUD_WIDTH-0.75}),
+    plywood({length: 48, left: -PLYWOOD_THICKNESS}),
+    plywood({length: 48, left: STUD_DEPTH})
+  )
+
+  addHtml(long.html())
+
+  var short = section({left: position.left, top: position.top+48})
+
+  short.children.push(
+    stud({top: 0.75, orientation: "south"}),
+    stud({top: 12-STUD_WIDTH/2}),
+    stud({top: 24-STUD_WIDTH}),
+    plywood({length: 24, left: -PLYWOOD_THICKNESS}),
+    plywood({length: 24, left: STUD_DEPTH})
+  )
+
+  addHtml(short.html())
+}
+
+sideWall({left: 0, top: 0})
+
+sideWall({left: 96-STUD_DEPTH-PLYWOOD_THICKNESS*2, top: 0})
+
+
+
+// BACK LEFT
+
+var backLeft = section({left: 0, top: 0})
+
+var secondStudOffset = 16-PLYWOOD_THICKNESS-STUD_WIDTH/2
+
+backLeft.children.push(
+  stud({orientation: "east", left: STUD_DEPTH+PLYWOOD_THICKNESS}),
+  stud({orientation: "west", left: secondStudOffset}),
+  stud({orientation: "west", left: secondStudOffset+16}),
+  stud({orientation: "west", left: 48-PLYWOOD_THICKNESS-STUD_WIDTH-0.75}),
+  plywood({
+    length: 48,
+    rotate: 90,
+    top: -PLYWOOD_THICKNESS,
+    left: -PLYWOOD_THICKNESS
+  }),
+  plywood({
+    length: 48-STUD_DEPTH-2*PLYWOOD_THICKNESS,
+    rotate: 90,
+    top: STUD_DEPTH,
+    left: STUD_DEPTH+PLYWOOD_THICKNESS
+  })
+)
+
+addHtml(backLeft.html())
+
+
+
+// BACK RIGHT
+
+var backRight = section({left: 48-PLYWOOD_THICKNESS, top: 0})
+
+var secondStudOffset = 16-STUD_WIDTH/2
+
+backRight.children.push(
+  stud({orientation: "east", left: 0.75}),
+  stud({orientation: "west", left: secondStudOffset}),
+  stud({orientation: "west", left: secondStudOffset+16}),
+  stud({orientation: "west", left: 48-PLYWOOD_THICKNESS*2-STUD_DEPTH-STUD_WIDTH}),
+  plywood({
+    length: 48,
+    rotate: 90,
+    top: -PLYWOOD_THICKNESS
+  }),
+  plywood({
+    length: 48-STUD_DEPTH-2*PLYWOOD_THICKNESS,
+    rotate: 90,
+    top: STUD_DEPTH
+  })
+)
+
+addHtml(backRight.html())
+
+
+
+
+</script>
