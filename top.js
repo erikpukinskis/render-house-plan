@@ -1,5 +1,7 @@
 drawPlan(function(stud, plywood, section) {
 
+var DOOR_WIDTH = 32
+
 
 var trim = element.template(
   ".trim",
@@ -26,7 +28,68 @@ var trim = element.template(
 )
 trim.THICKNESS = 0.75
 
-addHtml(element.stylesheet(trim).html())
+
+
+var door = element.template(
+  ".door-container",
+  element.style({
+    "position": "absolute"
+  }),
+  function(options) {
+    var swing = doorSwing()
+    var box = doorBox(swing)
+
+    if (options.orientation == "east") {
+      box.appendStyles({
+        "border-right": "0.4em solid black"
+      })
+    } else {
+      box.appendStyles({
+        "border-left": "0.4em solid black"
+      })
+      swing.appendStyles({
+        "margin-left": (-DOOR_WIDTH-0.375)+"75em"
+      })
+    }
+
+    this.children.push(box)
+
+    if (options.section) {
+      options.section.children.push(this)
+    }
+
+    drawPlan.addStylesFromOptions(options, this)
+  }
+)
+door.WIDTH = DOOR_WIDTH
+
+var doorBox = element.template.container(
+  ".door-box",
+  element.style({
+    "width": DOOR_WIDTH+"em",
+    "height": DOOR_WIDTH+"em",
+    "box-sizing": "border-box",
+    "border-top": "1.5em solid black",
+    "position": "absolute",
+    "top": "-1.5em",
+    "overflow": "hidden",
+  })
+)
+
+var doorSwing = element.template(
+  ".door-swing",
+  element.style({
+    "width": "200%",
+    "height": "200%",
+    "border": "0.4em solid black",
+    "border-radius": (DOOR_WIDTH-1.5)+"em",
+    "margin-top": (-DOOR_WIDTH+0.75)+"em"
+  })
+)
+
+
+
+addHtml(element.stylesheet(trim, door, doorBox, doorSwing).html())
 
 
 // BACK
@@ -247,27 +310,69 @@ trim({
   right: 0
 })
 
+door({
+  section: opening,
+  left: trim.THICKNESS,
+  bottom: 0
+})
+
+door({
+  section: opening,
+  left: trim.THICKNESS+door.WIDTH,
+  bottom: 0,
+  orientation: "east"
+})
+
+trim({
+  section: opening,
+  height: 3.5,
+  bottom: -trim.THICKNESS,
+  left: trim.THICKNESS+door.WIDTH*2
+})
+
 
 // FRONT WALL
 
+var distanceIn = plywood.THICKNESS + stud.DEPTH + trim.THICKNESS*2 + door.WIDTH*2
+
 var front = section({
   top: 48+24,
-  left: 48*2-plywood.THICKNESS*2
+  left: distanceIn
 })
 
 plywood({
   section: front,
-  width: 24,
-  orientation: "south",
-  right: -plywood.THICKNESS
+  width: 96 - distanceIn - plywood.THICKNESS,
+  orientation: "south"
+})
+
+plywood({
+  section: front,
+  width: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH,
+  bottom: stud.DEPTH,
+  orientation: "north"
+})
+
+stud({
+  section: front,
+  orientation: "east",
+  bottom: 0
+})
+
+stud({
+  section: front,
+  orientation: "east",
+  bottom: 0,
+  left: 12
 })
 
 stud({
   section: front,
   orientation: "west",
   bottom: 0,
-  right: stud.DEPTH+plywood.THICKNESS
+  left: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH
 })
+
 
 
 
