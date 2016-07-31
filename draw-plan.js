@@ -83,6 +83,9 @@ var drawPlan = (function() {
       "position": "absolute"
     }),
     function(options) {
+      this.height = options.height
+      this.width = options.width
+
       if (options.section) {
         options.section.children.push(this)
       }
@@ -91,7 +94,7 @@ var drawPlan = (function() {
         this.appendStyles({
           "width": options.length+"em"
         })
-      } else {
+      } else if (options.length) {
         this.appendStyles({
           "height": options.length+"em"
         })
@@ -166,6 +169,8 @@ var drawPlan = (function() {
       }
     )
   }
+
+  drawPlan.addStylesFromOptions = addStylesFromOptions
 
   return drawPlan
 })()

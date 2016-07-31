@@ -2,67 +2,35 @@
 
 drawPlan(function(stud, plywood, section) {
 
-  var frontStud = element.template(
-    ".front-stud",
+  var slopeWrapper = element.template(
+    ".slope-wrapper",
     element.style({
       "width": stud.WIDTH+"em",
       "position": "absolute",
       "overflow": "hidden",
-      "box-sizing": "border-box",
-      "border-bottom": "1px solid #bbb"
+      "box-sizing": "border-box"
     }),
-    function(options) {
-      options.section.children.push(this)
-      this.children.push(
-        inner({height: options.height, topSlope: options.topSlope})
-      )
-      this.appendStyles({
-        "height": options.height+"em"
+    function(el, options) {
+
+      var angle = Math.atan(options.slope)/Math.PI*180
+
+      var dh = el.width*options.slope
+      console.log("dh for", el.width, "slope", options.slope, "is", dh)
+      el.appendStyles({
+        "transform": "skewY(-"+angle+"deg)",
+        "margin-top": dh/2+"em"
       })
-      if (options.left) {
-        this.appendStyles({
-          "left": options.left+"em"
-        })
-      }
-      if (typeof options.bottom != "undefined") {
-        this.appendStyles({
-          "bottom": options.bottom+"em"
-        })
-      }   
+
+      this.appendStyles({
+        "height": el.height+"em",
+        "width": el.width+"em"
+      })
+
+      this.children.push(el)
+
+      drawPlan.addStylesFromOptions(options, this)
     }
   )
-
-
-
-  var inner = element.template(
-    ".front-stud-inner",
-    element.style({
-      "width": stud.WIDTH+"em",
-      "background": "#ccc",
-      "border": "1px solid #999",
-      "box-sizing": "border-box",
-      "border-color": "#bbb #bbb #999 #999",
-      "position": "absolute"
-    }),
-    function(options) {
-      this.appendStyles({
-        height: options.height+"em"
-      })
-      if (options.topSlope) {
-        var angle = Math.atan(options.topSlope)/Math.PI*180
-        var dh = stud.WIDTH*options.topSlope
-        this.appendStyles({
-          "transform": "skewY(-"+angle+"deg)",
-          "top": dh+"em"
-        })
-      }        
-    } 
-  )
-
-  addHtml(element.stylesheet(frontStud, inner).html())
-
-
-
 
 
 
@@ -74,45 +42,91 @@ drawPlan(function(stud, plywood, section) {
 
   // SHEATHING
 
-  plywood({
-    section: side,
-    length: 72,
-    bottom: 0,
-    width: 48
-  })
+  var frontStud = element.template(
+    ".front-stud-inner",
+    element.style({
+      "width": stud.WIDTH+"em",
+      "background": "#ccc",
+      "border": "1px solid #999",
+      "box-sizing": "border-box",
+      "border-color": "#bbb #bbb #999 #999",
+    }),
+    function(options) {
+      this.height = options.height
+      this.width = options.width
 
-  plywood({
-    section: side,
-    length: 72,
-    left: 48,
-    bottom: 0,
-    width: 24
-  })
+      drawPlan.addStylesFromOptions(options, this)
+    } 
+  )
+
+  addHtml(element.stylesheet(frontStud, slopeWrapper).html())
 
 
-  // SIDE STUDS
 
-  myFrontStud(0)
-  myFrontStud(16-stud.WIDTH/2)
-  myFrontStud(16*2-stud.WIDTH/2)
-  myFrontStud(16*3-stud.WIDTH/2)
-  myFrontStud(48+12-stud.WIDTH/2)
-  myFrontStud(72-stud.WIDTH)
 
-  function myFrontStud(offset) {
-    var leftSide = offset + stud.WIDTH
 
-    var height = 72 + leftSide/72*12
 
-    frontStud({
+
+  slopedPly(0, 48)
+  slopedPly(48, 24)
+
+  slopedStud(0)
+  slopedStud(16-stud.WIDTH/2)
+  slopedStud(16*2-stud.WIDTH/2)
+  slopedStud(16*3-stud.WIDTH/2)
+  slopedStud(48+12-stud.WIDTH/2)
+  slopedStud(72-stud.WIDTH)
+
+
+
+
+  function slopedStud(offset) {
+    var rightSide = offset + stud.WIDTH
+
+    var height = 72 + rightSide/72*12
+
+    var newStud = frontStud({
       section: side,
-      height: height,
-      left: offset,
-      bottom: 0,
-      topSlope: 1/6
+      width: stud.WIDTH,
+      height: height
     })
+
+    side.children.push(
+      slopeWrapper(
+        newStud,
+        {
+          slope: 1/6,
+          left: offset,
+          bottom: 0
+        }
+      )
+    )
   }
 
+
+  function slopedPly(offset, width) {
+    var rightSide = offset + width
+
+    var height = 72 + rightSide/72*12
+
+    plywood.push = false
+
+    var ply = plywood({
+      width: width,
+      height: height
+    })
+
+    side.children.push(
+      slopeWrapper(
+        ply,
+        {
+          slope: 1/6,
+          left: offset,
+          bottom: 0
+        }
+      )
+    )
+  }
 
 
 })

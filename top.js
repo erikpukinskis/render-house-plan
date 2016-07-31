@@ -8,7 +8,7 @@ var backLeft = section({
   top: 0
 })
 
-stud({
+backLeft.add(stud({
   section: backLeft,
   orientation: "east",
   left: stud.DEPTH + plywood.THICKNESS
