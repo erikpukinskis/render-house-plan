@@ -156,16 +156,14 @@ var drawPlan = (function() {
       "transform-origin": "50% 50% 0"
     }),
     function(options) {
-      this.appendStyles({
-        "left": (options.left)+"em",
-        "top": (options.top)+"em"
-      })
 
       if (options.rotate) {
         this.appendStyles({
           "transform": "rotate("+options.rotate+"deg)"
         })
       }
+
+      addStylesFromOptions(options, this)
 
       sections.push(this)
     }

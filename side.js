@@ -2,6 +2,8 @@
 
 drawPlan(function(stud, plywood, section) {
 
+  var REAR_WALL_HEIGHT = 80
+
   var slopeWrapper = element.template(
     ".slope-wrapper",
     element.style({
@@ -62,7 +64,7 @@ drawPlan(function(stud, plywood, section) {
   function slopedStud(offset) {
     var rightSide = offset + stud.WIDTH
 
-    var height = 72 + rightSide/72*12
+    var height = REAR_WALL_HEIGHT + rightSide/72*12
 
     var newStud = frontStud({
       section: side,
@@ -74,7 +76,7 @@ drawPlan(function(stud, plywood, section) {
       slopeWrapper(
         newStud,
         {
-          slope: 1/6,
+          slope: 1/4,
           left: offset,
           bottom: 0
         }
@@ -86,7 +88,7 @@ drawPlan(function(stud, plywood, section) {
   function slopedPly(offset, width) {
     var rightSide = offset + width
 
-    var height = 72 + rightSide/72*12
+    var height = REAR_WALL_HEIGHT + rightSide/72*12
 
     plywood.push = false
 
@@ -133,13 +135,45 @@ drawPlan(function(stud, plywood, section) {
 
   plywood({
     section: back,
-    height: 72,
+    height: REAR_WALL_HEIGHT,
     bottom: 0,
     left: -plywood.THICKNESS,
     orientation: "west"
   })
 
 
+  // HEADER
+
+  var header = section({
+    left: 72-stud.DEPTH,
+    top: 96-80-12
+  })
+
+  plywood({
+    section: header,
+    height: 12,
+    left: -plywood.THICKNESS,
+    orientation: "west"
+  })
+
+  plywood({
+    section: header,
+    height: 12,
+    left: stud.DEPTH,
+    orientation: "east"
+  })
+
+  stud({
+    section: header,
+    orientation: "north",
+    top: 12-stud.WIDTH
+  })
+
+  stud({
+    section: header,
+    orientation: "south",
+    top: 0
+  })
 
 })
 
