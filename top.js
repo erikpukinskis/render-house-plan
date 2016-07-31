@@ -3,39 +3,13 @@ drawPlan(function(stud, plywood, section) {
 
 // BACK LEFT
 
-var backLeft = section({
+var back = section({
   left: 0,
   top: 0
 })
 
-stud({
-  section: backLeft,
-  orientation: "east",
-  left: stud.DEPTH + plywood.THICKNESS
-})
-
-var secondStudOffset = 16 - plywood.THICKNESS - stud.WIDTH/2
-
-stud({
-  section: backLeft,
-  orientation: "west",
-  left: secondStudOffset
-})
-
-stud({
-  section: backLeft,
-  orientation: "west",
-  left: secondStudOffset + 16
-})
-
-stud({
-  section: backLeft,
-  orientation: "west",
-  left: 48 - plywood.THICKNESS - stud.WIDTH - 0.75
-})
-
 plywood({
-  section: backLeft,
+  section: back,
   length: 48,
   rotate: 90,
   top: -plywood.THICKNESS,
@@ -44,7 +18,7 @@ plywood({
 })
 
 plywood({
-  section: backLeft,
+  section: back,
   length: 48 - stud.DEPTH - 2*plywood.THICKNESS,
   rotate: 90,
   top: stud.DEPTH,
@@ -52,52 +26,99 @@ plywood({
   orientation: "south"
 })
 
-
-// BACK RIGHT
-
-var backRight = section({left: 48 - plywood.THICKNESS, top: 0})
-
 stud({
-  section: backRight,
+  section: back,
   orientation: "east",
-  left: 0.75
+  left: stud.DEPTH + plywood.THICKNESS
 })
 
-var secondStudOffset = 16 - stud.WIDTH/2
+var secondStudOffset = 16 - plywood.THICKNESS - stud.WIDTH/2
 
 stud({
-  section: backRight,
+  section: back,
   orientation: "west",
   left: secondStudOffset
 })
 
 stud({
-  section: backRight,
+  section: back,
   orientation: "west",
   left: secondStudOffset + 16
 })
 
 stud({
-  section: backRight,
+  section: back,
   orientation: "west",
-  left: 48 - plywood.THICKNESS*2 - stud.DEPTH - stud.WIDTH
+  left: 48 - plywood.THICKNESS - stud.WIDTH/2
 })
 
+// BACK RIGHT
+
 plywood({
-  section: backRight,
+  section: back,
   length: 48,
+  left: 48-plywood.THICKNESS,
   rotate: 90,
   top: -plywood.THICKNESS,
   orientation: "north"
 })
 
 plywood({
-  section: backRight,
+  section: back,
   length: 48 - stud.DEPTH - 2*plywood.THICKNESS,
+  left: 48-plywood.THICKNESS,
   rotate: 90,
   top: stud.DEPTH,
   orientation: "south"
 })
+
+stud({
+  section: back,
+  orientation: "west",
+  left: 48 - plywood.THICKNESS + 16 - stud.WIDTH/2
+})
+
+stud({
+  section: back,
+  orientation: "west",
+  left: 48 - plywood.THICKNESS + 2*16 - stud.WIDTH/2
+})
+
+stud({
+  section: back,
+  orientation: "west",
+  left: 48*2 - plywood.THICKNESS*3 - stud.WIDTH-stud.DEPTH
+})
+
+
+
+// stud({
+//   section: backRight,
+//   orientation: "east",
+//   left: 0.75
+// })
+
+// var secondStudOffset = 16 - stud.WIDTH/2
+
+// stud({
+//   section: backRight,
+//   orientation: "west",
+//   left: secondStudOffset
+// })
+
+// stud({
+//   section: backRight,
+//   orientation: "west",
+//   left: secondStudOffset + 16
+// })
+
+// stud({
+//   section: backRight,
+//   orientation: "west",
+//   left: 48 - plywood.THICKNESS*2 - stud.DEPTH - stud.WIDTH
+// })
+
+
 
 
 // SIDES
