@@ -3,7 +3,7 @@ var drawPlan = (function() {
     ".stud",
     element.style({
       "box-sizing": "border-box",
-      "border": "0.4em solid gray",
+      "border": "0.4em solid #999",
       "border-top": "none",
       "border-radius": "0.2em",
       "position": "absolute"
@@ -14,6 +14,12 @@ var drawPlan = (function() {
       }
 
       switch(options.orientation) {
+        case "right":
+          this.appendStyles({
+            "background": "#ccc",
+            "border-width": "0 0 0 0.4em"
+          })
+          break;
         case "south":
           this.appendStyles({
             "transform": "rotate(180deg)"
@@ -33,16 +39,13 @@ var drawPlan = (function() {
           break;
       }
 
-      if (options.top) {
-        this.appendStyles({
-          "top": options.top+"em"
-        })
-      }
-      if (options.left) {
-        this.appendStyles({
-          "left": options.left+"em"
-        })
-      }
+      var styles = {};
+
+      ["top", "bottom", "left", "height"  ].forEach(function(attribute) {
+        styles[attribute] = options[attribute]+"em"
+      })
+
+      this.appendStyles(styles)
     }
   )
 
