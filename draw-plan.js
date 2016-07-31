@@ -192,7 +192,7 @@ var drawPlan = (function() {
       content: "\\00a0",
       background: "cyan",
       width: "20px",
-      height: "1px",
+      height: "0.5px",
       position: "absolute",
       left: "-10px"
     }
