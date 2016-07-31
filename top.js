@@ -1,7 +1,7 @@
 drawPlan(function(stud, plywood, section) {
 
 
-// BACK LEFT
+// BACK
 
 var back = section({
   left: 0,
@@ -197,7 +197,6 @@ function sideWall(position) {
     left: stud.DEPTH,
     orientation: "east"
   })
-
 }
 
 })

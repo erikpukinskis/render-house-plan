@@ -3,8 +3,8 @@ var drawPlan = (function() {
     ".stud",
     element.style({
       "box-sizing": "border-box",
-      "border": "0.4em solid #999",
-      "border-top": "none",
+      "border-color": "#999",
+      "border-style": "solid",
       "border-radius": "0.2em",
       "position": "absolute"
     }),
@@ -13,28 +13,36 @@ var drawPlan = (function() {
         options.section.children.push(this)
       }
 
+      var size = "0.4em"
+
       switch(options.orientation) {
-        case "right":
+        case "north":
+        default:
           this.appendStyles({
-            "background": "#ccc",
-            "border-width": "0 0 0 0.4em"
+            "border-width": [0, size, size, size].join(" "),
+            "width": stud.DEPTH+"em",
+            "height": stud.WIDTH+"em"
           })
           break
         case "south":
           this.appendStyles({
-            "transform": "rotate(180deg)"
+            "border-width": [size, size, 0, size].join(" "),
+            "width": stud.DEPTH+"em",
+            "height": stud.WIDTH+"em"
           })
           break
         case "east":
           this.appendStyles({
-            "transform": "rotate(90deg)",
-            "transform-origin": (stud.WIDTH/2)+"em "+(stud.WIDTH/2)+"em"
+            "border-width": [size, 0, size, size].join(" "),
+            "width": stud.WIDTH+"em",
+            "height": stud.DEPTH+"em"
           })
           break
         case "west":
           this.appendStyles({
-            "transform": "rotate(-90deg)",
-            "transform-origin": (stud.WIDTH)+"em "+(stud.WIDTH)+"em"
+            "border-width": [size, size, size, 0].join(" "),
+            "width": stud.WIDTH+"em",
+            "height": stud.DEPTH+"em"
           })
           break
       }
@@ -65,12 +73,8 @@ var drawPlan = (function() {
 
   }
 
-
   stud.WIDTH = 1.25
   stud.DEPTH = 2.5
-  stud.cssProperties.width = stud.DEPTH+"em"
-  stud.cssProperties.height = stud.WIDTH+"em"
-
 
   var plywood = element.template(
     ".plywood",
