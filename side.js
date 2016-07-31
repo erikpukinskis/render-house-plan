@@ -15,7 +15,7 @@ drawPlan(function(stud, plywood, section) {
       var angle = Math.atan(options.slope)/Math.PI*180
 
       var dh = el.width*options.slope
-      console.log("dh for", el.width, "slope", options.slope, "is", dh)
+
       el.appendStyles({
         "transform": "skewY(-"+angle+"deg)",
         "margin-top": dh/2+"em"
@@ -23,7 +23,8 @@ drawPlan(function(stud, plywood, section) {
 
       this.appendStyles({
         "height": el.height+"em",
-        "width": el.width+"em"
+        "width": el.width+"em",
+        "border-bottom": el.borderBottom
       })
 
       this.children.push(el)
@@ -34,11 +35,6 @@ drawPlan(function(stud, plywood, section) {
 
 
 
-  var side = section({
-    left: 0,
-    top: 96
-  })
-
 
   // SHEATHING
 
@@ -46,36 +42,19 @@ drawPlan(function(stud, plywood, section) {
     ".front-stud-inner",
     element.style({
       "width": stud.WIDTH+"em",
-      "background": "#ccc",
       "border": "1px solid #999",
-      "box-sizing": "border-box",
-      "border-color": "#bbb #bbb #999 #999",
+      "box-sizing": "border-box"
     }),
     function(options) {
       this.height = options.height
       this.width = options.width
+      this.borderBottom = "1px solid #999"
 
       drawPlan.addStylesFromOptions(options, this)
     } 
   )
 
   addHtml(element.stylesheet(frontStud, slopeWrapper).html())
-
-
-
-
-
-
-
-  slopedPly(0, 48)
-  slopedPly(48, 24)
-
-  slopedStud(0)
-  slopedStud(16-stud.WIDTH/2)
-  slopedStud(16*2-stud.WIDTH/2)
-  slopedStud(16*3-stud.WIDTH/2)
-  slopedStud(48+12-stud.WIDTH/2)
-  slopedStud(72-stud.WIDTH)
 
 
 
@@ -113,7 +92,8 @@ drawPlan(function(stud, plywood, section) {
 
     var ply = plywood({
       width: width,
-      height: height
+      height: height,
+      orientation: "in",
     })
 
     side.children.push(
@@ -127,6 +107,38 @@ drawPlan(function(stud, plywood, section) {
       )
     )
   }
+
+
+
+  var side = section({
+    left: 0,
+    top: 96
+  })
+
+  slopedPly(0, 48)
+  slopedPly(48, 24)
+
+  slopedStud(0)
+  slopedStud(16-stud.WIDTH/2)
+  slopedStud(16*2-stud.WIDTH/2)
+  slopedStud(16*3-stud.WIDTH/2)
+  slopedStud(48+12-stud.WIDTH/2)
+  slopedStud(72-stud.WIDTH)
+
+
+  var back = section({
+    left: 0,
+    top: 96
+  })
+
+  plywood({
+    section: back,
+    height: 72,
+    bottom: 0,
+    left: -plywood.THICKNESS,
+    orientation: "west"
+  })
+
 
 
 })

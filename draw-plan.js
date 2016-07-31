@@ -75,17 +75,48 @@ var drawPlan = (function() {
   var plywood = element.template(
     ".plywood",
     element.style({
-      "background": "#fdb",
       "box-sizing": "border-box",
-      "border-color": "#da7",
-      "border-style": "solid",
-      "border-width": "0.2em 0.2em 0 0",
       "position": "absolute"
     }),
     function(options) {
       this.height = options.height
       this.width = options.width
 
+      var size = "0.2em"
+
+      switch (options.orientation) {
+        case "west":
+          this.appendStyles({
+            "border-left": size+" solid black",
+            "border-right": size+" dashed red"
+          })
+          break
+        case "east":
+          this.appendStyles({
+            "border-right": size+" solid black",
+            "border-left": size+" dashed red"
+          })
+          break
+        case "north":
+          this.appendStyles({
+            "border-top": size+" solid black",
+            "border-bottom": size+" dashed red"
+          })
+          break
+        case "south":
+          this.appendStyles({
+            "border-bottom": size+" solid black",
+            "border-top": size+" dashed red"
+          })
+          break
+        case "in":
+          this.borderBottom = size+" solid black"
+          this.appendStyles({
+            "border": size+" solid black"
+          })
+          break
+
+      }
       if (options.section) {
         options.section.children.push(this)
       }

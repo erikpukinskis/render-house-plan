@@ -8,7 +8,7 @@ var backLeft = section({
   top: 0
 })
 
-backLeft.add(stud({
+stud({
   section: backLeft,
   orientation: "east",
   left: stud.DEPTH + plywood.THICKNESS
@@ -38,8 +38,9 @@ plywood({
   section: backLeft,
   length: 48,
   rotate: 90,
-  top:  - plywood.THICKNESS,
-  left:  - plywood.THICKNESS
+  top: -plywood.THICKNESS,
+  left: -plywood.THICKNESS,
+  orientation: "north"
 })
 
 plywood({
@@ -47,7 +48,8 @@ plywood({
   length: 48 - stud.DEPTH - 2*plywood.THICKNESS,
   rotate: 90,
   top: stud.DEPTH,
-  left: stud.DEPTH + plywood.THICKNESS
+  left: stud.DEPTH + plywood.THICKNESS,
+  orientation: "south"
 })
 
 
@@ -85,14 +87,16 @@ plywood({
   section: backRight,
   length: 48,
   rotate: 90,
-  top:  - plywood.THICKNESS
+  top: -plywood.THICKNESS,
+  orientation: "north"
 })
 
 plywood({
   section: backRight,
   length: 48 - stud.DEPTH - 2*plywood.THICKNESS,
   rotate: 90,
-  top: stud.DEPTH
+  top: stud.DEPTH,
+  orientation: "south"
 })
 
 
@@ -109,8 +113,6 @@ sideWall({
 })
 
 function sideWall(position) {
-
-  // 4 ft section:
 
   var long = section(position)
 
@@ -132,55 +134,47 @@ function sideWall(position) {
 
   stud({
     section: long,
-    top: 16*3 - stud.WIDTH - 0.75
+    top: 48 - stud.WIDTH/2
   })
 
   plywood({
     section: long,
     length: 48,
-    left:  - plywood.THICKNESS
+    left: -plywood.THICKNESS,
+    orientation: "west"
+  })
+
+  plywood({
+    section: long,
+    length: 24,
+    left: stud.DEPTH,
+    orientation: "east"
+  })
+
+  stud({
+    section: long,
+    top: 48+12 - stud.WIDTH/2
+  })
+
+  stud({
+    section: long,
+    top: 48+24 - stud.WIDTH
+  })
+
+  plywood({
+    section: long,
+    length: 24,
+    top: 48,
+    left: -plywood.THICKNESS,
+    orientation: "west"
   })
 
   plywood({
     section: long,
     length: 48,
-    left: stud.DEPTH
-  })
-
-
-  // 2 ft section:
-
-  var short = section({
-    left: position.left,
-    top: position.top + 48
-  })
-
-  stud({
-    section: short,
-    top: 0.75,
-    orientation: "south"
-  })
-
-  stud({
-    section: short,
-    top: 12 - stud.WIDTH/2
-  })
-
-  stud({
-    section: short,
-    top: 24 - stud.WIDTH
-  })
-
-  plywood({
-    section: short,
-    length: 24,
-    left:  - plywood.THICKNESS
-  })
-
-  plywood({
-    section: short,
-    length: 24,
-    left: stud.DEPTH
+    top: 24,
+    left: stud.DEPTH,
+    orientation: "east"
   })
 
 }
