@@ -19,35 +19,52 @@ var drawPlan = (function() {
             "background": "#ccc",
             "border-width": "0 0 0 0.4em"
           })
-          break;
+          break
         case "south":
           this.appendStyles({
             "transform": "rotate(180deg)"
           })
-          break;
+          break
         case "east":
           this.appendStyles({
             "transform": "rotate(90deg)",
             "transform-origin": (stud.WIDTH/2)+"em "+(stud.WIDTH/2)+"em"
           })
-          break;
+          break
         case "west":
           this.appendStyles({
             "transform": "rotate(-90deg)",
             "transform-origin": (stud.WIDTH)+"em "+(stud.WIDTH)+"em"
           })
-          break;
+          break
       }
 
-      var styles = {};
-
-      ["top", "bottom", "left", "height"  ].forEach(function(attribute) {
-        styles[attribute] = options[attribute]+"em"
-      })
-
-      this.appendStyles(styles)
+      addStylesFromOptions(options, this)
     }
   )
+
+  function addStylesFromOptions(options, el) {
+
+    var styles = {}
+    var isSome = false
+
+    ;["top", "bottom", "left", "height"  , "width"].forEach(
+      function(attribute) {
+        var value = options[attribute]
+
+        if (typeof value != "undefined") {
+          styles[attribute] = value+"em"
+          isSome = true
+        }
+      }
+    )
+
+    if (isSome) {
+      el.appendStyles(styles)
+    }
+
+  }
+
 
   stud.WIDTH = 1.25
   stud.DEPTH = 2.5
@@ -63,8 +80,7 @@ var drawPlan = (function() {
       "border-color": "#da7",
       "border-style": "solid",
       "border-width": "0.2em 0.2em 0 0",
-      "position": "absolute",
-      "top": "0"
+      "position": "absolute"
     }),
     function(options) {
       if (options.section) {
@@ -91,6 +107,8 @@ var drawPlan = (function() {
           "top": options.top+"em"
         })
       }
+
+      addStylesFromOptions(options, this)
     }
   )
   plywood.THICKNESS = 3/8

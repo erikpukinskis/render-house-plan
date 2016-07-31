@@ -7,7 +7,9 @@ drawPlan(function(stud, plywood, section) {
     element.style({
       "width": stud.WIDTH+"em",
       "position": "absolute",
-      "overflow": "hidden"
+      "overflow": "hidden",
+      "box-sizing": "border-box",
+      "border-bottom": "1px solid #bbb"
     }),
     function(options) {
       options.section.children.push(this)
@@ -36,7 +38,10 @@ drawPlan(function(stud, plywood, section) {
     ".front-stud-inner",
     element.style({
       "width": stud.WIDTH+"em",
-      "background": "#999",
+      "background": "#ccc",
+      "border": "1px solid #999",
+      "box-sizing": "border-box",
+      "border-color": "#bbb #bbb #999 #999",
       "position": "absolute"
     }),
     function(options) {
@@ -45,7 +50,6 @@ drawPlan(function(stud, plywood, section) {
       })
       if (options.topSlope) {
         var angle = Math.atan(options.topSlope)/Math.PI*180
-        console.log("angle of", options.topSlope, "is", angle)
         var dh = stud.WIDTH*options.topSlope
         this.appendStyles({
           "transform": "skewY(-"+angle+"deg)",
@@ -57,24 +61,60 @@ drawPlan(function(stud, plywood, section) {
 
   addHtml(element.stylesheet(frontStud, inner).html())
 
-  // SIDE SECTION
+
+
+
+
 
   var side = section({
     left: 0,
     top: 96
   })
 
-  var firstStudHeight = 80+1/6*stud.WIDTH
 
-  for(var i=0; i<6; i++) {
+  // SHEATHING
+
+  plywood({
+    section: side,
+    length: 72,
+    bottom: 0,
+    width: 48
+  })
+
+  plywood({
+    section: side,
+    length: 72,
+    left: 48,
+    bottom: 0,
+    width: 24
+  })
+
+
+  // SIDE STUDS
+
+  myFrontStud(0)
+  myFrontStud(16-stud.WIDTH/2)
+  myFrontStud(16*2-stud.WIDTH/2)
+  myFrontStud(16*3-stud.WIDTH/2)
+  myFrontStud(48+12-stud.WIDTH/2)
+  myFrontStud(72-stud.WIDTH)
+
+  function myFrontStud(offset) {
+    var leftSide = offset + stud.WIDTH
+
+    var height = 72 + leftSide/72*12
+
     frontStud({
       section: side,
-      height: firstStudHeight+i/6*16,
-      left: i*16,
+      height: height,
+      left: offset,
       bottom: 0,
       topSlope: 1/6
     })
   }
+
+
+
 })
 
 
