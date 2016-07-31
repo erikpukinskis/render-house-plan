@@ -92,34 +92,6 @@ stud({
 
 
 
-// stud({
-//   section: backRight,
-//   orientation: "east",
-//   left: 0.75
-// })
-
-// var secondStudOffset = 16 - stud.WIDTH/2
-
-// stud({
-//   section: backRight,
-//   orientation: "west",
-//   left: secondStudOffset
-// })
-
-// stud({
-//   section: backRight,
-//   orientation: "west",
-//   left: secondStudOffset + 16
-// })
-
-// stud({
-//   section: backRight,
-//   orientation: "west",
-//   left: 48 - plywood.THICKNESS*2 - stud.DEPTH - stud.WIDTH
-// })
-
-
-
 
 // SIDES
 
@@ -198,5 +170,7 @@ function sideWall(position) {
     orientation: "east"
   })
 }
+
+
 
 })

@@ -56,7 +56,7 @@ var drawPlan = (function() {
     var styles = {}
     var isSome = false
 
-    ;["top", "bottom", "left", "height"  , "width"].forEach(
+    ;["top", "bottom", "left", "right", "height", "width"].forEach(
       function(attribute) {
         var value = options[attribute]
 
@@ -156,8 +156,9 @@ var drawPlan = (function() {
   var section = element.template(
     ".section",
     element.style({
-      "position": "relative",
-      "transform-origin": "50% 50% 0"
+      "position": "absolute",
+      "width": "0",
+      "height": "0"
     }),
     function(options) {
 
@@ -173,6 +174,30 @@ var drawPlan = (function() {
     }
   )
 
+  var sectionBefore = element.style(
+    ".section::before",
+    {
+      content: "\\00a0",
+      background: "cyan",
+      width: "1px",
+      height: "20px",
+      position: "absolute",
+      top: "-10px"
+    }
+  )
+
+  var sectionAfter = element.style(
+    ".section::after", 
+    {
+      content: "\\00a0",
+      background: "cyan",
+      width: "20px",
+      height: "1px",
+      position: "absolute",
+      left: "-10px"
+    }
+  )
+
   var sections
 
   var body = element.template(
@@ -181,7 +206,10 @@ var drawPlan = (function() {
       "position": "relative",
       "left": "5em",
       "top": "10em",
-      "font-size": "0.4em"
+      "width": "0",
+      "height": "0",
+      "font-size": "0.4em",
+      "margin": "0"
     })
   )
 
@@ -189,7 +217,9 @@ var drawPlan = (function() {
     body,
     stud,
     plywood,
-    section
+    section,
+    sectionBefore,
+    sectionAfter
   ).html())
 
 
