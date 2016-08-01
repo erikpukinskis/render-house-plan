@@ -373,10 +373,10 @@ var drawPlan = (function() {
     "body",
     element.style({
       "position": "relative",
-      "left": "5em",
+      "left": "10em",
       "top": "10em",
-      "width": "100em",
-      "height": "120em",
+      "min-width": "120em",
+      "min-height": "120em",
       "font-size": "0.39em",
       "margin": "0"
     })
