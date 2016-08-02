@@ -53,6 +53,9 @@ var drawPlan = (function() {
 
   function addStylesFromOptions(options, el) {
 
+    if (!el) {
+      throw new Error("You wanted to add some styles from an options hash but you didn't pass an element: "+JSON.stringify(options))
+    }
     var styles = {}
     var isSome = false
 

@@ -5,7 +5,7 @@ var DOOR_FRAMING_TOP = FLOOR_TOP - 80 - 0.75*2
 var HEADER_HEIGHT = 10
 var SLOPE = 1/6
 var FLOOR_THICKNESS = 0.75
-var POLY_THICKNESS = 7/16
+var TWIN_WALL_THICKNESS = 7/16
 var CENTER_BEAM_DEPTH = 3.5
 
 var centerBeam = element.template(
@@ -15,7 +15,6 @@ var centerBeam = element.template(
     "transform-origin": "0% 0%",
     "transform": "skewY(-"+drawPlan.slopeToDegrees(SLOPE)+"deg)",
     "border": "0.2em solid #ec4",
-    "width": "96em",
     "left": "-6em",
     "box-sizing": "border-box"
   }),
@@ -28,45 +27,51 @@ var centerBeam = element.template(
 
     var drop = SLOPE*6
 
-    var top = -height + drop + stockThicknessToEdgeHeight(options.offset, SLOPE)
+    var top = -height + drop + stockThicknessToEdgeHeight(options.normal, SLOPE)
 
     this.appendStyles({
       "height": height+"em",
-      "top": top + "em"
+      "top": top+"em",
+      "width": options.width+"em"
     })
   }
 )
 
 
 
-var slopedTrim = element.template(
-  ".sloped-trim",
-  element.style({
-    "position": "absolute",
+function tilted(options) {
+
+  var height = stockThicknessToEdgeHeight(options.height, SLOPE)
+
+  var drop = SLOPE*options.left
+
+  var top = -height - drop + stockThicknessToEdgeHeight(options.normal, SLOPE)
+
+  var angle = drawPlan.slopeToDegrees(SLOPE)
+
+  // cos(angle) = floorWidth/ceilingWidth
+
+  // floorWidth = ceilingWidth*cos(angle)
+
+  if (options.length) {
+    options.width = options.length*Math.cos(angle/180*Math.PI)
+  }
+
+  options.height = height
+  options.top = top
+
+  var generator = options.piece
+  delete options.piece
+
+  var el = generator.call(null, options)
+
+  el.appendStyles({
     "transform-origin": "0% 0%",
     "transform": "skewY(-"+drawPlan.slopeToDegrees(SLOPE)+"deg)",
-    "border": "0.2em solid #ec4",
-    "width": "96em",
-    "left": "-6em",
-    "box-sizing": "border-box"
-  }),
-  function(options) {
-    if (options.section) {
-      options.section.children.push(this)
-    }
+  })
 
-    var height = stockThicknessToEdgeHeight(options.height, SLOPE)
+}
 
-    var drop = SLOPE*6
-
-    var top = -height + drop + stockThicknessToEdgeHeight(options.offset, SLOPE)
-
-    this.appendStyles({
-      "height": height+"em",
-      "top": top + "em"
-    })
-  }
-)
 
 
 
@@ -74,11 +79,7 @@ var twinWallSide = element.template(
   ".twin-wall-side",
   element.style({
     "position": "absolute",
-    "transform-origin": "0% 0%",
-    "transform": "skewY(-"+drawPlan.slopeToDegrees(SLOPE)+"deg)",
     "border": "0.2em solid rgba(0,0,255,0.4)",
-    "width": "96em",
-    "left": "-6em",
     "box-sizing": "border-box"
   }),
   function(options) {
@@ -86,16 +87,7 @@ var twinWallSide = element.template(
       options.section.children.push(this)
     }
 
-    var height = stockThicknessToEdgeHeight(POLY_THICKNESS, SLOPE)     
-
-    var drop = SLOPE*6
-
-    var top = -height + drop + stockThicknessToEdgeHeight(options.offset, SLOPE)
-
-    this.appendStyles({
-      "height": height+"em",
-      "top": top + "em"
-    })
+    drawPlan.addStylesFromOptions(options, this)
   }
 )
 
@@ -120,7 +112,7 @@ function stockThicknessToEdgeHeight(stockThickness, slope) {
 }
 
 
-addHtml(element.stylesheet(centerBeam, twinWallSide, slopedTrim).html())
+addHtml(element.stylesheet(centerBeam, twinWallSide).html())
 
 
 
@@ -132,42 +124,60 @@ drawPlan(doors)
 drawPlan(roof)
 
 
-function roof(section, trim) {
+function roof(section, trim, stud, plywood) {
   var roof = section({
     name: "roof",
     left: 0,
     top: FLOOR_TOP - BACK_STUD_HEIGHT
   })
 
-  centerBeam({
+  tilted({
+    piece: centerBeam,
     section: roof,
-    offset: CENTER_BEAM_DEPTH - trim.THICKNESS*2 - POLY_THICKNESS
+    normal: CENTER_BEAM_DEPTH - trim.THICKNESS*2 - TWIN_WALL_THICKNESS,
+    length: 96
   })
 
-  slopedTrim({
+  tilted({
+    piece: trim,
     section: roof,
     name: "poly-support-rail",
     height: trim.THICKNESS,
-    offset: -trim.THICKNESS
+    normal: -trim.THICKNESS,
+    left: -6,
+    length: 96
   })
 
-  slopedTrim({
+
+  tilted({
+    piece: trim,
     section: roof,
     name: "shade-support-rail",
     height: trim.THICKNESS,
-    offset: 0
+    left: 0,
+    normal: 0,
+    width: 72 - stud.DEPTH - plywood.THICKNESS
   })
 
-  twinWallSide({
+
+
+  tilted({
+    piece: twinWallSide,
     section: roof,
-    offset: -trim.THICKNESS*2
+    normal: -trim.THICKNESS*2,
+    height: TWIN_WALL_THICKNESS,
+    length: 96,
+    left: -6
   })
 
-  slopedTrim({
+  tilted({
+    piece: trim,
     section: roof,
     name: "roof-cap",
     height: trim.THICKNESS,
-    offset: -trim.THICKNESS*2 - POLY_THICKNESS
+    normal: -trim.THICKNESS*2 - TWIN_WALL_THICKNESS,
+    left: -6,
+    length: 96
   })
   
 
