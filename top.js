@@ -1,9 +1,9 @@
 var BATTEN_WIDTH = 1.75
 
 drawPlan(walls)
-// drawPlan(battens)
-drawPlan(roof)
-// drawPlan(doors)
+drawPlan(battens)
+// drawPlan(roof)
+drawPlan(doors)
 // drawPlan(floor)
 
 
@@ -292,6 +292,7 @@ var jambWidth = trim.THICKNESS*2 + plywood.THICKNESS*2 + stud.DEPTH
 
 trim({
   section: opening,
+  name: "bottom-door-jamb",
   height: jambWidth,
   bottom: -trim.THICKNESS - plywood.THICKNESS
 })
@@ -305,6 +306,7 @@ plywood({
 
 trim({
   section: opening,
+  name: "left-door-trim",
   width: trim.THICKNESS+plywood.THICKNESS*2+stud.DEPTH,
   bottom: -plywood.THICKNESS - trim.THICKNESS,
   right: 0
@@ -327,6 +329,7 @@ door({
 
 trim({
   section: opening,
+  name: "top-door-jamb",
   height: jambWidth,
   bottom: -trim.THICKNESS - plywood.THICKNESS,
   left: trim.THICKNESS+door.WIDTH*2
@@ -334,6 +337,7 @@ trim({
 
 trim({
   section: opening,
+  name: "right-door-trim",
   width: BATTEN_WIDTH,
   bottom: -trim.THICKNESS - plywood.THICKNESS,
   left: trim.THICKNESS+door.WIDTH*2+trim.THICKNESS
