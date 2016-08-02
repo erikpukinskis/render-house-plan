@@ -295,7 +295,7 @@ var drawPlan = (function() {
     }),
     function(el, options) {
 
-      var angle = Math.atan(options.slope)/Math.PI*180
+      var angle = drawPlan.slopeToDegrees(options.slope)
 
       var dh = el.width*options.slope
 
@@ -503,6 +503,10 @@ var drawPlan = (function() {
   }
 
   drawPlan.addStylesFromOptions = addStylesFromOptions
+
+  drawPlan.slopeToDegrees = function(slope) {
+    return Math.atan(slope)/Math.PI*180
+  }
 
   return drawPlan
 })()

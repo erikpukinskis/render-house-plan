@@ -2,7 +2,7 @@ var BATTEN_WIDTH = 1.75
 
 drawPlan(walls)
 drawPlan(battens)
-// drawPlan(roof)
+drawPlan(roof)
 drawPlan(doors)
 // drawPlan(floor)
 
@@ -150,18 +150,6 @@ stud({
   section: back,
   orientation: "west",
   left: 48*2 - plywood.THICKNESS*3 - stud.WIDTH-stud.DEPTH
-})
-
-// SIDES
-
-sideWall({
-  left: 0,
-  top: 0
-})
-
-sideWall({
-  left: 96 - stud.DEPTH - plywood.THICKNESS*2,
-  top: 0
 })
 
 function sideWall(position) {

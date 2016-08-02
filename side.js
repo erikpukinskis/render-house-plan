@@ -1,16 +1,177 @@
 var BACK_STUD_HEIGHT = 80
 var BATTEN_WIDTH = 1.75
-var DOOR_FRAMING_TOP = 96 - 80 - 0.75*2
+var FLOOR_TOP = 96
+var DOOR_FRAMING_TOP = FLOOR_TOP - 80 - 0.75*2
 var HEADER_HEIGHT = 10
 var SLOPE = 1/6
 var FLOOR_THICKNESS = 0.75
+var POLY_THICKNESS = 7/16
+var CENTER_BEAM_DEPTH = 3.5
+
+var centerBeam = element.template(
+  ".center-beam",
+  element.style({
+    "position": "absolute",
+    "transform-origin": "0% 0%",
+    "transform": "skewY(-"+drawPlan.slopeToDegrees(SLOPE)+"deg)",
+    "border": "0.2em solid #ec4",
+    "width": "96em",
+    "left": "-6em",
+    "box-sizing": "border-box"
+  }),
+  function(options) {
+    if (options.section) {
+      options.section.children.push(this)
+    }
+
+    var height = stockThicknessToEdgeHeight(CENTER_BEAM_DEPTH, SLOPE)
+
+    var drop = SLOPE*6
+
+    var top = -height + drop + stockThicknessToEdgeHeight(options.offset, SLOPE)
+
+    this.appendStyles({
+      "height": height+"em",
+      "top": top + "em"
+    })
+  }
+)
+
+
+
+var slopedTrim = element.template(
+  ".sloped-trim",
+  element.style({
+    "position": "absolute",
+    "transform-origin": "0% 0%",
+    "transform": "skewY(-"+drawPlan.slopeToDegrees(SLOPE)+"deg)",
+    "border": "0.2em solid #ec4",
+    "width": "96em",
+    "left": "-6em",
+    "box-sizing": "border-box"
+  }),
+  function(options) {
+    if (options.section) {
+      options.section.children.push(this)
+    }
+
+    var height = stockThicknessToEdgeHeight(options.height, SLOPE)
+
+    var drop = SLOPE*6
+
+    var top = -height + drop + stockThicknessToEdgeHeight(options.offset, SLOPE)
+
+    this.appendStyles({
+      "height": height+"em",
+      "top": top + "em"
+    })
+  }
+)
+
+
+
+var twinWallSide = element.template(
+  ".twin-wall-side",
+  element.style({
+    "position": "absolute",
+    "transform-origin": "0% 0%",
+    "transform": "skewY(-"+drawPlan.slopeToDegrees(SLOPE)+"deg)",
+    "border": "0.2em solid rgba(0,0,255,0.4)",
+    "width": "96em",
+    "left": "-6em",
+    "box-sizing": "border-box"
+  }),
+  function(options) {
+    if (options.section) {
+      options.section.children.push(this)
+    }
+
+    var height = stockThicknessToEdgeHeight(POLY_THICKNESS, SLOPE)     
+
+    var drop = SLOPE*6
+
+    var top = -height + drop + stockThicknessToEdgeHeight(options.offset, SLOPE)
+
+    this.appendStyles({
+      "height": height+"em",
+      "top": top + "em"
+    })
+  }
+)
+
+
+function stockThicknessToEdgeHeight(stockThickness, slope) {
+    // x^2 + (x*SLOPE)^2 = stockHeight^2
+
+    // ((1+SLOPE)*x)^2 = stockHeight^2
+
+    // x = Math.sqrt(stockHeight^2)/(1+SLOPE)
+
+    var height = Math.sqrt(
+      Math.pow(stockThickness, 2)/
+      (1+slope)
+    ) 
+
+    if (stockThickness < 0) {
+      height = -height
+    }
+
+    return height
+}
+
+
+addHtml(element.stylesheet(centerBeam, twinWallSide, slopedTrim).html())
+
+
 
 drawPlan(floor)
 drawPlan(header)
 drawPlan(backWall)
 drawPlan(sideWall)
 drawPlan(doors)
+drawPlan(roof)
 
+
+function roof(section, trim) {
+  var roof = section({
+    name: "roof",
+    left: 0,
+    top: FLOOR_TOP - BACK_STUD_HEIGHT
+  })
+
+  centerBeam({
+    section: roof,
+    offset: CENTER_BEAM_DEPTH - trim.THICKNESS*2 - POLY_THICKNESS
+  })
+
+  slopedTrim({
+    section: roof,
+    name: "poly-support-rail",
+    height: trim.THICKNESS,
+    offset: -trim.THICKNESS
+  })
+
+  slopedTrim({
+    section: roof,
+    name: "shade-support-rail",
+    height: trim.THICKNESS,
+    offset: 0
+  })
+
+  twinWallSide({
+    section: roof,
+    offset: -trim.THICKNESS*2
+  })
+
+  slopedTrim({
+    section: roof,
+    name: "roof-cap",
+    height: trim.THICKNESS,
+    offset: -trim.THICKNESS*2 - POLY_THICKNESS
+  })
+  
+
+}
 
 function doors(section, trim, plywood, stud) {
   var opening = section({
@@ -83,7 +244,7 @@ function floor(section, stud, frontStud, plywood) {
 
   var floor = section({
     name: "floor",
-    top: 96,
+    top: FLOOR_TOP,
     left: 0
   })
 
@@ -131,7 +292,7 @@ function sideWall(section, stud, frontStud, plywood, sloped) {
 
   var side = section({
     left: 0,
-    top: 96
+    top: FLOOR_TOP
   })
 
   slopedPly(0, 48)
@@ -144,11 +305,11 @@ function sideWall(section, stud, frontStud, plywood, sloped) {
       section: side,
       piece: plywood,
       width: width,
-      height: BACK_STUD_HEIGHT + rightSide/72*12,
+      height: BACK_STUD_HEIGHT + FLOOR_THICKNESS + stud.DEPTH + plywood.THICKNESS + rightSide/72*12,
       slope: SLOPE,
       orientation: "in",
       left: offset,
-      bottom: 0
+      bottom: -FLOOR_THICKNESS - stud.DEPTH - plywood.THICKNESS
     })
 
   }
@@ -185,7 +346,7 @@ function backWall(section, plywood, stud, trim, sloped) {
   var back = section({
     name: "back-wall",
     left: 0,
-    top: 96
+    top: FLOOR_TOP
   })
 
   var backBattenHeight = BACK_STUD_HEIGHT + FLOOR_THICKNESS + plywood.THICKNESS + stud.DEPTH
