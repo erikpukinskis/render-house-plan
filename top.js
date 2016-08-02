@@ -1,10 +1,43 @@
 var BATTEN_WIDTH = 1.75
 
-// drawPlan(walls)
+drawPlan(walls)
 // drawPlan(battens)
-drawPlan(roof)
+// drawPlan(roof)
 // drawPlan(doors)
+drawPlan(floor)
 
+
+
+function floor(section, frontStud, plywood, stud) {
+
+  var floor = section({
+    name: "floor",
+    left: 0,
+    top: 0
+  })
+
+  for(var i=0; i<6; i++) {
+    frontStud({
+      section: floor,
+      height: 72,
+      left: i*16
+    })
+  }
+
+  frontStud({
+    section: floor,
+    height: 72,
+    left: 96 - plywood.THICKNESS*2 - stud.WIDTH
+  })
+
+  plywood({
+    section: floor,
+    width: 96 - plywood.THICKNESS,
+    height: 72,
+    orientation: "in"
+  })
+
+}
 
 
 // WALLS

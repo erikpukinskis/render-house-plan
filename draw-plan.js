@@ -91,32 +91,32 @@ var drawPlan = (function() {
       switch (options.orientation) {
         case "west":
           this.appendStyles({
-            "border-left": size+" solid black",
+            "border-left": size+" solid #863",
             "border-right": size+" dashed red"
           })
           break
         case "east":
           this.appendStyles({
-            "border-right": size+" solid black",
+            "border-right": size+" solid #863",
             "border-left": size+" dashed red"
           })
           break
         case "north":
           this.appendStyles({
-            "border-top": size+" solid black",
+            "border-top": size+" solid #863",
             "border-bottom": size+" dashed red"
           })
           break
         case "south":
           this.appendStyles({
-            "border-bottom": size+" solid black",
+            "border-bottom": size+" solid #863",
             "border-top": size+" dashed red"
           })
           break
         case "in":
-          this.borderBottom = size+" solid black"
+          this.borderBottom = size+" solid #863"
           this.appendStyles({
-            "border": size+" solid black"
+            "border": size+" solid #863"
           })
           break
 
@@ -283,9 +283,14 @@ var drawPlan = (function() {
     element.style({
       "width": stud.WIDTH+"em",
       "border": "1px solid #999",
-      "box-sizing": "border-box"
+      "box-sizing": "border-box",
+      "position": "absolute"
     }),
     function(options) {
+      if (options.section) {
+        options.section.children.push(this)
+      }
+
       this.height = options.height
       this.width = options.width
       this.borderBottom = "1px solid #999"
@@ -300,7 +305,7 @@ var drawPlan = (function() {
   var twinWall = element.template(
     ".twin-wall",
     element.style({
-      "background": "url(twin-wall.png)",
+      "background": "url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/230211/twin-wall.png)",
       "background-size": "1em",
       "position": "absolute",
       "box-sizing": "border-box",
