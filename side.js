@@ -3,6 +3,7 @@ var BATTEN_WIDTH = 1.75
 var DOOR_FRAMING_TOP = 96 - 80 - 0.75*2
 var HEADER_HEIGHT = 10
 var SLOPE = 1/6
+var FLOOR_THICKNESS = 0.75
 
 drawPlan(floor)
 drawPlan(header)
@@ -45,7 +46,7 @@ function doors(section, trim, plywood, stud) {
   trim({
     section: opening,
     name: "left-door-trim",
-    height: BATTEN_WIDTH + trim.THICKNESS*2 + 80 + plywood.THICKNESS*2 + stud.DEPTH,
+    height: BATTEN_WIDTH + trim.THICKNESS*2 + 80 + FLOOR_THICKNESS + plywood.THICKNESS + stud.DEPTH,
     top: -BATTEN_WIDTH,
     left: plywood.THICKNESS
   })
@@ -72,7 +73,7 @@ function doors(section, trim, plywood, stud) {
     width: BATTEN_WIDTH,
     top: -HEADER_HEIGHT,
     right: -plywood.THICKNESS - trim.THICKNESS,
-    height: HEADER_HEIGHT + trim.THICKNESS*2 + 80 + plywood.THICKNESS*2 + stud.DEPTH
+    height: HEADER_HEIGHT + trim.THICKNESS*2 + 80 + FLOOR_THICKNESS + plywood.THICKNESS + stud.DEPTH
   })
 
 }
@@ -81,26 +82,30 @@ function doors(section, trim, plywood, stud) {
 function floor(section, stud, frontStud, plywood) {
 
   var floor = section({
+    name: "floor",
     top: 96,
     left: 0
   })
 
   plywood({
     section: floor,
+    name: "subfloor",
     width: 72,
+    height: FLOOR_THICKNESS,
+    top: 0,
     orientation: "north"
   })
 
   plywood({
     section: floor,
     width: 72,
-    top: plywood.THICKNESS + stud.DEPTH,
+    top: FLOOR_THICKNESS + stud.DEPTH,
     orientation: "south"
   })
 
   frontStud({
     section: floor,
-    top: plywood.THICKNESS,
+    top: FLOOR_THICKNESS,
     width: 72,
     height: stud.DEPTH
   })
@@ -108,13 +113,13 @@ function floor(section, stud, frontStud, plywood) {
   stud({
     section: floor,
     orientation: "east",
-    top: plywood.THICKNESS
+    top: FLOOR_THICKNESS
   })
 
   stud({
     section: floor,
     orientation: "west",
-    top: plywood.THICKNESS,
+    top: FLOOR_THICKNESS,
     left: 72 - stud.WIDTH
   })
 
@@ -183,28 +188,29 @@ function backWall(section, plywood, stud, trim, sloped) {
     top: 96
   })
 
-  var backBattenHeight = BACK_STUD_HEIGHT + plywood.THICKNESS*2 + stud.DEPTH
+  var backBattenHeight = BACK_STUD_HEIGHT + FLOOR_THICKNESS + plywood.THICKNESS + stud.DEPTH
 
   var dh = BATTEN_WIDTH * SLOPE
 
   sloped({
     section: back,
+    name: "left-side-batten-1",
     piece: trim,
     slope: SLOPE,
-    name: "left-side-batten-1",
     width: BATTEN_WIDTH,
     height: backBattenHeight + dh,
     left: -plywood.THICKNESS,
-    bottom: -plywood.THICKNESS*2 - stud.DEPTH
+    bottom: -FLOOR_THICKNESS - plywood.THICKNESS - stud.DEPTH
   })
 
   trim({
     section: back,
+    name: "back-batten",
     height: backBattenHeight,
-    bottom: -plywood.THICKNESS*2 - stud.DEPTH,
+    bottom: -FLOOR_THICKNESS - plywood.THICKNESS - stud.DEPTH,
     left: -plywood.THICKNESS - trim.THICKNESS
   })
-  
+
   plywood({
     section: back,
     height: BACK_STUD_HEIGHT + plywood.THICKNESS*2 + stud.DEPTH,

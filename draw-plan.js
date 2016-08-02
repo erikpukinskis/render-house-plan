@@ -113,9 +113,9 @@ var drawPlan = (function() {
           })
           break
         case "in":
-          this.borderBottom = size+" solid #863"
+          this.borderBottom = size+" solid black"
           this.appendStyles({
-            "border": size+" solid #863"
+            "border": size+" solid black"
           })
           break
 
