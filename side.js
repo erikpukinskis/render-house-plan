@@ -8,37 +8,6 @@ var FLOOR_THICKNESS = 0.75
 var TWIN_WALL_THICKNESS = 7/16
 var CENTER_BEAM_DEPTH = 3.5
 
-var centerBeam = element.template(
-  ".center-beam",
-  element.style({
-    "position": "absolute",
-    "transform-origin": "0% 0%",
-    "transform": "skewY(-"+drawPlan.slopeToDegrees(SLOPE)+"deg)",
-    "border": "0.2em solid #ec4",
-    "left": "-6em",
-    "box-sizing": "border-box"
-  }),
-  function(options) {
-    if (options.section) {
-      options.section.children.push(this)
-    }
-
-    var height = stockThicknessToEdgeHeight(CENTER_BEAM_DEPTH, SLOPE)
-
-    var drop = SLOPE*6
-
-    var top = -height + drop + stockThicknessToEdgeHeight(options.normal, SLOPE)
-
-    this.appendStyles({
-      "height": height+"em",
-      "top": top+"em",
-      "width": options.width+"em"
-    })
-  }
-)
-
-
-
 function tilted(options) {
 
   var height = stockThicknessToEdgeHeight(options.height, SLOPE)
@@ -132,10 +101,12 @@ function roof(section, trim, stud, plywood) {
   })
 
   tilted({
-    piece: centerBeam,
+    piece: trim,
     section: roof,
     normal: CENTER_BEAM_DEPTH - trim.THICKNESS*2 - TWIN_WALL_THICKNESS,
-    length: 96
+    length: 96,
+    left: -6,
+    height: CENTER_BEAM_DEPTH
   })
 
   tilted({
