@@ -61,6 +61,7 @@ var drawPlan = (function() {
         var value = options[attribute]
 
         if (typeof value != "undefined") {
+          el[attribute] = value
           styles[attribute] = value+"em"
           isSome = true
         }
@@ -83,8 +84,6 @@ var drawPlan = (function() {
       "position": "absolute"
     }),
     function(options) {
-      this.height = options.height
-      this.width = options.width
 
       var size = "0.2em"
 
@@ -166,6 +165,8 @@ var drawPlan = (function() {
       "position": "absolute"
     }),
     function(options) {
+      this.borderBottom = "0.2em solid #ec4"
+
       if (options.height) {
         this.appendStyles({
           "width": trim.THICKNESS+"em"
@@ -244,6 +245,10 @@ var drawPlan = (function() {
 
 
   function sloped(options) {
+
+    if (!options.slope) {
+      throw new Error("You need to pass a slope option when you create a sloped piece. You passed options "+JSON.stringify(options))
+    }
 
     var wrapperOptions = {}
     var innerOptions = {}
@@ -327,14 +332,12 @@ var drawPlan = (function() {
       }
 
       if (options.height) {
-        this.height = options.height
         this.appendStyles({
           "width": stud.WIDTH+"em"
         })
       }
 
       if (options.width) {
-        this.width = options.width
         this.appendStyles({
           "height": stud.WIDTH+"em"
         })

@@ -175,26 +175,42 @@ function sideWall(section, stud, frontStud, plywood, sloped) {
 
 
 
-function backWall(section, plywood, stud, trim) {
+function backWall(section, plywood, stud, trim, sloped) {
 
   var back = section({
+    name: "back-wall",
     left: 0,
     top: 96
   })
 
+  var backBattenHeight = BACK_STUD_HEIGHT + plywood.THICKNESS*2 + stud.DEPTH
+
+  var dh = BATTEN_WIDTH * SLOPE
+
+  sloped({
+    section: back,
+    piece: trim,
+    slope: SLOPE,
+    name: "left-side-batten-1",
+    width: BATTEN_WIDTH,
+    height: backBattenHeight + dh,
+    left: -plywood.THICKNESS,
+    bottom: -plywood.THICKNESS*2 - stud.DEPTH
+  })
+
+  trim({
+    section: back,
+    height: backBattenHeight,
+    bottom: -plywood.THICKNESS*2 - stud.DEPTH,
+    left: -plywood.THICKNESS - trim.THICKNESS
+  })
+  
   plywood({
     section: back,
     height: BACK_STUD_HEIGHT + plywood.THICKNESS*2 + stud.DEPTH,
     bottom: -plywood.THICKNESS*2 - stud.DEPTH,
     left: -plywood.THICKNESS,
     orientation: "west"
-  })
-
-  trim({
-    name: "left-side-batten-1",
-    width: BATTEN_WIDTH,
-    height: BACK_STUD_HEIGHT,
-    bottom: 0
   })
 
 }
