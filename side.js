@@ -2,10 +2,11 @@ var BACK_STUD_HEIGHT = 80
 var BATTEN_WIDTH = 1.75
 var DOOR_FRAMING_TOP = 96 - 80 - 0.75*2
 var HEADER_HEIGHT = 10
+var SLOPE = 1/6
 
 drawPlan(floor)
 drawPlan(header)
-drawPlan(rearWall)
+drawPlan(backWall)
 drawPlan(sideWall)
 drawPlan(doors)
 
@@ -120,7 +121,7 @@ function floor(section, stud, frontStud, plywood) {
 }
 
 
-function sideWall(section, stud, frontStud, plywood, slope) {
+function sideWall(section, stud, frontStud, plywood, sloped) {
 
 
   var side = section({
@@ -134,24 +135,17 @@ function sideWall(section, stud, frontStud, plywood, slope) {
   function slopedPly(offset, width) {
     var rightSide = offset + width
 
-    var height = BACK_STUD_HEIGHT + rightSide/72*12
-
-    var ply = plywood({
+    sloped({
+      section: side,
+      piece: plywood,
       width: width,
-      height: height,
+      height: BACK_STUD_HEIGHT + rightSide/72*12,
+      slope: SLOPE,
       orientation: "in",
+      left: offset,
+      bottom: 0
     })
 
-    side.children.push(
-      slope(
-        ply,
-        {
-          slope: 1/6,
-          left: offset,
-          bottom: 0
-        }
-      )
-    )
   }
 
 
@@ -165,30 +159,23 @@ function sideWall(section, stud, frontStud, plywood, slope) {
   function slopedStud(offset) {
     var rightSide = offset + stud.WIDTH
 
-    var height = BACK_STUD_HEIGHT + rightSide/72*12
-
-    var newStud = frontStud({
+    sloped({
+      section: side,
+      piece: frontStud,
       width: stud.WIDTH,
-      height: height
+      height: BACK_STUD_HEIGHT + rightSide/72*12,
+      slope: 1/6,
+      left: offset,
+      bottom: 0
     })
 
-    side.children.push(
-      slope(
-        newStud,
-        {
-          slope: 1/4,
-          left: offset,
-          bottom: 0
-        }
-      )
-    )
   }
 
 }
 
 
 
-function rearWall(section, plywood, stud) {
+function backWall(section, plywood, stud, trim) {
 
   var back = section({
     left: 0,
@@ -201,6 +188,13 @@ function rearWall(section, plywood, stud) {
     bottom: -plywood.THICKNESS*2 - stud.DEPTH,
     left: -plywood.THICKNESS,
     orientation: "west"
+  })
+
+  trim({
+    name: "left-side-batten-1",
+    width: BATTEN_WIDTH,
+    height: BACK_STUD_HEIGHT,
+    bottom: 0
   })
 
 }

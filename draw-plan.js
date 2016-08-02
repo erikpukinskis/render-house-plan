@@ -243,8 +243,44 @@ var drawPlan = (function() {
   )
 
 
+  function sloped(options) {
 
-  var slope = element.template(
+    var wrapperOptions = {}
+    var innerOptions = {}
+
+    for(var key in options) {
+      switch(key) {
+        case "piece":
+          var generator = options[key]
+          break
+        case "left":
+        case "right":
+        case "top":
+        case "bottom":
+        case "slope":
+          wrapperOptions[key] = options[key]
+          break
+        case "section":
+          var parentSection = options[key]
+          break
+        default:
+          innerOptions[key] = options[key]
+          break
+      }
+    }
+
+    var innerEl = generator.call(null, innerOptions)
+
+    var wrapped = slopeWrapper(innerEl, wrapperOptions)
+
+    if (parentSection) {
+      parentSection.children.push(wrapped)
+    }
+
+    return wrapped
+  }
+
+  var slopeWrapper = element.template(
     ".slope-wrapper",
     element.style({
       "width": stud.WIDTH+"em",
@@ -410,7 +446,7 @@ var drawPlan = (function() {
     doorBox,
     doorSwing,
     frontStud,
-    slope,
+    slopeWrapper,
     twinWall
   ).html())
 
@@ -422,7 +458,7 @@ var drawPlan = (function() {
     door: door,
     trim: trim,
     frontStud: frontStud,
-    slope: slope,
+    sloped: sloped,
     twinWall: twinWall
   }
 
