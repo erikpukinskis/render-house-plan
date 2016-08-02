@@ -281,7 +281,6 @@ var drawPlan = (function() {
   var frontStud = element.template(
     ".front-stud-inner",
     element.style({
-      "width": stud.WIDTH+"em",
       "border": "1px solid #999",
       "box-sizing": "border-box",
       "position": "absolute"
@@ -291,8 +290,20 @@ var drawPlan = (function() {
         options.section.children.push(this)
       }
 
-      this.height = options.height
-      this.width = options.width
+      if (options.height) {
+        this.height = options.height
+        this.appendStyles({
+          "width": stud.WIDTH+"em"
+        })
+      }
+
+      if (options.width) {
+        this.width = options.width
+        this.appendStyles({
+          "height": stud.WIDTH+"em"
+        })
+      }
+
       this.borderBottom = "1px solid #999"
 
       drawPlan.addStylesFromOptions(options, this)

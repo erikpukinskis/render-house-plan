@@ -2,9 +2,9 @@ var BATTEN_WIDTH = 1.75
 
 drawPlan(walls)
 // drawPlan(battens)
-// drawPlan(roof)
+drawPlan(roof)
 // drawPlan(doors)
-drawPlan(floor)
+// drawPlan(floor)
 
 
 
@@ -16,11 +16,28 @@ function floor(section, frontStud, plywood, stud) {
     top: 0
   })
 
-  for(var i=0; i<6; i++) {
+  frontStud({
+    section: floor,
+    width: 96 - plywood.THICKNESS*2
+  })
+
+  frontStud({
+    section: floor,
+    width: 96 - plywood.THICKNESS*2,
+    top: 72 - stud.WIDTH
+  })
+
+  frontStud({
+    section: floor,
+    height: 72,
+    left: 0
+  })
+
+  for(var i=1; i<6; i++) {
     frontStud({
       section: floor,
       height: 72,
-      left: i*16
+      left: i*16 - stud.WIDTH/2
     })
   }
 
@@ -32,7 +49,15 @@ function floor(section, frontStud, plywood, stud) {
 
   plywood({
     section: floor,
-    width: 96 - plywood.THICKNESS,
+    width: 48,
+    height: 72,
+    orientation: "in"
+  })
+
+  plywood({
+    section: floor,
+    left: 48,
+    width: 48-plywood.THICKNESS*2,
     height: 72,
     orientation: "in"
   })
