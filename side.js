@@ -8,81 +8,6 @@ var FLOOR_THICKNESS = 0.75
 var TWIN_WALL_THICKNESS = 7/16
 var CENTER_BEAM_DEPTH = 3.5
 
-function tilted(options) {
-
-  var height = stockThicknessToEdgeHeight(options.height, SLOPE)
-
-  var drop = SLOPE*options.left
-
-  var top = -height - drop + stockThicknessToEdgeHeight(options.normal, SLOPE)
-
-  var angle = drawPlan.slopeToDegrees(SLOPE)
-
-  // cos(angle) = floorWidth/ceilingWidth
-
-  // floorWidth = ceilingWidth*cos(angle)
-
-  if (options.length) {
-    options.width = options.length*Math.cos(angle/180*Math.PI)
-  }
-
-  options.height = height
-  options.top = top
-
-  var generator = options.piece
-  delete options.piece
-
-  var el = generator.call(null, options)
-
-  el.appendStyles({
-    "transform-origin": "0% 0%",
-    "transform": "skewY(-"+drawPlan.slopeToDegrees(SLOPE)+"deg)",
-  })
-
-}
-
-
-
-
-var twinWallSide = element.template(
-  ".twin-wall-side",
-  element.style({
-    "position": "absolute",
-    "border": "0.2em solid rgba(0,0,255,0.4)",
-    "box-sizing": "border-box"
-  }),
-  function(options) {
-    if (options.section) {
-      options.section.children.push(this)
-    }
-
-    drawPlan.addStylesFromOptions(options, this)
-  }
-)
-
-
-function stockThicknessToEdgeHeight(stockThickness, slope) {
-    // x^2 + (x*SLOPE)^2 = stockHeight^2
-
-    // ((1+SLOPE)*x)^2 = stockHeight^2
-
-    // x = Math.sqrt(stockHeight^2)/(1+SLOPE)
-
-    var height = Math.sqrt(
-      Math.pow(stockThickness, 2)/
-      (1+slope)
-    ) 
-
-    if (stockThickness < 0) {
-      height = -height
-    }
-
-    return height
-}
-
-
-addHtml(element.stylesheet(centerBeam, twinWallSide).html())
-
 
 
 drawPlan(floor)
@@ -93,7 +18,8 @@ drawPlan(doors)
 drawPlan(roof)
 
 
-function roof(section, trim, stud, plywood) {
+function roof(section, trim, stud, plywood, tilted, twinWallSide) {
+
   var roof = section({
     name: "roof",
     left: 0,
@@ -105,6 +31,7 @@ function roof(section, trim, stud, plywood) {
     section: roof,
     normal: CENTER_BEAM_DEPTH - trim.THICKNESS*2 - TWIN_WALL_THICKNESS,
     length: 96,
+    slope: SLOPE,
     left: -6,
     height: CENTER_BEAM_DEPTH
   })
@@ -116,9 +43,9 @@ function roof(section, trim, stud, plywood) {
     height: trim.THICKNESS,
     normal: -trim.THICKNESS,
     left: -6,
-    length: 96
+    length: 96,
+    slope: SLOPE
   })
-
 
   tilted({
     piece: trim,
@@ -127,17 +54,29 @@ function roof(section, trim, stud, plywood) {
     height: trim.THICKNESS,
     left: 0,
     normal: 0,
-    width: 72 - stud.DEPTH - plywood.THICKNESS
+    width: 72 - stud.DEPTH - plywood.THICKNESS,
+    slope: SLOPE
   })
 
-
+  tilted({
+    piece: trim,
+    section: roof,
+    name: "spacer",
+    height: TWIN_WALL_THICKNESS,
+    left: -6,
+    normal: -trim.THICKNESS*2,
+    length: 96,
+    slope: SLOPE
+  })
 
   tilted({
     piece: twinWallSide,
+    name: "twin-wall",
     section: roof,
     normal: -trim.THICKNESS*2,
     height: TWIN_WALL_THICKNESS,
     length: 96,
+    slope: SLOPE,
     left: -6
   })
 
@@ -148,13 +87,15 @@ function roof(section, trim, stud, plywood) {
     height: trim.THICKNESS,
     normal: -trim.THICKNESS*2 - TWIN_WALL_THICKNESS,
     left: -6,
-    length: 96
+    length: 96,
+    slope: SLOPE
   })
   
-
 }
 
+
 function doors(section, trim, plywood, stud) {
+
   var opening = section({
     top: DOOR_FRAMING_TOP,
     left: 72,
@@ -270,16 +211,15 @@ function floor(section, stud, frontStud, plywood) {
 
 function sideWall(section, stud, frontStud, plywood, sloped) {
 
-
   var side = section({
     left: 0,
     top: FLOOR_TOP
   })
 
-  slopedPly(0, 48)
-  slopedPly(48, 24)
+  plywoodAtOffset(0, 48)
+  plywoodAtOffset(48, 24)
 
-  function slopedPly(offset, width) {
+  function plywoodAtOffset(offset, width) {
     var rightSide = offset + width
 
     sloped({
@@ -296,14 +236,14 @@ function sideWall(section, stud, frontStud, plywood, sloped) {
   }
 
 
-  slopedStud(0)
-  slopedStud(16-stud.WIDTH/2)
-  slopedStud(16*2-stud.WIDTH/2)
-  slopedStud(16*3-stud.WIDTH/2)
-  slopedStud(48+12-stud.WIDTH/2)
-  slopedStud(72-stud.WIDTH)
+  studAtOffset(0)
+  studAtOffset(16-stud.WIDTH/2)
+  studAtOffset(16*2-stud.WIDTH/2)
+  studAtOffset(16*3-stud.WIDTH/2)
+  studAtOffset(48+12-stud.WIDTH/2)
+  studAtOffset(72-stud.WIDTH)
 
-  function slopedStud(offset) {
+  function studAtOffset(offset) {
     var rightSide = offset + stud.WIDTH
 
     sloped({

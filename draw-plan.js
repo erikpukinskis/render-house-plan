@@ -355,6 +355,82 @@ var drawPlan = (function() {
 
 
 
+  function tilted(options) {
+
+    var height = stockThicknessToEdgeHeight(options.height, options.slope)
+
+    var drop = options.slope*options.left
+
+    var top = -height - drop + stockThicknessToEdgeHeight(options.normal, options.slope)
+
+    var angle = drawPlan.slopeToDegrees(options.slope)
+
+    // cos(angle) = floorWidth/ceilingWidth
+
+    // floorWidth = ceilingWidth*cos(angle)
+
+    if (options.length) {
+      options.width = options.length*Math.cos(angle/180*Math.PI)
+    }
+
+    options.height = height
+    options.top = top
+
+    var generator = options.piece
+    delete options.piece
+
+    var el = generator.call(null, options)
+
+    el.appendStyles({
+      "transform-origin": "0% 0%",
+      "transform": "skewY(-"+drawPlan.slopeToDegrees(options.slope)+"deg)",
+    })
+
+  }
+
+
+
+
+  var twinWallSide = element.template(
+    ".twin-wall-side",
+    element.style({
+      "position": "absolute",
+      "border": "0.2em solid rgba(0,0,255,0.4)",
+      "box-sizing": "border-box"
+    }),
+    function(options) {
+      if (options.section) {
+        options.section.children.push(this)
+      }
+
+      drawPlan.addStylesFromOptions(options, this)
+    }
+  )
+
+
+  function stockThicknessToEdgeHeight(stockThickness, slope) {
+      // x^2 + (x*SLOPE)^2 = stockHeight^2
+
+      // ((1+SLOPE)*x)^2 = stockHeight^2
+
+      // x = Math.sqrt(stockHeight^2)/(1+SLOPE)
+
+      var height = Math.sqrt(
+        Math.pow(stockThickness, 2)/
+        (1+slope)
+      ) 
+
+      if (stockThickness < 0) {
+        height = -height
+      }
+
+      return height
+  }
+
+
+
+
+
   var twinWall = element.template(
     ".twin-wall",
     element.style({
@@ -453,7 +529,8 @@ var drawPlan = (function() {
     doorSwing,
     frontStud,
     slopeWrapper,
-    twinWall
+    twinWall,
+    twinWallSide
   ).html())
 
   var parts = {
@@ -465,7 +542,9 @@ var drawPlan = (function() {
     trim: trim,
     frontStud: frontStud,
     sloped: sloped,
-    twinWall: twinWall
+    twinWall: twinWall,
+    twinWallSide: twinWallSide,
+    tilted: tilted
   }
 
   function drawPlan(generator) {
