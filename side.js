@@ -4,31 +4,13 @@ drawPlan(function(stud, frontStud, plywood, section, slope) {
 
 var BACK_WALL_HEIGHT = 80
 
-function slopedStud(offset) {
-  var rightSide = offset + stud.WIDTH
+var side = section({
+  left: 0,
+  top: 96
+})
 
-  var height = BACK_WALL_HEIGHT + rightSide/72*12
-
-  frontStud.push = false
-
-  var newStud = frontStud({
-    section: side,
-    width: stud.WIDTH,
-    height: height
-  })
-
-  side.children.push(
-    slope(
-      newStud,
-      {
-        slope: 1/4,
-        left: offset,
-        bottom: 0
-      }
-    )
-  )
-}
-
+slopedPly(0, 48)
+slopedPly(48, 24)
 
 function slopedPly(offset, width) {
   var rightSide = offset + width
@@ -56,21 +38,37 @@ function slopedPly(offset, width) {
 }
 
 
-
-var side = section({
-  left: 0,
-  top: 96
-})
-
-slopedPly(0, 48)
-slopedPly(48, 24)
-
 slopedStud(0)
 slopedStud(16-stud.WIDTH/2)
 slopedStud(16*2-stud.WIDTH/2)
 slopedStud(16*3-stud.WIDTH/2)
 slopedStud(48+12-stud.WIDTH/2)
 slopedStud(72-stud.WIDTH)
+
+function slopedStud(offset) {
+  var rightSide = offset + stud.WIDTH
+
+  var height = BACK_WALL_HEIGHT + rightSide/72*12
+
+  frontStud.push = false
+
+  var newStud = frontStud({
+    section: side,
+    width: stud.WIDTH,
+    height: height
+  })
+
+  side.children.push(
+    slope(
+      newStud,
+      {
+        slope: 1/4,
+        left: offset,
+        bottom: 0
+      }
+    )
+  )
+}
 
 
 // REAR WALL
