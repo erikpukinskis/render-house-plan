@@ -1,10 +1,53 @@
-var BACK_WALL_HEIGHT = 80
+var BACK_STUD_HEIGHT = 80
 
 
+drawPlan(floor)
 drawPlan(header)
 drawPlan(rearWall)
 drawPlan(sideWall)
 
+
+function floor(section, stud, frontStud, plywood) {
+
+  var floor = section({
+    top: 96,
+    left: 0
+  })
+
+  plywood({
+    section: floor,
+    width: 72,
+    orientation: "north"
+  })
+
+  plywood({
+    section: floor,
+    width: 72,
+    top: plywood.THICKNESS + stud.DEPTH,
+    orientation: "south"
+  })
+
+  frontStud({
+    section: floor,
+    top: plywood.THICKNESS,
+    width: 72,
+    height: stud.DEPTH
+  })
+
+  stud({
+    section: floor,
+    orientation: "east",
+    top: plywood.THICKNESS
+  })
+
+  stud({
+    section: floor,
+    orientation: "west",
+    top: plywood.THICKNESS,
+    left: 72 - stud.WIDTH
+  })
+
+}
 
 
 function sideWall(section, stud, frontStud, plywood, slope) {
@@ -21,7 +64,7 @@ function sideWall(section, stud, frontStud, plywood, slope) {
   function slopedPly(offset, width) {
     var rightSide = offset + width
 
-    var height = BACK_WALL_HEIGHT + rightSide/72*12
+    var height = BACK_STUD_HEIGHT + rightSide/72*12
 
     var ply = plywood({
       width: width,
@@ -52,7 +95,7 @@ function sideWall(section, stud, frontStud, plywood, slope) {
   function slopedStud(offset) {
     var rightSide = offset + stud.WIDTH
 
-    var height = BACK_WALL_HEIGHT + rightSide/72*12
+    var height = BACK_STUD_HEIGHT + rightSide/72*12
 
     var newStud = frontStud({
       width: stud.WIDTH,
@@ -75,7 +118,7 @@ function sideWall(section, stud, frontStud, plywood, slope) {
 
 
 
-function rearWall(section, plywood) {
+function rearWall(section, plywood, stud) {
 
   var back = section({
     left: 0,
@@ -84,8 +127,8 @@ function rearWall(section, plywood) {
 
   plywood({
     section: back,
-    height: BACK_WALL_HEIGHT,
-    bottom: 0,
+    height: BACK_STUD_HEIGHT + plywood.THICKNESS*2 + stud.DEPTH,
+    bottom: -plywood.THICKNESS*2 - stud.DEPTH,
     left: -plywood.THICKNESS,
     orientation: "west"
   })
