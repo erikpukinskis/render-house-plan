@@ -168,7 +168,7 @@ var drawPlan = (function() {
       "position": "absolute"
     }),
     function(options) {
-      this.borderBottom = "0.4em solid #ec4"
+      this.borderBottom = "0.2em solid #ec4"
 
       if (options.height) {
         this.appendStyles({
@@ -302,6 +302,10 @@ var drawPlan = (function() {
 
       var dh = el.width*options.slope
 
+      if (!el.width) {
+        throw new Error("Can't slope an element without a width "+JSON.stringify(el))
+      }
+
       el.appendStyles({
         "transform": "skewY(-"+angle+"deg)",
         "margin-top": dh/2+"em"
@@ -357,20 +361,24 @@ var drawPlan = (function() {
 
   function tilted(options) {
 
-    var height = stockThicknessToEdgeHeight(options.height, options.slope)
+    var height = verticalSlice(options.height, options.slope)
 
     var drop = options.slope*options.left
 
-    var top = -height - drop + stockThicknessToEdgeHeight(options.normal, options.slope)
+    if (options.normal) {
+      var top = -height - drop + stockThicknessToEdgeHeight(options.normal, options.slope)
+    } else {
+      var top = options.top - drop
+    }
 
-    var angle = drawPlan.slopeToDegrees(options.slope)
+    var radians = drawPlan.slopeToRadians(options.slope)
 
     // cos(angle) = floorWidth/ceilingWidth
 
     // floorWidth = ceilingWidth*cos(angle)
 
     if (options.length) {
-      options.width = options.length*Math.cos(angle/180*Math.PI)
+      options.width = options.length*Math.cos(radians)
     }
 
     options.height = height
@@ -521,8 +529,8 @@ var drawPlan = (function() {
     stud,
     plywood,
     section,
-    sectionBefore,
-    sectionAfter,
+    // sectionBefore,
+    // sectionAfter,
     trim,
     door,
     doorBox,
@@ -584,11 +592,40 @@ var drawPlan = (function() {
     }
   }
 
+  function verticalSlice(thickness, slope) {
+    // cos(angle) = adjacent/hypotenuse
+
+    // cos(angle) = thickness/slice
+
+    // slice = thickness/cos(angle)
+
+    var angle = drawPlan.slopeToRadians(slope)
+
+    return thickness/Math.cos(angle)
+  }
+
+
   drawPlan.addStylesFromOptions = addStylesFromOptions
 
+
   drawPlan.slopeToDegrees = function(slope) {
-    return Math.atan(slope)/Math.PI*180
+    var degrees = 180*drawPlan.slopeToRadians(slope)/Math.PI
+    // console.log(degrees)
+    return degrees
   }
+
+  drawPlan.slopeToRadians = function(slope) {
+
+    // tan(angle) = opposite/adjacent
+
+    // tan(angle) = slope
+
+    // angle = atan(slope)
+
+    return Math.atan(slope)
+  }
+
+  drawPlan.verticalSlice = verticalSlice
 
   return drawPlan
 })()
