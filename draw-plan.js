@@ -168,7 +168,7 @@ var drawPlan = (function() {
       "position": "absolute"
     }),
     function(options) {
-      this.borderBottom = "0.2em solid #ec4"
+      this.borderBottom = "0.4em solid #ec4"
 
       if (options.height) {
         this.appendStyles({

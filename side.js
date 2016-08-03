@@ -222,11 +222,15 @@ function sideWall(section, stud, frontStud, plywood, sloped) {
   function plywoodAtOffset(offset, width) {
     var rightSide = offset + width
 
+    var leftSideHeight = BACK_STUD_HEIGHT + FLOOR_THICKNESS + stud.DEPTH + plywood.THICKNESS
+
+    var rightSideHeight = leftSideHeight + rightSide/72*12
+
     sloped({
       section: side,
       piece: plywood,
       width: width,
-      height: BACK_STUD_HEIGHT + FLOOR_THICKNESS + stud.DEPTH + plywood.THICKNESS + rightSide/72*12,
+      height: rightSideHeight,
       slope: SLOPE,
       orientation: "in",
       left: offset,
