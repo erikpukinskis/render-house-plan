@@ -395,15 +395,15 @@ function header(section, stud, plywood, trim, sloped) {
     orientation: "east"
   })
 
-  var plateBaseToCap = drawPlan.verticalSlice(RAFTER_THICKNESS, SLOPE) - (plywood.THICKNESS + trim.THICKNESS)*SLOPE
+  var toTop = drawPlan.verticalSlice(RAFTER_THICKNESS, SLOPE) + (plywood.THICKNESS + trim.THICKNESS)*SLOPE
 
   sloped({
     section: header,
     part: trim,
     name: "front-left-corner-batten",
     left: plywood.THICKNESS,
-    top: -plateBaseToCap,
-    height: plateBaseToCap + headerHeight + DOOR_GAP - BATTEN_WIDTH,
+    top: -toTop,
+    height: toTop + headerHeight + DOOR_GAP - BATTEN_WIDTH,
     width: trim.THICKNESS,
     slope: SLOPE
   })
