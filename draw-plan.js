@@ -258,7 +258,7 @@ var drawPlan = (function() {
 
     for(var key in options) {
       switch(key) {
-        case "piece":
+        case "part":
           var generator = options[key]
           break
         case "left":
@@ -384,8 +384,8 @@ var drawPlan = (function() {
     options.height = height
     options.top = top
 
-    var generator = options.piece
-    delete options.piece
+    var generator = options.part
+    delete options.part
 
     var el = generator.call(null, options)
 
@@ -607,6 +607,7 @@ var drawPlan = (function() {
 
   drawPlan.addStylesFromOptions = addStylesFromOptions
 
+  drawPlan.parts = parts
 
   drawPlan.slopeToDegrees = function(slope) {
     var degrees = 180*drawPlan.slopeToRadians(slope)/Math.PI
