@@ -113,9 +113,27 @@ function doors(section, trim, plywood, stud) {
     section: opening,
     name: "bottom-door-jamb",
     width: jambWidth,
-    top: 80 + DOOR_GAP*2 + trim.THICKNESS,
+    top: 80 + DOOR_GAP + trim.THICKNESS,
     right: -plywood.THICKNESS - trim.THICKNESS
   })
+
+  trim({
+    section: opening,
+    name: "side-door-jamb",
+    width: jambWidth,
+    height: 80,
+    right: -plywood.THICKNESS - trim.THICKNESS,
+    top: DOOR_GAP + trim.THICKNESS
+  })
+
+  trim({
+    section: opening,
+    name: "door-trim-top",
+    height: BATTEN_WIDTH,
+    left: plywood.THICKNESS,
+    top: -BATTEN_WIDTH + DOOR_GAP
+  })
+
 
   // trim({
   //   section: opening,
@@ -221,10 +239,10 @@ function sideWall(section, stud, frontStud, plywood, sloped) {
       section: side,
       part: frontStud,
       width: stud.WIDTH,
-      height: BACK_STUD_HEIGHT + rightSide/72*12,
+      height: plywood.THICKNESS + stud.DEPTH + FLOOR_THICKNESS + BACK_STUD_HEIGHT + rightSide/72*12,
       slope: 1/6,
       left: offset,
-      bottom: 0
+      bottom: -FLOOR_THICKNESS - stud.DEPTH - plywood.THICKNESS
     })
 
   }
