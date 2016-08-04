@@ -96,8 +96,26 @@ function doors(section, trim, plywood, stud) {
 
   plywood({
     section: opening,
-    height: 80,
+    name: "left-of-door-sheathing",
+    height: 77,
     top: 3,
+    orientation: "east"
+  })
+
+  plywood({
+    section: opening,
+    name: "below-door-sheathing",
+    height: 2.5,
+    top: DOOR_GAP*2 + trim.THICKNESS*2 + 80 + 0.5,
+    orientation: "east"
+  })
+
+  trim({
+    section: opening,
+    name: "door-trim-bottom",
+    height: DOOR_GAP + floorSectionHeight,
+    top: DOOR_GAP + trim.THICKNESS*2 + 80,
+    left: plywood.THICKNESS,
     orientation: "east"
   })
 
