@@ -94,12 +94,12 @@ function doors(section, trim, plywood, stud) {
     left: 72,
   })
 
-  // plywood({
-  //   section: opening,
-  //   height: 80,
-  //   top: 3,
-  //   orientation: "east"
-  // })
+  plywood({
+    section: opening,
+    height: 80,
+    top: 3,
+    orientation: "east"
+  })
 
   var jambWidth = trim.THICKNESS*2 + plywood.THICKNESS*2 + stud.DEPTH
 
@@ -135,16 +135,6 @@ function doors(section, trim, plywood, stud) {
     left: plywood.THICKNESS,
     top: -BATTEN_WIDTH + DOOR_GAP
   })
-
-
-  // trim({
-  //   section: opening,
-  //   name: "left-side-batten-4",
-  //   width: BATTEN_WIDTH,
-  //   top: -headerHeight,
-  //   right: -plywood.THICKNESS - trim.THICKNESS,
-  //   height: headerHeight + trim.THICKNESS*2 + 80 + SUBFLOOR_THICKNESS + plywood.THICKNESS + stud.DEPTH
-  // })
 
 }
 
@@ -196,7 +186,7 @@ function floor(section, stud, frontStud, plywood) {
 }
 
 
-function sideWall(section, stud, frontStud, plywood, sloped) {
+function sideWall(section, stud, frontStud, plywood, sloped, trim, sloped) {
 
   var side = section({
     left: 0,
@@ -251,6 +241,17 @@ function sideWall(section, stud, frontStud, plywood, sloped) {
     })
 
   }
+
+  sloped({
+    section: side,
+    part: trim,
+    name: "left-side-batten-4",
+    width: BATTEN_WIDTH,
+    bottom: -floorSectionHeight,
+    left: 72 - BATTEN_WIDTH + plywood.THICKNESS,
+    height: floorSectionHeight + DOOR_GAP*2 + 80 + trim.THICKNESS*2 + headerHeight + RAFTER_THICKNESS + plywood.THICKNESS*SLOPE,
+    slope: SLOPE
+  })
 
 }
 
@@ -376,15 +377,18 @@ function header(section, stud, plywood, trim, sloped) {
     orientation: "east"
   })
 
-  // trim({
-  //   section: header,
-  //   name: "front-left-corner-batten",
-  //   left: stud.DEPTH + plywood.THICKNESS,
-  //   bottom: 0,
-  //   height: headerHeight + 3
-  // })
+  var plateBaseToCap = drawPlan.verticalSlice(RAFTER_THICKNESS, SLOPE) - (plywood.THICKNESS + trim.THICKNESS)*SLOPE
 
+  sloped({
+    section: header,
+    part: trim,
+    name: "front-left-corner-batten",
+    left: plywood.THICKNESS,
+    top: -plateBaseToCap,
+    height: plateBaseToCap + headerHeight + DOOR_GAP - BATTEN_WIDTH,
+    width: trim.THICKNESS,
+    slope: SLOPE
+  })
 
 }
-// 
 
