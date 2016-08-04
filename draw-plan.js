@@ -303,7 +303,7 @@ var drawPlan = (function() {
     }),
     function(el, options) {
 
-      var angle = drawPlan.slopeToDegrees(options.slope)
+      var angle = slopeToDegrees(options.slope)
 
       var dh = el.width*options.slope
 
@@ -376,7 +376,7 @@ var drawPlan = (function() {
       var top = options.top - drop
     }
 
-    var radians = drawPlan.slopeToRadians(options.slope)
+    var radians = slopeToRadians(options.slope)
 
     // cos(angle) = floorWidth/ceilingWidth
 
@@ -396,7 +396,7 @@ var drawPlan = (function() {
 
     el.appendStyles({
       "transform-origin": "0% 0%",
-      "transform": "skewY(-"+drawPlan.slopeToDegrees(options.slope)+"deg)",
+      "transform": "skewY(-"+slopeToDegrees(options.slope)+"deg)",
     })
 
   }
@@ -514,6 +514,67 @@ var drawPlan = (function() {
     }
   )
 
+
+  function verticalSlice(thickness, slope) {
+    // cos(angle) = adjacent/hypotenuse
+
+    // cos(angle) = thickness/slice
+
+    // slice = thickness/cos(angle)
+
+    var angle = slopeToRadians(slope)
+
+    return thickness/Math.cos(angle)
+  }
+
+
+  slopeToDegrees = function(slope) {
+    var degrees = 180*slopeToRadians(slope)/Math.PI
+    // console.log(degrees)
+    return degrees
+  }
+
+  slopeToRadians = function(slope) {
+
+    // tan(angle) = opposite/adjacent
+
+    // tan(angle) = slope
+
+    // angle = atan(slope)
+
+    return Math.atan(slope)
+  }
+
+
+
+
+
+
+  // All of the parts and helpers:
+
+  var parts = {
+    section: section,
+    stud: stud,
+    plywood: plywood,
+    section: section,
+    door: door,
+    trim: trim,
+    frontStud: frontStud,
+    sloped: sloped,
+    twinWall: twinWall,
+    twinWallSide: twinWallSide,
+    tilted: tilted,
+    slopeToRadians: slopeToRadians,
+    slopeToDegrees: slopeToDegrees,
+    verticalSlice: verticalSlice
+  }
+
+
+
+
+
+
+
   var sections
 
   var body = element.template(
@@ -545,20 +606,6 @@ var drawPlan = (function() {
     twinWall,
     twinWallSide
   ).html())
-
-  var parts = {
-    section: section,
-    stud: stud,
-    plywood: plywood,
-    section: section,
-    door: door,
-    trim: trim,
-    frontStud: frontStud,
-    sloped: sloped,
-    twinWall: twinWall,
-    twinWallSide: twinWallSide,
-    tilted: tilted
-  }
 
   function drawPlan(generator) {
     sections = []
@@ -597,41 +644,9 @@ var drawPlan = (function() {
     }
   }
 
-  function verticalSlice(thickness, slope) {
-    // cos(angle) = adjacent/hypotenuse
-
-    // cos(angle) = thickness/slice
-
-    // slice = thickness/cos(angle)
-
-    var angle = drawPlan.slopeToRadians(slope)
-
-    return thickness/Math.cos(angle)
-  }
-
-
   drawPlan.addStylesFromOptions = addStylesFromOptions
 
   drawPlan.parts = parts
-
-  drawPlan.slopeToDegrees = function(slope) {
-    var degrees = 180*drawPlan.slopeToRadians(slope)/Math.PI
-    // console.log(degrees)
-    return degrees
-  }
-
-  drawPlan.slopeToRadians = function(slope) {
-
-    // tan(angle) = opposite/adjacent
-
-    // tan(angle) = slope
-
-    // angle = atan(slope)
-
-    return Math.atan(slope)
-  }
-
-  drawPlan.verticalSlice = verticalSlice
 
   return drawPlan
 })()

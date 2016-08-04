@@ -40,7 +40,7 @@ drawPlan(roof)
 
 
 
-function roof(section, trim, stud, plywood, tilted, twinWallSide) {
+function roof(section, trim, stud, plywood, tilted, twinWallSide, verticalSlice) {
 
   var roof = section({
     name: "roof",
@@ -67,7 +67,7 @@ function roof(section, trim, stud, plywood, tilted, twinWallSide) {
     section: roof,
     name: "roof-cap",
     height: trim.THICKNESS,
-    top: -RAFTER_THICKNESS - plywood.THICKNESS*SLOPE -  drawPlan.verticalSlice(trim.THICKNESS, SLOPE),
+    top: -RAFTER_THICKNESS - plywood.THICKNESS*SLOPE -  verticalSlice(trim.THICKNESS, SLOPE),
     left: -8,
     length: 96,
     slope: SLOPE
@@ -348,7 +348,7 @@ function backWall(section, plywood, stud, trim, sloped) {
 
 
 
-function header(section, stud, plywood, trim, sloped) {
+function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
   var header = section(headerRafterIntersection)
 
@@ -374,7 +374,7 @@ function header(section, stud, plywood, trim, sloped) {
     orientation: "west"
   })
 
-  var topPlateHeight = drawPlan.verticalSlice(RAFTER_THICKNESS - TWIN_WALL_THICKNESS, SLOPE)
+  var topPlateHeight = verticalSlice(RAFTER_THICKNESS - TWIN_WALL_THICKNESS, SLOPE)
 
   sloped({
     section: header,
@@ -395,7 +395,7 @@ function header(section, stud, plywood, trim, sloped) {
     orientation: "east"
   })
 
-  var toTop = drawPlan.verticalSlice(RAFTER_THICKNESS, SLOPE) + (plywood.THICKNESS + trim.THICKNESS)*SLOPE
+  var toTop = verticalSlice(RAFTER_THICKNESS, SLOPE) + (plywood.THICKNESS + trim.THICKNESS)*SLOPE
 
   sloped({
     section: header,
