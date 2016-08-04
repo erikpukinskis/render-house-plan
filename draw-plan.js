@@ -170,6 +170,11 @@ var drawPlan = (function() {
     function(options) {
       this.borderBottom = "0.2em solid #ec4"
 
+      if (options.color) {
+        this.appendStyles({
+          "border-color": options.color
+        })
+      }
       if (options.height) {
         this.appendStyles({
           "width": trim.THICKNESS+"em"
@@ -529,8 +534,8 @@ var drawPlan = (function() {
     stud,
     plywood,
     section,
-    sectionBefore,
-    sectionAfter,
+    // sectionBefore,
+    // sectionAfter,
     trim,
     door,
     doorBox,
