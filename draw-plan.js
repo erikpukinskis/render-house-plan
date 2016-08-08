@@ -59,7 +59,7 @@ var drawPlan = (function() {
     var styles = {}
     var isSome = false
 
-    ;["top", "bottom", "left", "right", "height", "width", "zPos", "xPos"].forEach(
+    ;["top", "bottom", "left", "right", "height", "width", "zPos", "xPos", "yPos"].forEach(
       function(attribute) {
         var value = options[attribute]
 
@@ -74,6 +74,11 @@ var drawPlan = (function() {
           } else if (attribute == "xPos") {
             attribute = {
               top: "left"
+            }[view]
+            if (!attribute) { throw new Error }
+          } else if (attribute == "yPos") {
+            attribute = {
+              side: "top"
             }[view]
             if (!attribute) { throw new Error }
           }
@@ -273,6 +278,13 @@ var drawPlan = (function() {
             throw new Error("Can only slope in side view")
           }
           break
+        case "yPos":
+          if (view == "side") {
+            wrapperOptions.top = options.yPos
+          } else {
+            throw new Error("Can only slope in side view")
+          }
+          break
         case "section":
           var parentSection = options[key]
           break
@@ -374,12 +386,8 @@ var drawPlan = (function() {
 
     var drop = options.slope*options.zPos
 
-    if (options.normal) {
-      var top = -height - drop + stockThicknessToEdgeHeight(options.normal, options.slope)
-    } else {
-      var top = options.top - drop
-    }
-
+    var yPos = options.yPos - drop
+    
     var radians = slopeToRadians(options.slope)
 
     // cos(angle) = floorWidth/ceilingWidth
@@ -391,7 +399,7 @@ var drawPlan = (function() {
     }
 
     options.height = height
-    options.top = top
+    options.yPos = yPos
 
     var generator = options.part
     delete options.part
