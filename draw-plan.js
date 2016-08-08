@@ -59,11 +59,20 @@ var drawPlan = (function() {
     var styles = {}
     var isSome = false
 
-    ;["top", "bottom", "left", "right", "height", "width"].forEach(
+    ;["top", "bottom", "left", "right", "height", "width", "zPos"].forEach(
       function(attribute) {
         var value = options[attribute]
 
         if (typeof value != "undefined") {
+
+          if (attribute == "zPos") {
+            attribute = {
+              side: "left",
+              top: "top"
+            }[view]
+            if (!view) { throw new Error }
+          }
+
           el[attribute] = value
           styles[attribute] = value+"em"
           isSome = true
@@ -125,27 +134,6 @@ var drawPlan = (function() {
       }
       if (options.section) {
         options.section.children.push(this)
-      }
-
-      if (options.rotate == 90) {
-        this.appendStyles({
-          "width": options.length+"em"
-        })
-      } else if (options.length) {
-        this.appendStyles({
-          "height": options.length+"em"
-        })
-      }
-
-      if (options.left) {
-        this.appendStyles({
-          "left": options.left+"em"
-        })
-      }
-      if (options.top) {
-        this.appendStyles({
-          "top": options.top+"em"
-        })
       }
 
       addStylesFromOptions(options, this)
@@ -273,6 +261,13 @@ var drawPlan = (function() {
         case "slope":
           wrapperOptions[key] = options[key]
           break
+        case "zPos":
+          if (view == "side") {
+            wrapperOptions.left = options.zPos
+          } else {
+            throw new Error("Can only slope in side view")
+          }
+          break
         case "section":
           var parentSection = options[key]
           break
@@ -368,7 +363,7 @@ var drawPlan = (function() {
 
     var height = verticalSlice(options.height, options.slope)
 
-    var drop = options.slope*options.left
+    var drop = options.slope*options.zPos
 
     if (options.normal) {
       var top = -height - drop + stockThicknessToEdgeHeight(options.normal, options.slope)
@@ -607,6 +602,7 @@ var drawPlan = (function() {
     twinWallSide
   ).html())
 
+
   function drawPlan(generator) {
     sections = []
 
@@ -642,6 +638,11 @@ var drawPlan = (function() {
     } else {
       return []
     }
+  }
+
+  var view
+  drawPlan.setView = function(newView) {
+    view = newView
   }
 
   drawPlan.addStylesFromOptions = addStylesFromOptions
