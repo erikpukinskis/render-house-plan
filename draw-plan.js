@@ -59,7 +59,7 @@ var drawPlan = (function() {
     var styles = {}
     var isSome = false
 
-    ;["top", "bottom", "left", "right", "height", "width", "zPos", "xPos", "yPos", "xSize"].forEach(
+    ;["top", "bottom", "left", "right", "height", "width", "zPos", "xPos", "yPos", "xSize", "zSize"].forEach(
       function(attribute) {
         var value = options[attribute]
 
@@ -84,6 +84,11 @@ var drawPlan = (function() {
           } else if (attribute == "xSize") {
             attribute = {
               top: "width"
+            }[view]
+            if (!attribute) { throw new Error }
+          } else if (attribute == "zSize") {
+            attribute = {
+              top: "height"
             }[view]
             if (!attribute) { throw new Error }
           }
@@ -178,18 +183,37 @@ var drawPlan = (function() {
           "border-color": options.color
         })
       }
-      if (options.height) {
+
+      var height = options.height
+
+      if(options.zSize && view == "top") {
+        height = options.zSize
+      } else if (options.ySize && view == "side") {
+        height = options.ySize
+      }
+
+      var width = options.width
+
+      if (options.xSize && view == "top") {
+        width = options.xSize
+      } else if (options.zSize && view == "side") {
+        width = options.zSize
+      }
+
+      if (height) {
         this.appendStyles({
           "width": trim.THICKNESS+"em"
         })
-      } else {
+      } else if (width) {
         this.appendStyles({
           "height": trim.THICKNESS+"em"
         })
       }
+
       if (options.section) {
         options.section.children.push(this)
       }
+
       drawPlan.addStylesFromOptions(options, this)
     }
   )
