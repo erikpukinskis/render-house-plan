@@ -59,7 +59,7 @@ var drawPlan = (function() {
     var styles = {}
     var isSome = false
 
-    ;["top", "bottom", "left", "right", "height", "width", "zPos"].forEach(
+    ;["top", "bottom", "left", "right", "height", "width", "zPos", "xPos"].forEach(
       function(attribute) {
         var value = options[attribute]
 
@@ -70,7 +70,12 @@ var drawPlan = (function() {
               side: "left",
               top: "top"
             }[view]
-            if (!view) { throw new Error }
+            if (!attribute) { throw new Error }
+          } else if (attribute == "xPos") {
+            attribute = {
+              top: "left"
+            }[view]
+            if (!attribute) { throw new Error }
           }
 
           el[attribute] = value
@@ -360,6 +365,10 @@ var drawPlan = (function() {
 
 
   function tilted(options) {
+
+    if (view != "side") {
+      throw new Error("Can only tilt in side view")
+    }
 
     var height = verticalSlice(options.height, options.slope)
 
