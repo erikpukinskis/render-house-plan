@@ -59,7 +59,7 @@ var drawPlan = (function() {
     var styles = {}
     var isSome = false
 
-    ;["top", "bottom", "left", "right", "height", "width", "zPos", "xPos", "yPos"].forEach(
+    ;["top", "bottom", "left", "right", "height", "width", "zPos", "xPos", "yPos", "xSize"].forEach(
       function(attribute) {
         var value = options[attribute]
 
@@ -79,6 +79,11 @@ var drawPlan = (function() {
           } else if (attribute == "yPos") {
             attribute = {
               side: "top"
+            }[view]
+            if (!attribute) { throw new Error }
+          } else if (attribute == "xSize") {
+            attribute = {
+              top: "width"
             }[view]
             if (!attribute) { throw new Error }
           }
@@ -361,7 +366,7 @@ var drawPlan = (function() {
         })
       }
 
-      if (options.width) {
+      if (options.width || options.xSize) {
         this.appendStyles({
           "height": stud.WIDTH+"em"
         })

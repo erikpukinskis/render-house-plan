@@ -20,12 +20,12 @@ function floor(section, frontStud, plywood, stud) {
 
   frontStud({
     section: floor,
-    width: 96 - plywood.THICKNESS*2
+    xSize: 96 - plywood.THICKNESS*2
   })
 
   frontStud({
     section: floor,
-    width: 96 - plywood.THICKNESS*2,
+    xSize: 96 - plywood.THICKNESS*2,
     zPos: 72 - stud.WIDTH
   })
 
@@ -51,7 +51,7 @@ function floor(section, frontStud, plywood, stud) {
 
   plywood({
     section: floor,
-    width: 48,
+    xSize: 48,
     height: 72,
     orientation: "in"
   })
@@ -59,7 +59,7 @@ function floor(section, frontStud, plywood, stud) {
   plywood({
     section: floor,
     xPos: 48,
-    width: 48-plywood.THICKNESS*2,
+    xSize: 48-plywood.THICKNESS*2,
     height: 72,
     orientation: "in"
   })
@@ -80,7 +80,7 @@ var back = section({
 
 plywood({
   section: back,
-  width: 48,
+  xSize: 48,
   zPos: -plywood.THICKNESS,
   xPos: -plywood.THICKNESS,
   orientation: "north"
@@ -88,7 +88,7 @@ plywood({
 
 plywood({
   section: back,
-  width: 48 - stud.DEPTH - 2*plywood.THICKNESS,
+  xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
   zPos: stud.DEPTH,
   xPos: stud.DEPTH + plywood.THICKNESS,
   orientation: "south"
@@ -122,7 +122,7 @@ stud({
 
 plywood({
   section: back,
-  width: 48,
+  xSize: 48,
   xPos: 48-plywood.THICKNESS,
   zPos: -plywood.THICKNESS,
   orientation: "north"
@@ -130,7 +130,7 @@ plywood({
 
 plywood({
   section: back,
-  width: 48 - stud.DEPTH - 2*plywood.THICKNESS,
+  xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
   xPos: 48-plywood.THICKNESS,
   zPos: stud.DEPTH,
   orientation: "south"
@@ -243,13 +243,13 @@ var front = section({
 
 plywood({
   section: front,
-  width: 96 - distanceIn - plywood.THICKNESS,
+  xSize: 96 - distanceIn - plywood.THICKNESS,
   orientation: "south"
 })
 
 plywood({
   section: front,
-  width: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH,
+  xSize: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH,
   bottom: stud.DEPTH,
   orientation: "north"
 })
@@ -301,7 +301,7 @@ trim({
 
 plywood({
   section: opening,
-  width: stud.DEPTH + plywood.THICKNESS*2,
+  xSize: stud.DEPTH + plywood.THICKNESS*2,
   xPos: -plywood.THICKNESS*2 - stud.DEPTH,
   orientation: "south"
 })
@@ -309,7 +309,7 @@ plywood({
 trim({
   section: opening,
   name: "left-door-trim",
-  width: trim.THICKNESS+plywood.THICKNESS*2+stud.DEPTH,
+  xSize: trim.THICKNESS+plywood.THICKNESS*2+stud.DEPTH,
   bottom: -plywood.THICKNESS - trim.THICKNESS,
   right: 0
 })
@@ -340,7 +340,7 @@ trim({
 trim({
   section: opening,
   name: "right-door-trim",
-  width: BATTEN_WIDTH,
+  xSize: BATTEN_WIDTH,
   bottom: -trim.THICKNESS - plywood.THICKNESS,
   xPos: trim.THICKNESS + door.WIDTH*2 + trim.THICKNESS
 })
@@ -392,7 +392,7 @@ trim({
 
 trim({
   section: battens,
-  width: BATTEN_WIDTH,
+  xSize: BATTEN_WIDTH,
   xPos: 96 - plywood.THICKNESS - BATTEN_WIDTH,
   zPos: 72 + plywood.THICKNESS
 })
@@ -411,7 +411,7 @@ sideBatten(48 - BATTEN_WIDTH/2, xPos)
 function backBatten(xPos) {
   trim({
     section: battens,
-    width: BATTEN_WIDTH,
+    xSize: BATTEN_WIDTH,
     xPos: xPos,
     zPos: -plywood.THICKNESS - trim.THICKNESS
   })
@@ -446,7 +446,7 @@ var roofProjection = Math.sqrt(96*96+12*12)
 
 twinWall({
   section: roof,
-  width: 48 - plywood.THICKNESS - 0.75 - 0.75,
+  xSize: 48 - plywood.THICKNESS - 0.75 - 0.75,
   zPos: -6,
   xPos: 0.75,
   height: roofProjection
@@ -454,7 +454,7 @@ twinWall({
 
 trim({
   section: roof,
-  width: 7.5,
+  xSize: 7.5,
   height: roofProjection,
   zPos: -6,
   xPos: -5
@@ -462,7 +462,7 @@ trim({
 
 trim({
   section: roof,
-  width: 0.75,
+  xSize: 0.75,
   height: roofProjection,
   zPos: -6,
   xPos: 0
@@ -472,7 +472,7 @@ var centerLine = 48 - plywood.THICKNESS
 
 trim({
   section: roof,
-  width: 1.5,
+  xSize: 1.5,
   height: roofProjection,
   xPos: centerLine - 0.75,
   zPos: -6
@@ -480,7 +480,7 @@ trim({
 
 trim({
   section: roof,
-  width: 0.75,
+  xSize: 0.75,
   height: roofProjection,
   zPos: -6,
   xPos: centerLine - 0.75*2
@@ -488,7 +488,7 @@ trim({
 
 trim({
   section: roof,
-  width: 0.75,
+  xSize: 0.75,
   height: roofProjection,
   zPos: -6,
   xPos: centerLine + 0.75
@@ -496,7 +496,7 @@ trim({
 
 trim({
   section: roof,
-  width: 7.5,
+  xSize: 7.5,
   height: roofProjection,
   xPos: centerLine - 7.5/2,
   zPos: -6
@@ -504,7 +504,7 @@ trim({
 
 twinWall({
   section: roof,
-  width: 48 - 0.75 - plywood.THICKNESS - 0.75,
+  xSize: 48 - 0.75 - plywood.THICKNESS - 0.75,
   zPos: -6,
   xPos: centerLine+0.75,
   height: roofProjection
@@ -512,7 +512,7 @@ twinWall({
 
 trim({
   section: roof,
-  width: 7.5,
+  xSize: 7.5,
   height: roofProjection,
   zPos: -6,
   xPos: 96 - plywood.THICKNESS * 2 - 2.5
@@ -520,7 +520,7 @@ trim({
 
 trim({
   section: roof,
-  width: 0.75,
+  xSize: 0.75,
   height: roofProjection,
   zPos: -6,
   xPos: 96 - plywood.THICKNESS*2 - 0.75
