@@ -133,53 +133,73 @@ var drawPlan = (function() {
     ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(
       function(attribute) {
         var value = options[attribute]
+        var screenAttr
 
         if (typeof value != "undefined") {
 
           if (attribute == "zPos") {
-            attribute = {
+            screenAttr = {
               side: "left",
               top: "top",
               front: "__ignore"
             }[view]
           } else if (attribute == "xPos") {
-            attribute = {
+            screenAttr = {
               top: "left",
               side: "__ignore",
               front: "left"
             }[view]
           } else if (attribute == "yPos") {
-            attribute = {
+
+            screenAttr = {
               side: "top",
               top: "__ignore",
               front: "top"
             }[view]
           } else if (attribute == "xSize") {
-            attribute = {
+            screenAttr = {
               top: "width",
               side: "__ignore",
               front: "width"
             }[view]
           } else if (attribute == "ySize") {
-            attribute = {
+            screenAttr = {
               top: "__ignore",
               side: "height",
               front: "height"
             }[view]
-            if (!attribute) { throw new Error }
           } else if (attribute == "zSize") {
-            attribute = {
+            screenAttr = {
               top: "height",
               side: "width",
               front: "__ignore"
             }[view]
           }
 
-          if (attribute != "__ignore") {
-            el[attribute] = value
-            styles[attribute] = value+"em"
-            isSome = true
+          if (screenAttr == "__ignore") { return }
+
+          var isPos = attribute.substr(1) == "Pos"
+
+          var isSize = attribute.substr(1) == "Size"
+
+          if (isPos) {
+            var dimension = attribute[0]
+            var sizeAttr = dimension+"Size"
+            if (options[sizeAttr] < 0) {
+
+              screenAttr = reverse(screenAttr)
+              value = -value
+            }
           }
+
+          if (isSize) {
+            value = Math.abs(value)
+          }
+
+          el[screenAttr || attribute] = value
+          styles[screenAttr || attribute] = value+"em"
+          isSome = true
+
         }
       }
     )
@@ -188,6 +208,14 @@ var drawPlan = (function() {
       el.appendStyles(styles)
     }
 
+  }
+
+  function reverse(attr) {
+    console.log(attr)
+    return {
+      left: "right",
+      top: "bottom"
+    }[attr]
   }
 
   stud.WIDTH = 1.25
@@ -387,39 +415,29 @@ var drawPlan = (function() {
       throw new Error("You need to pass a slope option when you create a sloped piece. You passed options "+JSON.stringify(options))
     }
 
-    var wrapperOptions = {}
+    var wrapperOptions = {
+      slope: options.slope
+    }
+    var parentSection = options.section
+
     var innerOptions = {}
 
     for(var key in options) {
-      switch(key) {
-        case "left":
-        case "right":
-        case "top":
-        case "bottom":
-        case "slope":
-          wrapperOptions[key] = options[key]
-          break
-        case "zPos":
-          if (sideView) {
-            wrapperOptions.left = options.zPos
-          } else {
-            throw new Error("Can only slope in side view")
-          }
-          break
-        case "yPos":
-          if (sideView) {
-            wrapperOptions.top = options.yPos
-          } else {
-            throw new Error("Can only slope in side view")
-          }
-          break
-        case "section":
-          var parentSection = options[key]
-          break
-        default:
-          innerOptions[key] = options[key]
-          break
+      if (key == "section" || key == "slope") {
+        continue
       }
+
+      var isPos = key.substr(1) == "Pos"
+      var isSize = key.substr(1) == "Size"
+
+      if (isPos) {
+        wrapperOptions[key] = options[key]
+      } else if (isSize) {
+        wrapperOptions[key] = innerOptions[key] = options[key]
+      } else {
+        innerOptions[key] = options[key]
+      }        
+
     }
 
     var innerEl = generator.call(null, innerOptions)

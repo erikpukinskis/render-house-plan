@@ -36,23 +36,24 @@ function draw(view) {
   drawPlan.clear()
   drawPlan.setView(view)
 
-  // drawPlan(floor)
-  // drawPlan(header)
-  // drawPlan(backWall)
+  drawPlan(floor)
+  drawPlan(header)
+  drawPlan(backWall)
   drawPlan(sideWall, {
     xPos: 0,
     zPos: 0
   })
-  // drawPlan(sideWall, {
-  //   xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
-  //   zPos: 0
-  // })
-  // drawPlan(doors)
-  // drawPlan(roof)
+  drawPlan(sideWall, {
+    xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
+    zPos: 0
+  })
+  drawPlan(doors)
+  drawPlan(roof)
 
 }
 
-draw("top")
+
+draw("side")
 
 function roof(section, trim, stud, plywood, tilted, twinWallSide, verticalSlice) {
 
@@ -239,10 +240,10 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
     xPos: -plywood.THICKNESS,
     zPos: 0,
     zSize: 48,
-    ySize: plywoodHeightAt(48),
+    ySize: -plywoodHeightAt(48),
     slope: SLOPE,
     orientation: "west",
-    bottom: -floorSectionHeight
+    yPos: floorSectionHeight
   })
 
   sloped({
@@ -252,10 +253,10 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
     xPos: -plywood.THICKNESS,
     zPos: 48,
     zSize: 24,
-    ySize: plywoodHeightAt(48 + 24),
+    ySize: -plywoodHeightAt(48 + 24),
     slope: SLOPE,
     orientation: "west",
-    bottom: -floorSectionHeight
+    yPos: floorSectionHeight
   })
 
   sloped({
@@ -266,9 +267,9 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
     zPos: 0,
     orientation: "east",
     zSize: 48,
-    ySize: plywoodHeightAt(48),
+    ySize: -plywoodHeightAt(48),
     slope: SLOPE,
-    bottom: -floorSectionHeight
+    yPos: floorSectionHeight
   })
 
   sloped({
@@ -279,9 +280,9 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
     zPos: 48,
     orientation: "east",
     zSize: 24,
-    ySize: plywoodHeightAt(48 + 24),
+    ySize: -plywoodHeightAt(48 + 24),
     slope: SLOPE,
-    bottom: -floorSectionHeight
+    yPos: floorSectionHeight
   })
 
 
@@ -315,10 +316,10 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
       part: stud,
       orientation: orientation,
       zSize: stud.WIDTH,
-      ySize: rightSideHeight,
+      ySize: -rightSideHeight,
       slope: 1/6,
       zPos: offset,
-      bottom: -floorSectionHeight
+      yPos: floorSectionHeight
     })
 
   }
@@ -328,9 +329,9 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
   //   part: trim,
   //   name: "left-side-batten-4",
   //   zSize: BATTEN_WIDTH,
-  //   bottom: -floorSectionHeight,
+  //   yPos: floorSectionHeight,
   //   zPos: 72 - BATTEN_WIDTH + plywood.THICKNESS,
-  //   ySize: floorSectionHeight + DOOR_GAP*2 + 80 + trim.THICKNESS*2 + headerHeight + RAFTER_HEIGHT + plywood.THICKNESS*SLOPE,
+  //   ySize: -(floorSectionHeight + DOOR_GAP*2 + 80 + trim.THICKNESS*2 + headerHeight + RAFTER_HEIGHT + plywood.THICKNESS*SLOPE),
   //   slope: SLOPE
   // })
 
@@ -352,37 +353,41 @@ function backWall(section, plywood, stud, trim, sloped) {
   //   part: trim,
   //   slope: SLOPE,
   //   zSize: BATTEN_WIDTH,
-  //   ySize: backBattenHeight + dh,
+  //   ySize: -(backBattenHeight + dh),
   //   zPos: -plywood.THICKNESS,
-  //   bottom: -floorSectionHeight
+  //   yPos: floorSectionHeight
   // })
 
-  sloped({
-    section: back,
-    part: trim,
-    slope: SLOPE,
-    name: "back-batten",
-    zSize: trim.THICKNESS,
-    ySize: BACK_STUD_HEIGHT + floorSectionHeight + backPlateLeftHeight - plywood.THICKNESS*SLOPE,
-    bottom: -floorSectionHeight,
-    zPos: -plywood.THICKNESS - trim.THICKNESS
-  })
+  // sloped({
+  //   section: back,
+  //   part: trim,
+  //   slope: SLOPE,
+  //   name: "back-batten",
+  //   zSize: trim.THICKNESS,
+  //   ySize: (BACK_STUD_HEIGHT + floorSectionHeight + backPlateLeftHeight - plywood.THICKNESS*SLOPE),
+  //   yPos: floorSectionHeight,
+  //   zPos: -plywood.THICKNESS - trim.THICKNESS
+  // })
+
 
   stud({
     section: back,
     name: "back-bottom-plate",
     orientation: "up",
     xSize: 1000,
-    bottom: 0
+    ySize: -stud.WIDTH,
+    yPos: 0
   })
 
   plywood({
     section: back,
     name: "back-left-interior",
+    xPos: stud.DEPTH + plywood.THICKNESS,
+    xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
     zPos: stud.DEPTH,
-    ySize: BACK_STUD_HEIGHT,
+    ySize: -BACK_STUD_HEIGHT,
     orientation: "south",
-    bottom: 0
+    yPos: 0
   })
 
   stud({
@@ -390,7 +395,7 @@ function backWall(section, plywood, stud, trim, sloped) {
     name: "back-top-plate",
     orientation: "down",
     xSize: 1000,
-    bottom: BACK_STUD_HEIGHT - stud.WIDTH
+    yPos: -BACK_STUD_HEIGHT
   })
 
   sloped({
@@ -398,16 +403,16 @@ function backWall(section, plywood, stud, trim, sloped) {
     section: back,
     name: "back-cap",
     zSize: 1.5,
-    ySize: backPlateRightHeight,
+    ySize: -backPlateRightHeight,
     slope: SLOPE,
-    bottom: BACK_STUD_HEIGHT
+    yPos: -BACK_STUD_HEIGHT
   })
 
   plywood({
     section: back,
     name: "back-left-sheathing",
-    ySize: BACK_STUD_HEIGHT + floorSectionHeight + backPlateLeftHeight,
-    bottom: -floorSectionHeight,
+    ySize: -(BACK_STUD_HEIGHT + floorSectionHeight + backPlateLeftHeight),
+    yPos: floorSectionHeight,
     zPos: -plywood.THICKNESS,
     orientation: "north"
   })
@@ -453,9 +458,9 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
     section: header,
     part: trim,
     name: "header-cap",
-    bottom: 0,
+    yPos: 0,
     zSize: 1.5,
-    ySize: topPlateHeight,
+    ySize: -topPlateHeight,
     slope: SLOPE,
     zPos: -1.5
   })
