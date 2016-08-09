@@ -31,14 +31,23 @@ var backPlateLeftHeight = RAFTER_HEIGHT - (drawPlan.parts.stud.DEPTH+drawPlan.pa
 
 var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
 
+
+
 drawPlan.setView("side")
 
-drawPlan(floor)
-drawPlan(header)
-drawPlan(backWall)
-drawPlan(sideWall)
-drawPlan(doors)
-drawPlan(roof)
+// drawPlan(floor)
+// drawPlan(header)
+// drawPlan(backWall)
+drawPlan(sideWall, {
+  xPos: 0,
+  zPos: 0
+})
+// drawPlan(sideWall, {
+//   xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
+//   zPos: 0
+// })
+// drawPlan(doors)
+// drawPlan(roof)
 
 
 
@@ -215,34 +224,44 @@ function floor(section, stud, plywood) {
 function sideWall(section, stud, plywood, sloped, trim, sloped) {
 
   var side = section({
+    xPos: 0,
     zPos: 0,
     yPos: FLOOR_TOP
   })
 
-  plywoodAtOffset(0, 48, "side-1-wide-sheathing")
-  plywoodAtOffset(48, 24, "side-1-narrow-sheathing")
+  sloped({
+    section: side,
+    name: "side-1-wide-sheathing",
+    part: plywood,
+    zPos: 0,
+    zSize: 48,
+    ySize: plywoodHeightAt(48),
+    slope: SLOPE,
+    orientation: "in",
+    bottom: -floorSectionHeight
+  })
 
-  function plywoodAtOffset(offset, width, name) {
-    var rightSide = offset + width
+  sloped({
+    section: side,
+    name: "side-1-narrow-sheathing",
+    part: plywood,
+    zPos: 48,
+    zSize: 24,
+    ySize: plywoodHeightAt(48 + 24),
+    slope: SLOPE,
+    orientation: "in",
+    bottom: -floorSectionHeight
+  })
 
-    var leftSideHeight = BACK_STUD_HEIGHT + floorSectionHeight + backPlateLeftHeight
+  function plywoodHeightAt(offset) {
+    var lowestHeight = BACK_STUD_HEIGHT + floorSectionHeight + backPlateLeftHeight
 
-    var rightSideHeight = leftSideHeight + rightSide/72*12
+    var rightSideHeight = lowestHeight + offset/72*12
 
-    sloped({
-      section: side,
-      name: name,
-      part: plywood,
-      zSize: width,
-      ySize: rightSideHeight,
-      slope: SLOPE,
-      orientation: "in",
-      zPos: offset,
-      bottom: -floorSectionHeight
-    })
-
+    return rightSideHeight
   }
 
+  return
 
   studAtOffset(0, 1)
   studAtOffset(16-stud.WIDTH/2, 2)
@@ -253,7 +272,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
 
   function studAtOffset(offset, id) {
 
-    var leftSideHeight = BACK_STUD_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + offset*SLOPE
+    var leftSideHeight = BACK_STUD_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + offset*SLOPE + floorSectionHeight
 
     var rightSideHeight = leftSideHeight + stud.WIDTH*SLOPE
 
@@ -268,7 +287,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
       ySize: rightSideHeight,
       slope: 1/6,
       zPos: offset,
-      bottom: 0
+      bottom: -floorSectionHeight
     })
 
   }
