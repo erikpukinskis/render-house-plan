@@ -19,6 +19,7 @@ var betweenRafterIntersections = 72 - rafterStart.zPos
 var elevationBetweenIntersections = betweenRafterIntersections*SLOPE
 
 var headerRafterIntersection = {
+  xPos: 0,
   zPos: 72,
   yPos: rafterStart.yPos - elevationBetweenIntersections
 }
@@ -38,7 +39,7 @@ function draw(view) {
   drawPlan.setView(view)
 
   // drawPlan(floor)
-  // drawPlan(header)
+  drawPlan(header)
   drawPlan(backWall)
   drawPlan(sideWall, {
     xPos: 0,
@@ -51,7 +52,7 @@ function draw(view) {
     zPos: 0
   })
   // drawPlan(doors)
-  drawPlan(roof)
+  // drawPlan(roof)
 
 }
 
@@ -554,11 +555,14 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
   var header = section(headerRafterIntersection)
 
+  var headerLength = 96 - plywood.THICKNESS*4 - stud.DEPTH*2
+
   stud({
     section: header,
     name: "header-top-plate",
     orientation: "down",
-    xPos: 1000,
+    xPos: stud.DEPTH + plywood.THICKNESS,
+    xSize: headerLength,
     zPos: -stud.DEPTH,
     yPos: 0
   })
@@ -567,7 +571,8 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
     section: header,
     name: "header-bottom-plate",
     orientation: "up",
-    xPos: 1000,
+    xPos: stud.DEPTH + plywood.THICKNESS,
+    xSize: headerLength,
     zPos: -stud.DEPTH,
     yPos: headerHeight - stud.WIDTH
   })
@@ -575,6 +580,8 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
   plywood({
     section: header,
     name: "header-interior",
+    xPos: stud.DEPTH + plywood.THICKNESS,
+    xSize: headerLength,
     ySize: headerHeight,
     yPos: 0,
     zPos: -stud.DEPTH - plywood.THICKNESS,
@@ -583,24 +590,28 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
   var topPlateHeight = verticalSlice(RAFTER_HEIGHT - TWIN_WALL_THICKNESS, SLOPE)
 
+  plywood({
+    section: header,
+    name: "header-sheathing",
+    xPos: -plywood.THICKNESS,
+    xSize: 96,
+    ySize: headerHeight + topPlateHeight,
+    yPos: -topPlateHeight,
+    zPos: 0,
+    orientation: "south"
+  })
+
   sloped({
     section: header,
     part: trim,
     name: "header-cap",
+    xPos: RAFTER_THICKNESS,
+    xSize: 96 - plywood.THICKNESS*2 - RAFTER_THICKNESS*2,
     yPos: 0,
     zSize: 1.5,
     ySize: -topPlateHeight,
     slope: SLOPE,
     zPos: -1.5
-  })
-
-  plywood({
-    section: header,
-    name: "header-sheathing",
-    ySize: headerHeight + topPlateHeight,
-    yPos: -topPlateHeight,
-    zPos: 0,
-    orientation: "south"
   })
 
   var toTop = verticalSlice(RAFTER_HEIGHT, SLOPE) + (plywood.THICKNESS + trim.THICKNESS)*SLOPE
@@ -609,11 +620,39 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
     section: header,
     part: trim,
     name: "front-left-corner-batten",
+    xPos: -plywood.THICKNESS,
+    xSize: BATTEN_WIDTH,
     zPos: plywood.THICKNESS,
     yPos: -toTop,
     ySize: toTop + headerHeight + DOOR_GAP - BATTEN_WIDTH,
     zSize: trim.THICKNESS,
     slope: SLOPE
+  })
+
+  stud({
+    section: header,
+    name: "header-stud-1",
+    xPos: stud.DEPTH + plywood.THICKNESS,
+    zPos: -stud.DEPTH,
+    orientation: "east"
+  })
+
+  for(var i=1; i<6; i++) {
+    stud({
+      section: header,
+      name: "header-stud-"+(i+1),
+      xPos: plywood.THICKNESS + i*16 - stud.WIDTH,
+      zPos: -stud.DEPTH,
+      orientation: "east"
+    })
+  }
+
+  stud({
+    section: header,
+    name: "header-stud-"+(i+1),
+    xPos: 96 - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH,
+    zPos: -stud.DEPTH,
+    orientation: "west"
   })
 
 }

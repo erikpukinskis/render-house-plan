@@ -134,6 +134,10 @@ var drawPlan = (function() {
       styles["border-color"] = options.color
     }
 
+    if (options.name) {
+      el.attributes["data-name"] = options.name
+    }
+
     ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(
       function(attribute) {
         var value = options[attribute]
