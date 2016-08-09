@@ -5,7 +5,7 @@ var DOOR_GAP = 1/4 // no gap below?
 var SLOPE = 1/6
 var SUBFLOOR_THICKNESS = 0.75
 var TWIN_WALL_THICKNESS = 7/16
-var RAFTER_THICKNESS = 3.5
+var RAFTER_HEIGHT = 3.5
 
 var floorSectionHeight = SUBFLOOR_THICKNESS + drawPlan.parts.stud.DEPTH + drawPlan.parts.plywood.THICKNESS
 
@@ -27,7 +27,7 @@ var doorFramingTop = FLOOR_TOP - 80 - 0.75*2 - DOOR_GAP*2
 var headerHeight = doorFramingTop - headerRafterIntersection.yPos
 
 
-var backPlateLeftHeight = RAFTER_THICKNESS - (drawPlan.parts.stud.DEPTH+drawPlan.parts.plywood.THICKNESS*SLOPE)*SLOPE
+var backPlateLeftHeight = RAFTER_HEIGHT - (drawPlan.parts.stud.DEPTH+drawPlan.parts.plywood.THICKNESS*SLOPE)*SLOPE
 
 var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
 
@@ -52,24 +52,24 @@ function roof(section, trim, stud, plywood, tilted, twinWallSide, verticalSlice)
 
   tilted({
     part: trim,
-    name: "rafter",
+    name: "left-rafter",
     section: roof,
-    yPos: -RAFTER_THICKNESS - plywood.THICKNESS*SLOPE,
+    yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE,
     length: 96,
     slope: SLOPE,
     zPos: -8,
-    ySize: RAFTER_THICKNESS
+    ySize: RAFTER_HEIGHT
   })
 
 
-  var roofHeight = RAFTER_THICKNESS - stud.DEPTH*SLOPE
+  var roofHeight = RAFTER_HEIGHT - stud.DEPTH*SLOPE
 
   tilted({
     part: trim,
     section: roof,
-    name: "roof-cap",
+    name: "left-roof-cap",
     ySize: trim.THICKNESS,
-    yPos: -RAFTER_THICKNESS - plywood.THICKNESS*SLOPE -  verticalSlice(trim.THICKNESS, SLOPE),
+    yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE -  verticalSlice(trim.THICKNESS, SLOPE),
     zPos: -8,
     length: 96,
     slope: SLOPE
@@ -92,6 +92,7 @@ function roof(section, trim, stud, plywood, tilted, twinWallSide, verticalSlice)
 function doors(section, trim, plywood, stud) {
 
   var opening = section({
+    name: "door",
     yPos: doorFramingTop,
     zPos: 72,
   })
@@ -218,10 +219,10 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
     yPos: FLOOR_TOP
   })
 
-  plywoodAtOffset(0, 48)
-  plywoodAtOffset(48, 24)
+  plywoodAtOffset(0, 48, "side-1-wide-sheathing")
+  plywoodAtOffset(48, 24, "side-1-narrow-sheathing")
 
-  function plywoodAtOffset(offset, width) {
+  function plywoodAtOffset(offset, width, name) {
     var rightSide = offset + width
 
     var leftSideHeight = BACK_STUD_HEIGHT + floorSectionHeight + backPlateLeftHeight
@@ -230,6 +231,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
 
     sloped({
       section: side,
+      name: name,
       part: plywood,
       zSize: width,
       ySize: rightSideHeight,
@@ -242,14 +244,14 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
   }
 
 
-  studAtOffset(0)
-  studAtOffset(16-stud.WIDTH/2)
-  studAtOffset(16*2-stud.WIDTH/2)
-  studAtOffset(16*3-stud.WIDTH/2)
-  studAtOffset(48+12-stud.WIDTH/2)
-  studAtOffset(72-stud.WIDTH)
+  studAtOffset(0, 1)
+  studAtOffset(16-stud.WIDTH/2, 2)
+  studAtOffset(16*2-stud.WIDTH/2, 3)
+  studAtOffset(16*3-stud.WIDTH/2, 4)
+  studAtOffset(48+12-stud.WIDTH/2, 5)
+  studAtOffset(72-stud.WIDTH, 6)
 
-  function studAtOffset(offset) {
+  function studAtOffset(offset, id) {
 
     var leftSideHeight = BACK_STUD_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + offset*SLOPE
 
@@ -259,6 +261,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
 
     sloped({
       section: side,
+      name: "side-1-stud-"+id,
       part: stud,
       orientation: orientation,
       zSize: stud.WIDTH,
@@ -277,7 +280,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped) {
     zSize: BATTEN_WIDTH,
     bottom: -floorSectionHeight,
     zPos: 72 - BATTEN_WIDTH + plywood.THICKNESS,
-    ySize: floorSectionHeight + DOOR_GAP*2 + 80 + trim.THICKNESS*2 + headerHeight + RAFTER_THICKNESS + plywood.THICKNESS*SLOPE,
+    ySize: floorSectionHeight + DOOR_GAP*2 + 80 + trim.THICKNESS*2 + headerHeight + RAFTER_HEIGHT + plywood.THICKNESS*SLOPE,
     slope: SLOPE
   })
 
@@ -317,6 +320,7 @@ function backWall(section, plywood, stud, trim, sloped) {
 
   stud({
     section: back,
+    name: "back-bottom-plate",
     orientation: "up",
     xSize: 1000,
     bottom: 0
@@ -324,6 +328,7 @@ function backWall(section, plywood, stud, trim, sloped) {
 
   plywood({
     section: back,
+    name: "back-left-interior",
     zPos: stud.DEPTH,
     ySize: BACK_STUD_HEIGHT,
     orientation: "south",
@@ -332,6 +337,7 @@ function backWall(section, plywood, stud, trim, sloped) {
 
   stud({
     section: back,
+    name: "back-top-plate",
     orientation: "down",
     xSize: 1000,
     bottom: BACK_STUD_HEIGHT - stud.WIDTH
@@ -349,7 +355,7 @@ function backWall(section, plywood, stud, trim, sloped) {
 
   plywood({
     section: back,
-    name: "back-sheathing",
+    name: "back-left-sheathing",
     ySize: BACK_STUD_HEIGHT + floorSectionHeight + backPlateLeftHeight,
     bottom: -floorSectionHeight,
     zPos: -plywood.THICKNESS,
@@ -366,6 +372,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
   stud({
     section: header,
+    name: "header-top-plate",
     orientation: "down",
     xPos: 1000,
     zPos: -stud.DEPTH,
@@ -374,6 +381,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
   stud({
     section: header,
+    name: "header-bottom-plate",
     orientation: "up",
     xPos: 1000,
     zPos: -stud.DEPTH,
@@ -382,18 +390,19 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
   plywood({
     section: header,
+    name: "header-interior",
     ySize: headerHeight,
     yPos: 0,
     zPos: -stud.DEPTH - plywood.THICKNESS,
     orientation: "north"
   })
 
-  var topPlateHeight = verticalSlice(RAFTER_THICKNESS - TWIN_WALL_THICKNESS, SLOPE)
+  var topPlateHeight = verticalSlice(RAFTER_HEIGHT - TWIN_WALL_THICKNESS, SLOPE)
 
   sloped({
     section: header,
     part: trim,
-    name: "header-top-plate",
+    name: "header-cap",
     bottom: 0,
     zSize: 1.5,
     ySize: topPlateHeight,
@@ -403,13 +412,14 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
   plywood({
     section: header,
+    name: "header-sheathing",
     ySize: headerHeight + topPlateHeight,
     yPos: -topPlateHeight,
     zPos: 0,
     orientation: "south"
   })
 
-  var toTop = verticalSlice(RAFTER_THICKNESS, SLOPE) + (plywood.THICKNESS + trim.THICKNESS)*SLOPE
+  var toTop = verticalSlice(RAFTER_HEIGHT, SLOPE) + (plywood.THICKNESS + trim.THICKNESS)*SLOPE
 
   sloped({
     section: header,
