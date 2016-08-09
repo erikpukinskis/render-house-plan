@@ -51,14 +51,14 @@ function draw(view) {
     zPos: 0
   })
   // drawPlan(doors)
-  // drawPlan(roof)
+  drawPlan(roof)
 
 }
 
 
 draw("top")
 
-function roof(section, trim, stud, plywood, tilted, twinWallSide, verticalSlice) {
+function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice) {
 
   var roof = section({
     name: "roof",
@@ -66,42 +66,84 @@ function roof(section, trim, stud, plywood, tilted, twinWallSide, verticalSlice)
     yPos: rafterStart.yPos
   })
 
-  tilted({
-    part: trim,
-    name: "left-rafter",
-    section: roof,
-    yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE,
-    length: 96,
-    slope: SLOPE,
-    zPos: -8,
-    ySize: RAFTER_HEIGHT
-  })
+  var roofLength = Math.sqrt(96*96+12*12)
 
+  function rafter(xPos, name) {
+
+    tilted({
+      part: trim,
+      name: name,
+      section: roof,
+      slope: SLOPE,
+      xPos: xPos,
+      xSize: RAFTER_THICKNESS,
+      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE,
+      ySize: RAFTER_HEIGHT,
+      zPos: -8,
+      zSize: roofLength,
+    })
+
+  }
+
+  var centerLine = 48 - plywood.THICKNESS
+
+  rafter(0, "left-rafter")
+
+  rafter(centerLine - 0.75, "center-rafter")
+
+  rafter(96 - plywood.THICKNESS*2 - RAFTER_THICKNESS, "right-rafter")
 
   var roofHeight = RAFTER_HEIGHT - stud.DEPTH*SLOPE
 
-  tilted({
-    part: trim,
-    section: roof,
-    name: "left-roof-cap",
-    ySize: trim.THICKNESS,
-    yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE -  verticalSlice(trim.THICKNESS, SLOPE),
-    zPos: -8,
-    length: 96,
-    slope: SLOPE
+  function roofCap(xPos, name) {
+
+    tilted({
+      part: trim,
+      section: roof,
+      name: name,
+      slope: SLOPE,
+      xPos: xPos,
+      xSize: 7.5,
+      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE -  verticalSlice(trim.THICKNESS, SLOPE),
+      ySize: trim.THICKNESS,
+      zPos: -8,
+      zSize: roofLength
+    })
+
+  }
+
+  roofCap(-5, "left-roof-cap")
+
+  roofCap(centerLine - 7.5/2
+, "center-roof-cap")
+
+  roofCap(96 - plywood.THICKNESS * 2 - 2.5, "right-roof-cap")
+
+  function roofPanel(options) {
+
+    tilted(merge(options, {
+      part: twinWall,
+      section: roof,
+      slope: SLOPE,
+      yPos: -3.5 - plywood.THICKNESS*SLOPE,
+      ySize: TWIN_WALL_THICKNESS,
+      zPos: -8,
+      zSize: roofLength
+    }))
+
+  }
+
+  roofPanel({
+    name: "left-twin-wall",
+    xPos: RAFTER_THICKNESS,
+    xSize: 48 - plywood.THICKNESS - RAFTER_THICKNESS*1.5
   })
 
-  tilted({
-    part: twinWallSide,
-    name: "twin-wall",
-    section: roof,
-    yPos: -3.5 - plywood.THICKNESS*SLOPE,
-    ySize: TWIN_WALL_THICKNESS,
-    length: 96,
-    slope: SLOPE,
-    zPos: -8
-  })  
-
+  roofPanel({
+    name: "right-twin-wall",
+    xPos: centerLine+0.75,
+    xSize: 48 - RAFTER_THICKNESS*1.5 - plywood.THICKNESS
+  })
 }
 
 
@@ -576,3 +618,11 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
 }
 
+
+
+function merge(obj1,obj2){
+  var obj3 = {};
+  for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+  for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+  return obj3;
+}

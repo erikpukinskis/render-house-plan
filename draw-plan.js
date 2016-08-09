@@ -568,7 +568,7 @@ var drawPlan = (function() {
   var twinWall = element.template(
     ".twin-wall",
     element.style({
-      "background": "url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/230211/twin-wall.png)",
+      "background-color": "rgba(0,0,255,0.02)",
       "background-size": "1em",
       "position": "absolute",
       "box-sizing": "border-box",

@@ -490,28 +490,28 @@ function roof(section, trim, twinWall, plywood) {
   twinWall({
     section: roof,
     name: "left-twin-wall",
+    xPos: RAFTER_THICKNESS,
     xSize: 48 - plywood.THICKNESS - RAFTER_THICKNESS*1.5,
     zPos: -6,
-    xPos: RAFTER_THICKNESS,
     zSize: roofProjection
   })
 
   trim({
     section: roof,
     name: "left-roof-cap",
+    xPos: -5,
     xSize: 7.5,
     zSize: roofProjection,
-    zPos: -6,
-    xPos: -5
+    zPos: -6
   })
 
   trim({
     section: roof,
     name: "left-rafter",
+    xPos: 0,
     xSize: RAFTER_THICKNESS,
     zSize: roofProjection,
-    zPos: -6,
-    xPos: 0
+    zPos: -6
   })
 
   var centerLine = 48 - plywood.THICKNESS
@@ -555,9 +555,9 @@ function roof(section, trim, twinWall, plywood) {
   twinWall({
     section: roof,
     name: "right-twin-wall",
+    xPos: centerLine+0.75,
     xSize: 48 - RAFTER_THICKNESS*1.5 - plywood.THICKNESS,
     zPos: -6,
-    xPos: centerLine+0.75,
     zSize: roofProjection
   })
 
