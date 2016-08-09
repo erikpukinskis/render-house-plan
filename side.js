@@ -38,14 +38,14 @@ function draw(view) {
   drawPlan.clear()
   drawPlan.setView(view)
 
-  // drawPlan(floor)
-  drawPlan(header)
-  drawPlan(backWall)
-  drawPlan(sideWall, {
-    xPos: 0,
-    yPos: FLOOR_TOP,
-    zPos: 0
-  })
+  drawPlan(floor)
+  // drawPlan(header)
+  // drawPlan(backWall)
+  // drawPlan(sideWall, {
+  //   xPos: 0,
+  //   yPos: FLOOR_TOP,
+  //   zPos: 0
+  // })
   drawPlan(sideWall, {
     xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
     yPos: FLOOR_TOP,
@@ -219,39 +219,33 @@ function doors(section, trim, plywood, stud) {
 }
 
 
-function floor(section, stud, plywood) {
+
+function floor(section, plywood, stud) {
 
   var floor = section({
     name: "floor",
+    xPos: 0,
     yPos: FLOOR_TOP,
     zPos: 0
   })
 
-  plywood({
+  stud({
     section: floor,
-    name: "left-subfloor",
-    zSize: 72,
-    ySize: SUBFLOOR_THICKNESS,
-    yPos: 0,
-    orientation: "down"
-  })
-
-  plywood({
-    section: floor,
-    name: "left-floor-sheathing",
-    zSize: 72,
-    yPos: SUBFLOOR_THICKNESS + stud.DEPTH,
-    orientation: "up"
+    name: "back-floor-joist",
+    xSize: 96 - plywood.THICKNESS*2,
+    yPos: SUBFLOOR_THICKNESS,
+    orientation: "horizontal-south"
   })
 
   stud({
     section: floor,
-    name: "floor-joist-left",
+    name: "front-floor-joist",
+    xSize: 96 - plywood.THICKNESS*2,
     yPos: SUBFLOOR_THICKNESS,
-    zSize: 72,
-    ySize: stud.DEPTH,
-    orientation: "horizontal-east"
+    zPos: 72 - stud.WIDTH,
+    orientation: "horizontal-north"
   })
+
 
   stud({
     section: floor,
@@ -260,15 +254,84 @@ function floor(section, stud, plywood) {
     yPos: SUBFLOOR_THICKNESS
   })
 
+
   stud({
     section: floor,
-    name: "front-floor-joist",
-    orientation: "horizontal-north",
+    name: "floor-joist-left",
+    orientation: "horizontal-east",
+    xPos: 0,
     yPos: SUBFLOOR_THICKNESS,
-    zPos: 72 - stud.WIDTH
+    ySize: stud.DEPTH,
+    zSize: 72
+  })
+
+
+  for(var i=1; i<6; i++) {
+    stud({
+      section: floor,
+      name: "floor-joist-"+(i+1),
+      orientation: "horizontal-west",
+      xPos: i*16 - stud.WIDTH/2,
+      yPos: SUBFLOOR_THICKNESS,
+      zSize: 72
+    })
+  }
+
+  stud({
+    section: floor,
+    name: "floor-joist-right",
+    orientation: "horizontal-west",
+    xPos: 96 - plywood.THICKNESS*2 - stud.WIDTH,
+    yPos: SUBFLOOR_THICKNESS,
+    zSize: 72,
+  })
+
+  plywood({
+    section: floor,
+    name: "left-subfloor",
+    xPos: 0,
+    xSize: 48,
+    yPos: 0,
+    ySize: SUBFLOOR_THICKNESS,
+    zSize: 72,
+    orientation: "up"
+  })
+
+  plywood({
+    section: floor,
+    name: "left-floor-sheathing",
+    xSize: 48,
+    yPos: SUBFLOOR_THICKNESS + stud.DEPTH,
+    zSize: 72,
+    orientation: "down"
+  })
+
+  plywood({
+    section: floor,
+    name: "right-subfloor",
+    xPos: 48,
+    xSize: 48 - plywood.THICKNESS*2,
+    yPos: 0,
+    ySize: SUBFLOOR_THICKNESS,
+    zSize: 72,
+    orientation: "up"
+  })
+
+  plywood({
+    section: floor,
+    name: "right-floor-sheathing",
+    xPos: 48,
+    xSize: 48 - plywood.THICKNESS*2,
+    yPos: SUBFLOOR_THICKNESS + stud.DEPTH,
+    ySize: SUBFLOOR_THICKNESS,
+    zSize: 72,
+    orientation: "down"
   })
 
 }
+
+
+
 
 
 function sideWall(section, stud, plywood, sloped, trim, sloped, position) {
