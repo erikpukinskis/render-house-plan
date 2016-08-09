@@ -694,7 +694,8 @@ var drawPlan = (function() {
     })
   )
 
-  addHtml(element.stylesheet(
+  addHtml(
+    element.stylesheet(
     body,
     stud,
     plywood,
@@ -710,6 +711,9 @@ var drawPlan = (function() {
     twinWallSide
   ).html())
 
+  addHtml(element(".plan").html())
+  var container = document.querySelector(".plan")
+
 
   function drawPlan(generator) {
     sections = []
@@ -724,9 +728,13 @@ var drawPlan = (function() {
 
     sections.forEach(
       function(houseSection) {
-        addHtml(houseSection.html())
+        addHtml.inside(container, houseSection.html())
       }
     )
+  }
+
+  drawPlan.clear = function() {
+    container.innerHTML = ""
   }
 
   function argsFor(generator) {

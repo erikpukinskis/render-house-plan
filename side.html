@@ -1,5 +1,26 @@
-<body></body>
+<body>
+  <div class="buttons">
+    <a href="javascript: draw('side')">side</a>
+    <a href="javascript: draw('top')">top</a>
+  </div>
+</body>
 
+<style>
+.buttons {
+  position: fixed;
+  right: 0;
+  top: 0.5em;
+  font-size: 3em;
+}
+
+.buttons a {
+  color: white;
+  text-decoration: none;
+  padding: 4px 10px;
+  background: cyan;
+  font-family: sans-serif;
+}
+</style>
 <script src="../build/element.js"></script>
 <script src="../build/add-html.js"></script>
 <script src="draw-plan.js"></script>
