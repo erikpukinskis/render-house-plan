@@ -14,37 +14,108 @@ var drawPlan = (function() {
       }
 
       var size = "0.4em"
+      var thin = "0.2em"
 
-      switch(options.orientation) {
-        case "north":
-        default:
-          this.appendStyles({
-            "border-width": [0, size, size, size].join(" "),
-            "width": stud.DEPTH+"em",
-            "height": stud.WIDTH+"em"
-          })
-          break
-        case "south":
-          this.appendStyles({
-            "border-width": [size, size, 0, size].join(" "),
-            "width": stud.DEPTH+"em",
-            "height": stud.WIDTH+"em"
-          })
-          break
-        case "east":
-          this.appendStyles({
-            "border-width": [size, 0, size, size].join(" "),
-            "width": stud.WIDTH+"em",
-            "height": stud.DEPTH+"em"
-          })
-          break
-        case "west":
-          this.appendStyles({
-            "border-width": [size, size, size, 0].join(" "),
-            "width": stud.WIDTH+"em",
-            "height": stud.DEPTH+"em"
-          })
-          break
+      this.borderBottom = thin+" solid #999"
+
+      var o = options.orientation
+
+      var horizontal = false
+      var vertical = false
+      var flat = false
+      var northSouth = false
+      var eastWest = false
+
+      var parts = o.split("-")
+
+      if (parts[0] == "horizontal") {
+
+        horizontal = true
+        northSouth = parts[1] == "north" || parts[1] == "south"
+        eastWest = !northSouth
+
+      } else if (parts[0] == "down" || parts[0] == "up") {
+
+        var flat = true
+
+      } else {
+        vertical = true
+        northSouth = parts[0] == "north" || parts[0] == "south"
+        eastWest = !northSouth
+      }
+
+      if (topView && o=="north" || sideView && o=="up" || frontView && o=="up"
+      ) {
+
+        // U-shape
+        this.appendStyles({
+          "border-width": [0, size, size, size].join(" "),
+          "width": stud.DEPTH+"em",
+          "height": stud.WIDTH+"em"
+        })
+
+      } else if (topView && o=="south" || sideView && o=="down" || frontView && o=="down"
+      ) {
+
+        // n-shape
+        this.appendStyles({
+          "border-width": [size, size, 0, size].join(" "),
+          "width": stud.DEPTH+"em",
+          "height": stud.WIDTH+"em"
+        })
+
+      } else if (topView && o=="east" || sideView && o=="horizontal-south" || frontView && o=="horizontal-east"
+      ) {
+
+        // C-shape
+        this.appendStyles({
+          "border-width": [size, 0, size, size].join(" "),
+          "width": stud.WIDTH+"em",
+          "height": stud.DEPTH+"em"
+        })
+
+      } else if (topView && o=="west" || sideView && o=="horizontal-north" || frontView && o=="horizontal-west"
+      ) {
+
+        // ɔ-shape
+        this.appendStyles({
+          "border-width": [size, size, size, 0].join(" "),
+          "width": stud.WIDTH+"em",
+          "height": stud.DEPTH+"em"
+        })
+
+      } else if (topView && flat && options.xSize || sideView && horizontal && eastWest || frontView && horizontal && northSouth) { 
+
+        // tall horizontal
+        this.appendStyles({
+          "border-width": thin,
+          "height": stud.DEPTH+"em"
+        })
+
+      } else if (topView && horizontal && northSouth || sideView && flat && options.zSize || frontView && flat && options.xSize) {
+
+        // short horizontal
+        this.appendStyles({
+          "border-width": thin,
+          "height": stud.WIDTH+"em"
+        })
+
+      } else if (topView && flat && options.zSize || sideView && vertical && eastWest || frontView && vertical && northSouth) {
+
+        // wide vertical
+        this.appendStyles({
+          "border-width": thin,
+          "width": stud.DEPTH+"em"
+        })
+
+      } else if (topView && horizontal && eastWest || sideView && vertical && northSouth || frontView && vertical && eastWest) {
+
+        // narrow vertical
+        this.appendStyles({
+          "border-width": thin,
+          "width": stud.WIDTH+"em"
+        })
+
       }
 
       addStylesFromOptions(options, this)
@@ -73,7 +144,8 @@ var drawPlan = (function() {
             if (!attribute) { throw new Error }
           } else if (attribute == "xPos") {
             attribute = {
-              top: "left"
+              top: "left",
+              side: "__ignore"
             }[view]
             if (!attribute) { throw new Error }
           } else if (attribute == "yPos") {
@@ -83,7 +155,8 @@ var drawPlan = (function() {
             if (!attribute) { throw new Error }
           } else if (attribute == "xSize") {
             attribute = {
-              top: "width"
+              top: "width",
+              side: "__ignore"
             }[view]
             if (!attribute) { throw new Error }
           } else if (attribute == "zSize") {
@@ -93,9 +166,11 @@ var drawPlan = (function() {
             if (!attribute) { throw new Error }
           }
 
-          el[attribute] = value
-          styles[attribute] = value+"em"
-          isSome = true
+          if (attribute != "__ignore") {
+            el[attribute] = value
+            styles[attribute] = value+"em"
+            isSome = true
+          }
         }
       }
     )
@@ -119,39 +194,46 @@ var drawPlan = (function() {
 
       var size = "0.2em"
 
-      switch (options.orientation) {
-        case "west":
-          this.appendStyles({
-            "border-left": size+" solid #863",
-            "border-right": size+" dashed red"
-          })
-          break
-        case "east":
-          this.appendStyles({
-            "border-right": size+" solid #863",
-            "border-left": size+" dashed red"
-          })
-          break
-        case "north":
+      var o = options.orientation
+
+      if (topView && o=="west" || sideView && o=="north" || frontView && o=="west"
+      ) {
+
+        this.appendStyles({
+          "border-left": size+" solid #863",
+          "border-right": size+" dashed red"
+        })
+
+      } else if (topView && o=="east" || sideView && o=="south" || frontView && o=="east") {
+
+        this.appendStyles({
+          "border-right": size+" solid #863",
+          "border-left": size+" dashed red"
+        })
+
+      } else if (topView && o=="north" || sideView && o=="down" || frontView && o=="down") {
+
           this.appendStyles({
             "border-top": size+" solid #863",
             "border-bottom": size+" dashed red"
           })
-          break
-        case "south":
+
+      } else if (topView && o=="south" || sideView && o=="up" || frontView && o=="up") {
+
           this.appendStyles({
             "border-bottom": size+" solid #863",
             "border-top": size+" dashed red"
           })
-          break
-        case "in":
-          this.borderBottom = size+" solid black"
-          this.appendStyles({
-            "border": size+" solid black"
-          })
-          break
+
+      } else {
+
+        this.borderBottom = size+" solid black"
+        this.appendStyles({
+          "border": size+" solid black"
+        })
 
       }
+
       if (options.section) {
         options.section.children.push(this)
       }
@@ -186,17 +268,17 @@ var drawPlan = (function() {
 
       var height = options.height
 
-      if(options.zSize && view == "top") {
+      if(options.zSize && topView) {
         height = options.zSize
-      } else if (options.ySize && view == "side") {
+      } else if (options.ySize && sideView) {
         height = options.ySize
       }
 
       var width = options.width
 
-      if (options.xSize && view == "top") {
+      if (options.xSize && topView) {
         width = options.xSize
-      } else if (options.zSize && view == "side") {
+      } else if (options.zSize && sideView) {
         width = options.zSize
       }
 
@@ -301,14 +383,14 @@ var drawPlan = (function() {
           wrapperOptions[key] = options[key]
           break
         case "zPos":
-          if (view == "side") {
+          if (sideView) {
             wrapperOptions.left = options.zPos
           } else {
             throw new Error("Can only slope in side view")
           }
           break
         case "yPos":
-          if (view == "side") {
+          if (sideView) {
             wrapperOptions.top = options.yPos
           } else {
             throw new Error("Can only slope in side view")
@@ -686,9 +768,23 @@ var drawPlan = (function() {
     }
   }
 
+  var sideView
+  var frontView
+  var topView
   var view
+
   drawPlan.setView = function(newView) {
     view = newView
+    sideView = frontView = topView = false
+    if (view == "side") {
+      sideView = true
+    } else if (view == "front") {
+      frontView = true
+    } else if (view == "top") {
+      topView = true
+    } else {
+      throw new Error(view+" is not a valid view")
+    }
   }
 
   drawPlan.addStylesFromOptions = addStylesFromOptions

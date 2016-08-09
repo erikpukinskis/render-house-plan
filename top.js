@@ -18,33 +18,43 @@ function floor(section, frontStud, plywood, stud) {
     zPos: 0
   })
 
-  frontStud({
+  stud({
     section: floor,
-    xSize: 96 - plywood.THICKNESS*2
-  })
-
-  frontStud({
-    section: floor,
+    name: "back-floor-joist",
     xSize: 96 - plywood.THICKNESS*2,
-    zPos: 72 - stud.WIDTH
+    orientation: "horizontal-south"
   })
 
-  frontStud({
+  stud({
     section: floor,
+    name: "front-floor-joist",
+    xSize: 96 - plywood.THICKNESS*2,
+    zPos: 72 - stud.WIDTH,
+    orientation: "horizontal-north"
+  })
+
+  stud({
+    section: floor,
+    name: "floor-joist-left",
+    orientation: "horizontal-east",
     zSize: 72,
-    xPos: 0
+    xPos: 0,
   })
 
   for(var i=1; i<6; i++) {
-    frontStud({
+    stud({
       section: floor,
+      name: "floor-joist-"+(i+1),
+      orientation: "horizontal-west",
       zSize: 72,
       xPos: i*16 - stud.WIDTH/2
     })
   }
 
-  frontStud({
+  stud({
     section: floor,
+    name: "floor-joist-right",
+    orientation: "horizontal-west",
     zSize: 72,
     xPos: 96 - plywood.THICKNESS*2 - stud.WIDTH
   })
@@ -53,7 +63,7 @@ function floor(section, frontStud, plywood, stud) {
     section: floor,
     xSize: 48,
     zSize: 72,
-    orientation: "in"
+    orientation: "up"
   })
 
   plywood({
@@ -61,7 +71,7 @@ function floor(section, frontStud, plywood, stud) {
     xPos: 48,
     xSize: 48-plywood.THICKNESS*2,
     zSize: 72,
-    orientation: "in"
+    orientation: "up"
   })
 
 }
@@ -178,17 +188,20 @@ function sideWall(position) {
 
   stud({
     section: long,
-    zPos: 16 - stud.WIDTH/2
+    zPos: 16 - stud.WIDTH/2,
+    orientation: "north"
   })
 
   stud({
     section: long,
-    zPos: 16*2 - stud.WIDTH/2
+    zPos: 16*2 - stud.WIDTH/2,
+    orientation: "north"
   })
 
   stud({
     section: long,
-    zPos: 48 - stud.WIDTH/2
+    zPos: 48 - stud.WIDTH/2,
+    orientation: "north"
   })
 
   plywood({
@@ -207,12 +220,14 @@ function sideWall(position) {
 
   stud({
     section: long,
-    zPos: 48+12 - stud.WIDTH/2
+    zPos: 48+12 - stud.WIDTH/2,
+    orientation: "north"
   })
 
   stud({
     section: long,
-    zPos: 48+24 - stud.WIDTH
+    zPos: 48+24 - stud.WIDTH,
+    orientation: "north"
   })
 
   plywood({
