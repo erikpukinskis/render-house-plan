@@ -130,6 +130,10 @@ var drawPlan = (function() {
     var styles = {}
     var isSome = false
 
+    if (options.color) {
+      styles["border-color"] = options.color
+    }
+
     ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(
       function(attribute) {
         var value = options[attribute]
@@ -296,12 +300,6 @@ var drawPlan = (function() {
     }),
     function(options) {
       this.borderBottom = "0.2em solid #ec4"
-
-      if (options.color) {
-        this.appendStyles({
-          "border-color": options.color
-        })
-      }
 
       var height = options.height
 

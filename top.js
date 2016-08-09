@@ -99,9 +99,9 @@ function backWall(stud, plywood, section, trim, door) {
   plywood({
     section: back,
     name: "back-left-sheathing",
+    xPos: -plywood.THICKNESS,
     xSize: 48,
     zPos: -plywood.THICKNESS,
-    xPos: -plywood.THICKNESS,
     orientation: "north"
   })
 
@@ -111,6 +111,27 @@ function backWall(stud, plywood, section, trim, door) {
     xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
     zPos: stud.DEPTH,
     xPos: stud.DEPTH + plywood.THICKNESS,
+    orientation: "south"
+  })
+
+
+  // BACK RIGHT
+
+  plywood({
+    section: back,
+    name: "back-right-sheathing",
+    xSize: 48,
+    xPos: 48-plywood.THICKNESS,
+    zPos: -plywood.THICKNESS,
+    orientation: "north"
+  })
+
+  plywood({
+    section: back,
+    name: "back-right-interior",
+    xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
+    xPos: 48-plywood.THICKNESS,
+    zPos: stud.DEPTH,
     orientation: "south"
   })
 
@@ -140,26 +161,6 @@ function backWall(stud, plywood, section, trim, door) {
     name: "back-stud-4",
     orientation: "west",
     xPos: 48 - plywood.THICKNESS - stud.WIDTH/2
-  })
-
-  // BACK RIGHT
-
-  plywood({
-    section: back,
-    name: "back-right-sheathing",
-    xSize: 48,
-    xPos: 48-plywood.THICKNESS,
-    zPos: -plywood.THICKNESS,
-    orientation: "north"
-  })
-
-  plywood({
-    section: back,
-    name: "back-right-interior",
-    xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
-    xPos: 48-plywood.THICKNESS,
-    zPos: stud.DEPTH,
-    orientation: "south"
   })
 
   stud({
