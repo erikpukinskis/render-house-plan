@@ -161,7 +161,8 @@ var drawPlan = (function() {
             if (!attribute) { throw new Error }
           } else if (attribute == "zSize") {
             attribute = {
-              top: "height"
+              top: "height",
+              side: "width"
             }[view]
             if (!attribute) { throw new Error }
           }
