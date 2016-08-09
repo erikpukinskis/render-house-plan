@@ -130,7 +130,7 @@ var drawPlan = (function() {
     var styles = {}
     var isSome = false
 
-    ;["top", "bottom", "left", "right", "height", "width", "zPos", "xPos", "yPos", "xSize", "zSize"].forEach(
+    ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(
       function(attribute) {
         var value = options[attribute]
 
@@ -139,32 +139,40 @@ var drawPlan = (function() {
           if (attribute == "zPos") {
             attribute = {
               side: "left",
-              top: "top"
+              top: "top",
+              front: "__ignore"
             }[view]
-            if (!attribute) { throw new Error }
           } else if (attribute == "xPos") {
             attribute = {
               top: "left",
-              side: "__ignore"
+              side: "__ignore",
+              front: "left"
             }[view]
-            if (!attribute) { throw new Error }
           } else if (attribute == "yPos") {
             attribute = {
-              side: "top"
+              side: "top",
+              top: "__ignore",
+              front: "top"
             }[view]
-            if (!attribute) { throw new Error }
           } else if (attribute == "xSize") {
             attribute = {
               top: "width",
-              side: "__ignore"
+              side: "__ignore",
+              front: "width"
+            }[view]
+          } else if (attribute == "ySize") {
+            attribute = {
+              top: "__ignore",
+              side: "height",
+              front: "height"
             }[view]
             if (!attribute) { throw new Error }
           } else if (attribute == "zSize") {
             attribute = {
               top: "height",
-              side: "width"
+              side: "width",
+              front: "__ignore"
             }[view]
-            if (!attribute) { throw new Error }
           }
 
           if (attribute != "__ignore") {
@@ -269,18 +277,22 @@ var drawPlan = (function() {
 
       var height = options.height
 
-      if(options.zSize && topView) {
+      if(topView && options.zSize) {
         height = options.zSize
-      } else if (options.ySize && sideView) {
+      } else if (sideView && options.ySize) {
+        height = options.ySize
+      } else if (frontView && options.ySize) {
         height = options.ySize
       }
 
       var width = options.width
 
-      if (options.xSize && topView) {
+      if (topView && options.xSize) {
         width = options.xSize
-      } else if (options.zSize && sideView) {
+      } else if (sideView && options.zSize) {
         width = options.zSize
+      } else if (frontView && options.xSize) {
+        width = options.xSize
       }
 
       if (height) {
@@ -364,6 +376,13 @@ var drawPlan = (function() {
 
   function sloped(options) {
 
+    var generator = options.part
+    delete options.part
+
+    if (!sideView) {
+      return generator.call(null, options)
+    }
+
     if (!options.slope) {
       throw new Error("You need to pass a slope option when you create a sloped piece. You passed options "+JSON.stringify(options))
     }
@@ -373,9 +392,6 @@ var drawPlan = (function() {
 
     for(var key in options) {
       switch(key) {
-        case "part":
-          var generator = options[key]
-          break
         case "left":
         case "right":
         case "top":
@@ -454,44 +470,12 @@ var drawPlan = (function() {
 
 
 
-
-  var frontStud = element.template(
-    ".front-stud-inner",
-    element.style({
-      "border": "1px solid #999",
-      "box-sizing": "border-box",
-      "position": "absolute"
-    }),
-    function(options) {
-      if (options.section) {
-        options.section.children.push(this)
-      }
-
-      if (options.height) {
-        this.appendStyles({
-          "width": stud.WIDTH+"em"
-        })
-      }
-
-      if (options.width || options.xSize) {
-        this.appendStyles({
-          "height": stud.WIDTH+"em"
-        })
-      }
-
-      this.borderBottom = "1px solid #999"
-
-      drawPlan.addStylesFromOptions(options, this)
-    } 
-  )
-
-
-
-
   function tilted(options) {
+    var generator = options.part
+    delete options.part
 
-    if (view != "side") {
-      throw new Error("Can only tilt in side view")
+    if (!sideView) {
+      return generator.call(null, options)
     }
 
     var height = verticalSlice(options.height, options.slope)
@@ -512,9 +496,6 @@ var drawPlan = (function() {
 
     options.height = height
     options.yPos = yPos
-
-    var generator = options.part
-    delete options.part
 
     var el = generator.call(null, options)
 
@@ -683,7 +664,6 @@ var drawPlan = (function() {
     section: section,
     door: door,
     trim: trim,
-    frontStud: frontStud,
     sloped: sloped,
     twinWall: twinWall,
     twinWallSide: twinWallSide,
@@ -725,7 +705,6 @@ var drawPlan = (function() {
     door,
     doorBox,
     doorSwing,
-    frontStud,
     slopeWrapper,
     twinWall,
     twinWallSide
@@ -736,6 +715,10 @@ var drawPlan = (function() {
     sections = []
 
     var args = argsFor(generator)
+
+    for(var i=1; i<arguments.length; i++) {
+      args.push(arguments[i])
+    }
 
     generator.apply(null, args)
 
@@ -749,11 +732,11 @@ var drawPlan = (function() {
   function argsFor(generator) {
     var names = argNames(generator)
 
-    var args = names.map(toPart)
-
-    function toPart(partName) {
-      return parts[partName]
-    }
+    var args = []
+    names.forEach(function(name) {
+      var helper = parts[name]
+      if (helper) { args.push(helper) }
+    })
 
     return args
   }

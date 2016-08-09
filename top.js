@@ -2,15 +2,26 @@ var BATTEN_WIDTH = 1.75
 
 drawPlan.setView("top")
 
-drawPlan(walls)
 drawPlan(battens)
 drawPlan(roof)
 drawPlan(doors)
 drawPlan(floor)
+drawPlan(backWall)
+drawPlan(frontWall)
+
+drawPlan(sideWall, {
+  xPos: 0,
+  zPos: 0
+})
+
+drawPlan(sideWall, {
+  xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
+  zPos: 0
+})
 
 
 
-function floor(section, frontStud, plywood, stud) {
+function floor(section, plywood, stud) {
 
   var floor = section({
     name: "floor",
@@ -61,6 +72,7 @@ function floor(section, frontStud, plywood, stud) {
 
   plywood({
     section: floor,
+    name: "left-subfloor",
     xSize: 48,
     zSize: 72,
     orientation: "up"
@@ -68,6 +80,7 @@ function floor(section, frontStud, plywood, stud) {
 
   plywood({
     section: floor,
+    name: "right-subfloor",
     xPos: 48,
     xSize: 48-plywood.THICKNESS*2,
     zSize: 72,
@@ -77,106 +90,92 @@ function floor(section, frontStud, plywood, stud) {
 }
 
 
-// WALLS
+function backWall(stud, plywood, section, trim, door) {
 
-function walls(stud, plywood, section, trim, door) {
+  var back = section({
+    xPos: 0,
+    zPos: 0
+  })
 
-// BACK
+  plywood({
+    section: back,
+    xSize: 48,
+    zPos: -plywood.THICKNESS,
+    xPos: -plywood.THICKNESS,
+    orientation: "north"
+  })
 
-var back = section({
-  xPos: 0,
-  zPos: 0
-})
+  plywood({
+    section: back,
+    xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
+    zPos: stud.DEPTH,
+    xPos: stud.DEPTH + plywood.THICKNESS,
+    orientation: "south"
+  })
 
-plywood({
-  section: back,
-  xSize: 48,
-  zPos: -plywood.THICKNESS,
-  xPos: -plywood.THICKNESS,
-  orientation: "north"
-})
+  stud({
+    section: back,
+    orientation: "east",
+    xPos: stud.DEPTH + plywood.THICKNESS
+  })
 
-plywood({
-  section: back,
-  xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
-  zPos: stud.DEPTH,
-  xPos: stud.DEPTH + plywood.THICKNESS,
-  orientation: "south"
-})
+  stud({
+    section: back,
+    orientation: "west",
+    xPos: 16 - plywood.THICKNESS - stud.WIDTH/2
+  })
 
-stud({
-  section: back,
-  orientation: "east",
-  xPos: stud.DEPTH + plywood.THICKNESS
-})
+  stud({
+    section: back,
+    orientation: "west",
+    xPos: 16*2 - plywood.THICKNESS - stud.WIDTH/2
+  })
 
-stud({
-  section: back,
-  orientation: "west",
-  xPos: 16 - plywood.THICKNESS - stud.WIDTH/2
-})
+  stud({
+    section: back,
+    orientation: "west",
+    xPos: 48 - plywood.THICKNESS - stud.WIDTH/2
+  })
 
-stud({
-  section: back,
-  orientation: "west",
-  xPos: 16*2 - plywood.THICKNESS - stud.WIDTH/2
-})
+  // BACK RIGHT
 
-stud({
-  section: back,
-  orientation: "west",
-  xPos: 48 - plywood.THICKNESS - stud.WIDTH/2
-})
+  plywood({
+    section: back,
+    xSize: 48,
+    xPos: 48-plywood.THICKNESS,
+    zPos: -plywood.THICKNESS,
+    orientation: "north"
+  })
 
-// BACK RIGHT
+  plywood({
+    section: back,
+    xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
+    xPos: 48-plywood.THICKNESS,
+    zPos: stud.DEPTH,
+    orientation: "south"
+  })
 
-plywood({
-  section: back,
-  xSize: 48,
-  xPos: 48-plywood.THICKNESS,
-  zPos: -plywood.THICKNESS,
-  orientation: "north"
-})
+  stud({
+    section: back,
+    orientation: "west",
+    xPos: 48 - plywood.THICKNESS + 16 - stud.WIDTH/2
+  })
 
-plywood({
-  section: back,
-  xSize: 48 - stud.DEPTH - 2*plywood.THICKNESS,
-  xPos: 48-plywood.THICKNESS,
-  zPos: stud.DEPTH,
-  orientation: "south"
-})
+  stud({
+    section: back,
+    orientation: "west",
+    xPos: 48 - plywood.THICKNESS + 2*16 - stud.WIDTH/2
+  })
 
-stud({
-  section: back,
-  orientation: "west",
-  xPos: 48 - plywood.THICKNESS + 16 - stud.WIDTH/2
-})
+  stud({
+    section: back,
+    orientation: "west",
+    xPos: 48*2 - plywood.THICKNESS*3 - stud.WIDTH-stud.DEPTH
+  })
 
-stud({
-  section: back,
-  orientation: "west",
-  xPos: 48 - plywood.THICKNESS + 2*16 - stud.WIDTH/2
-})
+}
 
-stud({
-  section: back,
-  orientation: "west",
-  xPos: 48*2 - plywood.THICKNESS*3 - stud.WIDTH-stud.DEPTH
-})
-
-// SIDES
-
-sideWall({
-  xPos: 0,
-  zPos: 0
-})
-
-sideWall({
-  xPos: 96 - stud.DEPTH - plywood.THICKNESS*2,
-  zPos: 0
-})
-
-function sideWall(position) {
+function sideWall(section, stud, plywood, position) {
 
   var long = section(position)
 
@@ -247,48 +246,48 @@ function sideWall(position) {
   })
 }
 
-// FRONT WALL
 
-var distanceIn = plywood.THICKNESS + stud.DEPTH + trim.THICKNESS*2 + door.WIDTH*2
+function frontWall(section, plywood, trim, stud, door) {
 
-var front = section({
-  zPos: 48+24,
-  xPos: distanceIn
-})
+  var distanceIn = plywood.THICKNESS + stud.DEPTH + trim.THICKNESS*2 + door.WIDTH*2
 
-plywood({
-  section: front,
-  xSize: 96 - distanceIn - plywood.THICKNESS,
-  orientation: "south"
-})
+  var front = section({
+    zPos: 48+24,
+    xPos: distanceIn
+  })
 
-plywood({
-  section: front,
-  xSize: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH,
-  bottom: stud.DEPTH,
-  orientation: "north"
-})
+  plywood({
+    section: front,
+    xSize: 96 - distanceIn - plywood.THICKNESS,
+    orientation: "south"
+  })
 
-stud({
-  section: front,
-  orientation: "east",
-  bottom: 0
-})
+  plywood({
+    section: front,
+    xSize: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH,
+    bottom: stud.DEPTH,
+    orientation: "north"
+  })
 
-stud({
-  section: front,
-  orientation: "east",
-  bottom: 0,
-  xPos: 12
-})
+  stud({
+    section: front,
+    orientation: "east",
+    bottom: 0
+  })
 
-stud({
-  section: front,
-  orientation: "west",
-  bottom: 0,
-  xPos: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH
-})
+  stud({
+    section: front,
+    orientation: "east",
+    bottom: 0,
+    xPos: 12
+  })
 
+  stud({
+    section: front,
+    orientation: "west",
+    bottom: 0,
+    xPos: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH
+  })
 
 }
 
