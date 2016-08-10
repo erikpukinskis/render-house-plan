@@ -19,6 +19,7 @@ var betweenRafterIntersections = 72 - rafterStart.zPos
 var elevationBetweenIntersections = betweenRafterIntersections*SLOPE
 
 var headerRafterIntersection = {
+  name: "header",
   xPos: 0,
   zPos: 72,
   yPos: rafterStart.yPos - elevationBetweenIntersections
@@ -43,11 +44,13 @@ function draw(view) {
   drawPlan(backWall)
   drawPlan(frontWall)
   drawPlan(sideWall, {
+    name: "left-wall",
     xPos: 0,
     yPos: FLOOR_TOP,
     zPos: 0
   })
   drawPlan(sideWall, {
+    name: "right-wall",
     xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
     yPos: FLOOR_TOP,
     zPos: 0

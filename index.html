@@ -1,0 +1,43 @@
+<body>
+  <div class="controls">
+    <a class="button" href="javascript: draw('side')">side</a>
+    <a class="button" href="javascript: draw('top')">top</a>
+    <div class="section-toggles">
+    </div>
+  </div>
+</body>
+
+<style>
+.controls {
+  position: absolute;
+  left: 0.25em;
+  top: 0.5em;
+}
+
+.button {
+  color: white;
+  text-decoration: none;
+  padding: 4px 10px;
+  background: cyan;
+  font-family: sans-serif;
+  margin-bottom: 0.25em;
+}
+
+.section-toggles {
+  margin-top: 0.5em;
+}
+
+.section-toggle.button {
+  display: block;
+  background: #bbb;
+}
+
+.section-toggle.button.on {
+  background: lightgreen;
+}
+
+</style>
+<script src="../build/element.js"></script>
+<script src="../build/add-html.js"></script>
+<script src="draw-plan.js"></script>
+<script src="teensy-house-1.js"></script>

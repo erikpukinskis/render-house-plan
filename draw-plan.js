@@ -645,7 +645,7 @@ var drawPlan = (function() {
     }),
     function(options) {
       if (options.name) {
-        this.attributes["data-name"] = options.name
+        this.attributes["data-name"] = this.name = options.name
       }
       if (options.rotate) {
         this.appendStyles({
@@ -750,7 +750,7 @@ var drawPlan = (function() {
     ".plan",
     element.style({
       "position": "relative",
-      "left": "10em",
+      "left": "22em",
       "top": "10em",
       "min-width": "120em",
       "min-height": "120em",
@@ -779,30 +779,94 @@ var drawPlan = (function() {
   ).html())
 
   addHtml(element(".plan").html())
-  var container = document.querySelector(".plan")
 
+  var generators = []
 
   function drawPlan(generator) {
     sections = []
-
+ 
     var args = argsFor(generator)
 
     for(var i=1; i<arguments.length; i++) {
       args.push(arguments[i])
     }
 
-    generator.apply(null, args)
+    var draw = Function.prototype.apply.bind(generator, null, args)
 
-    sections.forEach(
-      function(houseSection) {
-        addHtml.inside(container, houseSection.html())
-      }
-    )
+    draw()
+
+    generators.push(draw)
+
+    sections.forEach(addToPage)
+  }
+
+  function redraw() {
+    sections = []
+    generators.map(call)
+    sections.forEach(addToPage)
+    drawing = false
+  }
+
+  function addToPage(section) {
+    var name = section.name
+    ensureToggle(name)
+    if (sectionVisible[name] === false) { return }
+
+    addHtml.inside(container, section.html())
   }
 
   drawPlan.clear = function() {
-    container.innerHTML = ""
+    generators = []
+    emptyNode(container)
   }
+
+  var sectionVisible = {}
+  var toggles = document.querySelector(".section-toggles")
+
+  function ensureToggle(name) {
+    if (!name) { return }
+
+    if (typeof sectionVisible[name] == "undefined") {
+      sectionVisible[name] = true
+      var link = element("a.section-toggle.button.on", name, {
+        href: "javascript: drawPlan.toggleSection(\""+name+"\")"
+      })
+      link.classes.push("toggle-"+name)
+      addHtml.inside(toggles, link.html())
+    }
+  }
+
+  var drawing = false
+  var container = document.querySelector(".plan")
+
+  function toggleSection(name) {
+    if (drawing) { return }
+
+    var on = !sectionVisible[name]
+    sectionVisible[name] = on
+
+    var toggle = document.querySelector(".toggle-"+name)
+
+    if (on) {
+      toggle.classList.add("on")
+    } else {
+      toggle.classList.remove("on")
+    }
+
+    emptyNode(container)
+
+    if (drawing) { return }
+    setTimeout(redraw, 0)
+    drawing = true
+  }
+
+  function emptyNode(node) {
+    while (node.firstChild) {
+      node.removeChild(node.firstChild)
+    }
+  }
+
+  function call(func) { func() }
 
   function argsFor(generator) {
     var names = argNames(generator)
@@ -849,6 +913,8 @@ var drawPlan = (function() {
   drawPlan.addStylesFromOptions = addStylesFromOptions
 
   drawPlan.parts = parts
+
+  drawPlan.toggleSection = toggleSection
 
   return drawPlan
 })()
