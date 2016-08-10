@@ -807,26 +807,86 @@ var drawPlan = (function() {
     })
   )
 
-  var controls = element(".controls", [
-    element("a.button", "side", {
-      href: "javascript: drawPlan.setView(\"side\")"
+  var overlay = element.template(
+    ".overlay",
+    element.style({
+      "background": "white",
+      "z-index": "100",
+      "position": "fixed",
+      "left": "0.25em",
+      "top": "0.5em"
     }),
-    element("a.button", "front", {
-      href: "javascript: drawPlan.setView(\"front\")"
+    function(children) {
+      this.children = children
+    }
+  )
+
+  var viewButton = element.template(
+    ".button",
+    element.style({
+      "display": "inline-block",
+      "color": "white",
+      "padding": "0px 6px",
+      "background": "#1ef",
+      "text-decoration": "none",
+      "font-family": "sans-serif",
+      "margin-right": "0.25em",
+      "line-height": "2em",
+      "margin-bottom": "0.25em"
     }),
-    element("a.button", "top", {
-      href: "javascript: drawPlan.setView(\"top\")"
+    function(view) {
+      this.children.push(view)
+      this.attributes.href = "javascript: drawPlan.setView(\""+view+"\")"
+    }
+  ) 
+
+  var zoomButton = element.template(
+    ".zoom-button.button",
+    element.style({
+      "padding-left": "1em",
+      "padding-right": "1em"
     }),
+    function(factor, label) {
+      this.children.push(label)
+      this.attributes.href = "javascript: drawPlan.zoom("+factor+")"
+    }
+  )
+
+  var resetZoom = element.template(
+    ".reset-zoom-button.button",
+    "zoom",
+    element.style({
+      "background": "white",
+      "padding-left": "0.05em",
+      "padding-right": "0.1em",
+      "color": "#1ef"
+    }),
+    {
+      href: "javascript: drawPlan.zoom(\"default\")"
+    }
+  )
+
+  var sectionToggle = element.style(
+    ".section-toggle.button",
+    {
+      "display": "block",
+      "background": "#bbb"
+    }
+  )
+
+  var sectionToggleOn = element.style(
+    ".section-toggle.button.on",
+    {"background": "#6f5"}
+  )
+
+  var controls = overlay([
+    viewButton("side"),
+    viewButton("front"),
+    viewButton("top"),
     element(".zoom", [
-      element("a.button", "-", {
-        href: "javascript: drawPlan.zoom(0.8)"
-      }),
-      element("a.button.reset", "zoom", {
-        href: "javascript: drawPlan.zoom(\"default\")"
-      }),
-      element("a.button", "+", {
-        href: "javascript: drawPlan.zoom(1.2)"
-      })
+      zoomButton(0.8, "-"),
+      resetZoom(),
+      zoomButton(1.2, "+")
     ]),
     element(".section-toggles")
   ])
@@ -834,25 +894,34 @@ var drawPlan = (function() {
 
   addHtml(
     element.stylesheet(
-    container,
-    stud,
-    plywood,
-    section,
-    sectionBefore,
-    sectionAfter,
-    trim,
-    topDoorContainer,
-    basicDoor,
-    doorKnob,
-    doorBox,
-    doorSwing,
-    slopeWrapper,
-    twinWall,
-    twinWallSide
-  ).html())
+      container,
+      stud,
+      plywood,
+      section,
+      sectionBefore,
+      sectionAfter,
+      trim,
+      topDoorContainer,
+      basicDoor,
+      doorKnob,
+      doorBox,
+      doorSwing,
+      slopeWrapper,
+      twinWall,
+      twinWallSide,
+      overlay,
+      viewButton,
+      zoomButton,
+      resetZoom,
+      sectionToggle,
+      sectionToggleOn
+    ).html()
+  )
+
+  addHtml(element(".plan").html())
 
   addHtml(controls.html())
-  addHtml(element(".plan").html())
+
 
   var generators = []
 
