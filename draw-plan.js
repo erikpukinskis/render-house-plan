@@ -44,11 +44,11 @@ var drawPlan = (function() {
         eastWest = !northSouth
       }
 
-      if (options.name == "header-top-plate") {
-        debugger
+      if (options.name == "left-side-bottom-plate") {
+        // debugger
       }
 
-      if (topView && o=="north" || sideView && o=="up" || frontView && o=="up"
+      if (topView && o=="north" || sideView && o=="up" && options.xSize|| frontView && o=="up" && options.zSize
       ) {
 
         // U-shape
@@ -585,7 +585,17 @@ var drawPlan = (function() {
       return generator.call(null, newOptions)
     }
 
-    var height = verticalSlice(options.height, options.slope)
+    if (options.name == "left-side-top-plate") {
+      // debugger
+    }
+    if (typeof options.ySize == "undefined") {
+      throw new Error("sloped parts need to specify a ySize")
+    }
+    if (typeof options.zPos == "undefined") {
+      throw new Error("sloped parts need to specify a zPos")
+    }
+    var height = verticalSlice(options.ySize, options.slope)
+
 
     var drop = options.slope*options.zPos
 
@@ -596,10 +606,6 @@ var drawPlan = (function() {
     // cos(angle) = floorWidth/ceilingWidth
 
     // floorWidth = ceilingWidth*cos(angle)
-
-    if (options.length) {
-      options.width = options.length*Math.cos(radians)
-    }
 
     options.height = height
     options.yPos = yPos
@@ -786,6 +792,7 @@ var drawPlan = (function() {
 
 
   var sections
+  var zoomFactor = 0.39
 
   var container = element.template(
     ".plan",
@@ -795,7 +802,7 @@ var drawPlan = (function() {
       "top": "10em",
       "min-width": "120em",
       "min-height": "120em",
-      "font-size": "0.39em",
+      "font-size": zoomFactor+"em",
       "margin": "0"
     })
   )
@@ -810,6 +817,17 @@ var drawPlan = (function() {
     element("a.button", "top", {
       href: "javascript: drawPlan.setView(\"top\")"
     }),
+    element(".zoom", [
+      element("a.button", "-", {
+        href: "javascript: drawPlan.zoom(0.8)"
+      }),
+      element("a.button.reset", "zoom", {
+        href: "javascript: drawPlan.zoom(\"default\")"
+      }),
+      element("a.button", "+", {
+        href: "javascript: drawPlan.zoom(1.2)"
+      })
+    ]),
     element(".section-toggles")
   ])
 
@@ -993,6 +1011,15 @@ var drawPlan = (function() {
     if (draw !== false) { redraw() }
   }
 
+  function zoom(by) {
+    if (by == "default") {
+      zoomFactor = 0.39
+    } else {
+      zoomFactor = zoomFactor*by
+    }
+    document.querySelector(".plan").style["font-size"] = zoomFactor+"em"
+  }
+
   drawPlan.addStylesFromOptions = addStylesFromOptions
 
   drawPlan.parts = parts
@@ -1002,6 +1029,8 @@ var drawPlan = (function() {
   drawPlan.setView = setView
 
   drawPlan.setZDepth = setZDepth
+
+  drawPlan.zoom = zoom
 
   return drawPlan
 })()

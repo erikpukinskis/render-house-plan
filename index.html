@@ -3,23 +3,26 @@
 
 <style>
 .controls {
-  position: absolute;
+  background: white;
+  z-index: 100;
+  position: fixed;
   left: 0.25em;
   top: 0.5em;
 }
 
 .button {
+  display: inline-block;
   color: white;
   text-decoration: none;
-  padding: 4px 6px;
-  background: cyan;
+  padding: 0px 6px;
+  background: #1ef;
   font-family: sans-serif;
-  margin-bottom: 0.25em;
   margin-right: 0.25em;
+  line-height: 2em;
+  margin-bottom: 0.25em;
 }
 
 .section-toggles {
-  margin-top: 0.5em;
 }
 
 .section-toggle.button {
@@ -28,7 +31,23 @@
 }
 
 .section-toggle.button.on {
-  background: lightgreen;
+  background: #6f5;
+}
+
+.zoom {
+  color: #1ef;
+  font-family: sans-serif;
+}
+.zoom .button {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.zoom .button.reset {
+  background: white;
+  padding-left: 0.05em;
+  padding-right: 0.1em;
+  color: #1ef;
 }
 </style>
 
