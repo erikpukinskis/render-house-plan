@@ -219,7 +219,6 @@ var drawPlan = (function() {
   }
 
   function reverse(attr) {
-    console.log(attr)
     return {
       left: "right",
       top: "bottom"
@@ -256,14 +255,14 @@ var drawPlan = (function() {
           "border-left": size+" dashed red"
         })
 
-      } else if (topView && o=="north" || sideView && o=="down" || frontView && o=="down") {
+      } else if (topView && o=="north" || sideView && o=="up" || frontView && o=="up") {
 
           this.appendStyles({
             "border-top": size+" solid #863",
             "border-bottom": size+" dashed red"
           })
 
-      } else if (topView && o=="south" || sideView && o=="up" || frontView && o=="up") {
+      } else if (topView && o=="south" || sideView && o=="down" || frontView && o=="down") {
 
           this.appendStyles({
             "border-bottom": size+" solid #863",
@@ -702,7 +701,6 @@ var drawPlan = (function() {
 
   slopeToDegrees = function(slope) {
     var degrees = 180*slopeToRadians(slope)/Math.PI
-    // console.log(degrees)
     return degrees
   }
 
@@ -748,8 +746,8 @@ var drawPlan = (function() {
 
   var sections
 
-  var body = element.template(
-    "body",
+  var container = element.template(
+    ".plan",
     element.style({
       "position": "relative",
       "left": "10em",
@@ -763,7 +761,7 @@ var drawPlan = (function() {
 
   addHtml(
     element.stylesheet(
-    body,
+    container,
     stud,
     plywood,
     section,

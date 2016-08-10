@@ -39,8 +39,9 @@ function draw(view) {
   drawPlan.setView(view)
 
   drawPlan(floor)
-  // drawPlan(header)
-  // drawPlan(backWall)
+  drawPlan(header)
+  drawPlan(backWall)
+  drawPlan(frontWall)
   drawPlan(sideWall, {
     xPos: 0,
     yPos: FLOOR_TOP,
@@ -52,12 +53,12 @@ function draw(view) {
     zPos: 0
   })
   drawPlan(doors)
-  // drawPlan(roof)
+  drawPlan(roof)
 
 }
 
 
-draw("top")
+draw("side")
 
 function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice) {
 
@@ -232,7 +233,7 @@ function doors(section, door, trim, plywood, stud) {
     name: "below-door-sheathing",
     xPos: 0,
     xSize: door.WIDTH*2 + DOOR_GAP*2 + trim.THICKNESS*2,
-    yPos: DOOR_GAP*2 + trim.THICKNESS*2 + 80 + 0.5,
+    yPos: DOOR_GAP*2 + trim.THICKNESS*2 + door.HEIGHT + 0.5,
     ySize: 2.5,
     orientation: "south"
   })
@@ -263,6 +264,7 @@ function doors(section, door, trim, plywood, stud) {
   })
 
 }
+
 
 
 
@@ -369,7 +371,6 @@ function floor(section, plywood, stud) {
     xPos: 48,
     xSize: 48 - plywood.THICKNESS*2,
     yPos: SUBFLOOR_THICKNESS + stud.DEPTH,
-    ySize: SUBFLOOR_THICKNESS,
     zSize: 72,
     orientation: "down"
   })
@@ -762,6 +763,85 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
     xPos: 96 - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH,
     zPos: -stud.DEPTH,
     orientation: "west"
+  })
+
+}
+
+
+function frontWall(section, plywood, trim, stud, door) {
+
+  var distanceIn = plywood.THICKNESS + stud.DEPTH + trim.THICKNESS*2 + door.WIDTH*2 + DOOR_GAP*2
+
+  var doorOpeningHeight = trim.THICKNESS*2 + door.HEIGHT + DOOR_GAP
+
+  var frontWallWidth = 96 - distanceIn - plywood.THICKNESS
+
+  var front = section({
+    name: "front-wall",
+    zPos: 48+24,
+    xPos: distanceIn,
+    yPos: FLOOR_TOP - doorOpeningHeight
+  })
+
+  plywood({
+    section: front,
+    name: "front-sheathing",
+    xSize: frontWallWidth,
+    ySize: doorOpeningHeight + floorSectionHeight,
+    orientation: "south"
+  })
+
+  plywood({
+    section: front,
+    name: "front-interior",
+    xSize: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH,
+    ySize: doorOpeningHeight,
+    zPos: -stud.DEPTH,
+    zSize: -plywood.THICKNESS,
+    orientation: "north"
+  })
+
+  stud({
+    section: front,
+    name: "front-stud-1",
+    orientation: "east",
+    zPos: -stud.DEPTH,
+    ySize: doorOpeningHeight
+  })
+
+  stud({
+    section: front,
+    name: "front-stud-2",
+    orientation: "east",
+    xPos: 12,
+    ySize: doorOpeningHeight,
+    zPos: -stud.DEPTH
+  })
+
+  stud({
+    section: front,
+    name: "front-stud-3",
+    orientation: "west",
+    xPos: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH,
+    zPos: -stud.DEPTH,
+    ySize: doorOpeningHeight
+  })
+
+  stud({
+    section: front,
+    name: "front-top-plate",
+    orientation: "down",
+    xSize: frontWallWidth,
+    zPos: -stud.DEPTH,
+  })
+
+  stud({
+    section: front,
+    name: "front-top-plate",
+    orientation: "up",
+    xSize: frontWallWidth,
+    yPos: doorOpeningHeight - stud.WIDTH,
+    zPos: -stud.DEPTH
   })
 
 }
