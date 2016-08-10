@@ -186,6 +186,7 @@ function doors(section, door, trim, plywood, stud) {
   door({
     section: opening,
     xPos: DOOR_GAP + trim.THICKNESS,
+    xSize: door.WIDTH,
     yPos: DOOR_GAP + trim.THICKNESS,
     zPos: 0,
     zSize: -door.THICKNESS,
@@ -195,6 +196,7 @@ function doors(section, door, trim, plywood, stud) {
   door({
     section: opening,
     xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH,
+    xSize: door.WIDTH,
     yPos: DOOR_GAP + trim.THICKNESS,
     zPos: 0,
     zSize: -door.THICKNESS,
