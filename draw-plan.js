@@ -44,6 +44,10 @@ var drawPlan = (function() {
         eastWest = !northSouth
       }
 
+      if (options.name == "header-top-plate") {
+        debugger
+      }
+
       if (topView && o=="north" || sideView && o=="up" || frontView && o=="up"
       ) {
 
@@ -54,7 +58,7 @@ var drawPlan = (function() {
           "height": stud.WIDTH+"em"
         })
 
-      } else if (topView && o=="south" || sideView && o=="down" || frontView && o=="down"
+      } else if (topView && o=="south" || sideView && o=="down" || frontView && o=="down" && options.zSize
       ) {
 
         // n-shape
@@ -450,12 +454,18 @@ var drawPlan = (function() {
     }
   }
 
+  var zDepth = 0
+
+  function setZDepth(d) {
+    zDepth = d
+  }
+
   function sloped(options) {
 
     var generator = options.part
     delete options.part
 
-    if (!sideView) {
+    if (topView || frontView) {
       return generator.call(null, options)
     }
 
@@ -499,6 +509,13 @@ var drawPlan = (function() {
     return wrapped
   }
 
+  function merge(obj1,obj2){
+    var obj3 = {};
+    for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+    for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+    return obj3;
+  }
+
   var slopeWrapper = element.template(
     ".slope-wrapper",
     element.style({
@@ -540,8 +557,32 @@ var drawPlan = (function() {
     var generator = options.part
     delete options.part
 
-    if (!sideView) {
+    if (topView) {
       return generator.call(null, options)
+    } else if (frontView) {
+      var originZ = options.zPos
+      var depth = Math.abs(options.zSize)
+
+      if (options.zSize < 0) {
+        var minZ = originZ - depth
+        var maxZ = originZ
+      } else {
+        var minZ = originZ
+        var maxZ = originZ + depth
+      }
+
+      var zIntersect = zDepth - minZ
+      var boost = zIntersect * options.slope
+
+      if (maxZ < zDepth || minZ > zDepth) {
+        return
+      }
+
+      var newOptions = merge(options, {
+        yPos: options.yPos - boost
+      })
+
+      return generator.call(null, newOptions)
     }
 
     var height = verticalSlice(options.height, options.slope)
@@ -959,6 +1000,8 @@ var drawPlan = (function() {
   drawPlan.toggleSection = toggleSection
 
   drawPlan.setView = setView
+
+  drawPlan.setZDepth = setZDepth
 
   return drawPlan
 })()

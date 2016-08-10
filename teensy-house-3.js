@@ -25,6 +25,8 @@ var headerRafterIntersection = {
   yPos: rafterStart.yPos - elevationBetweenIntersections
 }
 
+drawPlan.setZDepth(72)
+
 var doorFramingTop = FLOOR_TOP - drawPlan.parts.door.HEIGHT - 0.75*2 - DOOR_GAP*2
 
 var headerHeight = doorFramingTop - headerRafterIntersection.yPos
@@ -33,7 +35,6 @@ var headerHeight = doorFramingTop - headerRafterIntersection.yPos
 var backPlateLeftHeight = RAFTER_HEIGHT - (drawPlan.parts.stud.DEPTH+drawPlan.parts.plywood.THICKNESS*SLOPE)*SLOPE
 
 var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
-
 
 
 drawPlan(floor)
@@ -751,6 +752,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
       section: header,
       name: "header-stud-"+(i+1),
       xPos: plywood.THICKNESS + i*16 - stud.WIDTH,
+      ySize: headerHeight,
       zPos: -stud.DEPTH,
       orientation: "east"
     })
