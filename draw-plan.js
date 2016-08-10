@@ -293,7 +293,7 @@ var drawPlan = (function() {
 
 
   var DOOR_WIDTH = 32
-
+  var DOOR_THICKNESS = 1.5
 
   var trim = element.template(
     ".trim",
@@ -345,9 +345,8 @@ var drawPlan = (function() {
   trim.THICKNESS = 0.75
 
 
-
-  var door = element.template(
-    ".door-container",
+  var topDoorContainer = element.template(
+    ".top-door-container",
     element.style({
       "position": "absolute"
     }),
@@ -355,7 +354,7 @@ var drawPlan = (function() {
       var swing = doorSwing()
       var box = doorBox(swing)
 
-      if (options.orientation == "east") {
+      if (options.orientation == "west") {
         box.appendStyles({
           "border-right": "0.4em solid black"
         })
@@ -378,6 +377,8 @@ var drawPlan = (function() {
     }
   )
   door.WIDTH = DOOR_WIDTH
+  door.THICKNESS = DOOR_THICKNESS
+  door.HEIGHT = 80
 
   var doorBox = element.template.container(
     ".door-box",
@@ -385,9 +386,8 @@ var drawPlan = (function() {
       "width": DOOR_WIDTH+"em",
       "height": DOOR_WIDTH+"em",
       "box-sizing": "border-box",
-      "border-top": "1.5em solid black",
+      "border-top": door.THICKNESS+"em solid black",
       "position": "absolute",
-      "top": "-1.5em",
       "overflow": "hidden",
     })
   )
@@ -403,6 +403,53 @@ var drawPlan = (function() {
     })
   )
 
+  var basicDoor = element.template(
+      ".door",
+      element.style({
+        "position": "absolute",
+        "width": door.THICKNESS+"em",
+        "height": door.THICKNESS+"em",
+        "box-sizing": "border-box",
+        "border": "0.4em solid black"
+      }),
+      function(options) {
+        if (!options.ySize) {
+          options.ySize = door.HEIGHT
+        }
+
+        if (options.section) {
+          options.section.children.push(this)
+        }
+
+        addStylesFromOptions(options, this)
+      }
+    )
+
+  var doorKnob = element.style(
+    ".door::after", 
+    {
+      "z-index": "10",
+      "content": "\\00a0",
+      "width": "2em",
+      "height": "2.5em",
+      "box-sizing": "border-box",
+      "border-radius": "1em",
+      "border": "0.4em solid black",
+      "background": "white",
+      "position": "absolute",
+      "left": "1.2em",
+      "top": door.HEIGHT/2+"em"
+    }
+  )
+
+
+  function door(options) {
+    if (topView) {
+      topDoorContainer(options)
+    } else {
+      basicDoor(options)
+    }
+  }
 
   function sloped(options) {
 
@@ -723,7 +770,9 @@ var drawPlan = (function() {
     sectionBefore,
     sectionAfter,
     trim,
-    door,
+    topDoorContainer,
+    basicDoor,
+    doorKnob,
     doorBox,
     doorSwing,
     slopeWrapper,

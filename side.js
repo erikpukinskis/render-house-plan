@@ -1,4 +1,4 @@
-var BACK_STUD_HEIGHT = 80
+var BACK_STUD_HEIGHT = drawPlan.parts.door.HEIGHT
 var BATTEN_WIDTH = 1.75
 var FLOOR_TOP = 96
 var DOOR_GAP = 1/4 // no gap below?
@@ -24,7 +24,7 @@ var headerRafterIntersection = {
   yPos: rafterStart.yPos - elevationBetweenIntersections
 }
 
-var doorFramingTop = FLOOR_TOP - 80 - 0.75*2 - DOOR_GAP*2
+var doorFramingTop = FLOOR_TOP - drawPlan.parts.door.HEIGHT - 0.75*2 - DOOR_GAP*2
 
 var headerHeight = doorFramingTop - headerRafterIntersection.yPos
 
@@ -41,17 +41,17 @@ function draw(view) {
   drawPlan(floor)
   // drawPlan(header)
   // drawPlan(backWall)
-  // drawPlan(sideWall, {
-  //   xPos: 0,
-  //   yPos: FLOOR_TOP,
-  //   zPos: 0
-  // })
+  drawPlan(sideWall, {
+    xPos: 0,
+    yPos: FLOOR_TOP,
+    zPos: 0
+  })
   drawPlan(sideWall, {
     xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
     yPos: FLOOR_TOP,
     zPos: 0
   })
-  // drawPlan(doors)
+  drawPlan(doors)
   // drawPlan(roof)
 
 }
@@ -148,65 +148,111 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice) {
 }
 
 
-function doors(section, trim, plywood, stud) {
+function doors(section, door, trim, plywood, stud) {
 
   var opening = section({
     name: "door",
     yPos: doorFramingTop,
     zPos: 72,
+    xPos: stud.DEPTH+plywood.THICKNESS
   })
+
+  var jambWidth = trim.THICKNESS*2 + plywood.THICKNESS*2 + stud.DEPTH
 
   plywood({
     section: opening,
     name: "left-of-door-sheathing",
+    xSize: stud.DEPTH + plywood.THICKNESS*2,
+    xPos: -plywood.THICKNESS*2 - stud.DEPTH,
     ySize: 77,
     yPos: 3,
     orientation: "south"
   })
 
-  plywood({
+  trim({
     section: opening,
-    name: "below-door-sheathing",
-    ySize: 2.5,
-    yPos: DOOR_GAP*2 + trim.THICKNESS*2 + 80 + 0.5,
-    orientation: "south"
+    name: "left-door-jamb",
+    xPos: DOOR_GAP,
+    zSize: -jambWidth,
+    ySize: door.HEIGHT,
+    zPos: plywood.THICKNESS + trim.THICKNESS,
+    yPos: DOOR_GAP + trim.THICKNESS
+  })
+
+  door({
+    section: opening,
+    xPos: DOOR_GAP + trim.THICKNESS,
+    yPos: DOOR_GAP + trim.THICKNESS,
+    zPos: 0,
+    zSize: -door.THICKNESS,
+    orientation: "east"
+  })
+
+  door({
+    section: opening,
+    xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH,
+    yPos: DOOR_GAP + trim.THICKNESS,
+    zPos: 0,
+    zSize: -door.THICKNESS,
+    orientation: "west"
   })
 
   trim({
     section: opening,
-    name: "door-trim-bottom",
-    ySize: DOOR_GAP + floorSectionHeight,
-    yPos: DOOR_GAP + trim.THICKNESS*2 + 80,
-    zPos: plywood.THICKNESS,
-    orientation: "east"
+    name: "right-door-jamb",
+    xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH*2,
+    zSize: -jambWidth,
+    ySize: door.HEIGHT,
+    zPos: plywood.THICKNESS + trim.THICKNESS,
+    yPos: DOOR_GAP + trim.THICKNESS
   })
-
-  var jambWidth = trim.THICKNESS*2 + plywood.THICKNESS*2 + stud.DEPTH
 
   trim({
     section: opening,
     name: "top-door-jamb",
-    zSize: jambWidth,
-    right: -plywood.THICKNESS - trim.THICKNESS,
+    xPos: DOOR_GAP,
+    xSize: trim.THICKNESS*2 + door.WIDTH*2,
+    zSize: -jambWidth,
+    zPos: plywood.THICKNESS + trim.THICKNESS,
     yPos: DOOR_GAP
   })
 
   trim({
     section: opening,
     name: "bottom-door-jamb",
-    zSize: jambWidth,
-    yPos: 80 + DOOR_GAP + trim.THICKNESS,
-    right: -plywood.THICKNESS - trim.THICKNESS
+    xPos: DOOR_GAP,
+    xSize: trim.THICKNESS*2 + door.WIDTH*2,
+    zSize: -jambWidth,
+    yPos: door.HEIGHT + DOOR_GAP + trim.THICKNESS,
+    zPos: plywood.THICKNESS + trim.THICKNESS
   })
+
+  plywood({
+    section: opening,
+    name: "below-door-sheathing",
+    xPos: 0,
+    xSize: door.WIDTH*2 + DOOR_GAP*2 + trim.THICKNESS*2,
+    yPos: DOOR_GAP*2 + trim.THICKNESS*2 + 80 + 0.5,
+    ySize: 2.5,
+    orientation: "south"
+  })
+
+  return
 
   trim({
     section: opening,
-    name: "side-door-jamb",
-    zSize: jambWidth,
-    ySize: 80,
-    right: -plywood.THICKNESS - trim.THICKNESS,
-    yPos: DOOR_GAP + trim.THICKNESS
+    name: "door-trim-bottom",
+    xPos: -plywood.THICKNESS -stud.DEPTH + BATTEN_WIDTH,
+    xSize: 10,
+    ySize: DOOR_GAP + floorSectionHeight,
+    yPos: DOOR_GAP + trim.THICKNESS*2 + 80,
+    zPos: plywood.THICKNESS,
+    orientation: "east"
   })
+
+
+
+
 
   trim({
     section: opening,
