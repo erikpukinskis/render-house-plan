@@ -35,33 +35,27 @@ var backPlateLeftHeight = RAFTER_HEIGHT - (drawPlan.parts.stud.DEPTH+drawPlan.pa
 var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
 
 
-function draw(view) {
-  drawPlan.clear()
-  drawPlan.setView(view)
 
-  drawPlan(floor)
-  drawPlan(header)
-  drawPlan(backWall)
-  drawPlan(frontWall)
-  drawPlan(sideWall, {
-    name: "left-wall",
-    xPos: 0,
-    yPos: FLOOR_TOP,
-    zPos: 0
-  })
-  drawPlan(sideWall, {
-    name: "right-wall",
-    xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
-    yPos: FLOOR_TOP,
-    zPos: 0
-  })
-  drawPlan(doors)
-  drawPlan(roof)
-
-}
+drawPlan(floor)
+drawPlan(header)
+drawPlan(backWall)
+drawPlan(frontWall)
+drawPlan(sideWall, {
+  name: "left-wall",
+  xPos: 0,
+  yPos: FLOOR_TOP,
+  zPos: 0
+})
+drawPlan(sideWall, {
+  name: "right-wall",
+  xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
+  yPos: FLOOR_TOP,
+  zPos: 0
+})
+drawPlan(doors)
+drawPlan(roof)
 
 
-draw("side")
 
 function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice) {
 

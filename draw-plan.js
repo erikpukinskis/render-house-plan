@@ -750,7 +750,7 @@ var drawPlan = (function() {
     ".plan",
     element.style({
       "position": "relative",
-      "left": "22em",
+      "left": "26em",
       "top": "10em",
       "min-width": "120em",
       "min-height": "120em",
@@ -758,6 +758,20 @@ var drawPlan = (function() {
       "margin": "0"
     })
   )
+
+  var controls = element(".controls", [
+    element("a.button", "side", {
+      href: "javascript: drawPlan.setView(\"side\")"
+    }),
+    element("a.button", "front", {
+      href: "javascript: drawPlan.setView(\"front\")"
+    }),
+    element("a.button", "top", {
+      href: "javascript: drawPlan.setView(\"top\")"
+    }),
+    element(".section-toggles")
+  ])
+
 
   addHtml(
     element.stylesheet(
@@ -778,6 +792,7 @@ var drawPlan = (function() {
     twinWallSide
   ).html())
 
+  addHtml(controls.html())
   addHtml(element(".plan").html())
 
   var generators = []
@@ -785,6 +800,8 @@ var drawPlan = (function() {
   function drawPlan(generator) {
     sections = []
  
+    if (!view) { setView("top", false) }
+
     var args = argsFor(generator)
 
     for(var i=1; i<arguments.length; i++) {
@@ -801,6 +818,7 @@ var drawPlan = (function() {
   }
 
   function redraw() {
+    emptyNode(container)
     sections = []
     generators.map(call)
     sections.forEach(addToPage)
@@ -896,7 +914,7 @@ var drawPlan = (function() {
   var topView
   var view
 
-  drawPlan.setView = function(newView) {
+  function setView(newView, draw) {
     view = newView
     sideView = frontView = topView = false
     if (view == "side") {
@@ -908,6 +926,8 @@ var drawPlan = (function() {
     } else {
       throw new Error(view+" is not a valid view")
     }
+
+    if (draw !== false) { redraw() }
   }
 
   drawPlan.addStylesFromOptions = addStylesFromOptions
@@ -915,6 +935,8 @@ var drawPlan = (function() {
   drawPlan.parts = parts
 
   drawPlan.toggleSection = toggleSection
+
+  drawPlan.setView = setView
 
   return drawPlan
 })()
