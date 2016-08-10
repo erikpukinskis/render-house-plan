@@ -822,7 +822,7 @@ var drawPlan = (function() {
   )
 
   var viewButton = element.template(
-    ".button",
+    "a.button",
     element.style({
       "display": "inline-block",
       "color": "white",
@@ -841,7 +841,7 @@ var drawPlan = (function() {
   ) 
 
   var zoomButton = element.template(
-    ".zoom-button.button",
+    "a.zoom-button.button",
     element.style({
       "padding-left": "1em",
       "padding-right": "1em"
@@ -853,7 +853,7 @@ var drawPlan = (function() {
   )
 
   var resetZoom = element.template(
-    ".reset-zoom-button.button",
+    "a.reset-zoom-button.button",
     "zoom",
     element.style({
       "background": "white",
@@ -867,7 +867,7 @@ var drawPlan = (function() {
   )
 
   var sectionToggle = element.style(
-    ".section-toggle.button",
+    "a.section-toggle.button",
     {
       "display": "block",
       "background": "#bbb"
