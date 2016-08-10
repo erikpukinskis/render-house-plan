@@ -828,7 +828,8 @@ var drawPlan = (function() {
   function addToPage(section) {
     var name = section.name
     ensureToggle(name)
-    if (sectionVisible[name] === false) { return }
+
+    if (showSection[name] === false) { return }
 
     addHtml.inside(container, section.html())
   }
@@ -838,17 +839,31 @@ var drawPlan = (function() {
     emptyNode(container)
   }
 
-  var sectionVisible = {}
+  if (localStorage.showSection) {
+    var showSection = JSON.parse(localStorage.showSection)
+  } else {
+    var showSection = {}
+  }
+
   var toggles = document.querySelector(".section-toggles")
+
+  var togglesAdded = {}
 
   function ensureToggle(name) {
     if (!name) { return }
 
-    if (typeof sectionVisible[name] == "undefined") {
-      sectionVisible[name] = true
-      var link = element("a.section-toggle.button.on", name, {
+    if (!togglesAdded[name]) {
+      togglesAdded[name] = true
+
+      var show = showSection[name] !== false
+      showSection[name] = show
+
+      var link = element("a.section-toggle.button", name, {
         href: "javascript: drawPlan.toggleSection(\""+name+"\")"
       })
+      if (show) {
+        link.classes.push("on")
+      }
       link.classes.push("toggle-"+name)
       addHtml.inside(toggles, link.html())
     }
@@ -860,9 +875,11 @@ var drawPlan = (function() {
   function toggleSection(name) {
     if (drawing) { return }
 
-    var on = !sectionVisible[name]
-    sectionVisible[name] = on
+    var on = !showSection[name]
 
+    showSection[name] = on
+    localStorage.showSection = JSON.stringify(showSection)
+    
     var toggle = document.querySelector(".toggle-"+name)
 
     if (on) {
@@ -914,8 +931,13 @@ var drawPlan = (function() {
   var topView
   var view
 
+  setView(localStorage.view)
+
   function setView(newView, draw) {
+    if (!newView) { return }
+
     view = newView
+    localStorage.view = newView
     sideView = frontView = topView = false
     if (view == "side") {
       sideView = true
