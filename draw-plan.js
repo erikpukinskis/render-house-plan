@@ -474,7 +474,11 @@ var drawPlan = (function() {
     }
 
     var wrapperOptions = {
-      slope: options.slope
+      slope: options.slope,
+    }
+
+    if (options.name) {
+      wrapperOptions.name = options.name
     }
     var parentSection = options.section
 
@@ -742,6 +746,9 @@ var drawPlan = (function() {
 
 
   function verticalSlice(thickness, slope) {
+    if (!slope) {
+      throw new Error("verticalSlice takes a thickness and a slope. You didn't provide a slope")
+    }
     // cos(angle) = adjacent/hypotenuse
 
     // cos(angle) = thickness/slice
@@ -906,8 +913,8 @@ var drawPlan = (function() {
       stud,
       plywood,
       section,
-      sectionBefore,
-      sectionAfter,
+      // sectionBefore,
+      // sectionAfter,
       trim,
       topDoorContainer,
       basicDoor,
