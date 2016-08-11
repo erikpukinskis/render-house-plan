@@ -35,7 +35,7 @@ var drawPlan = (function() {
         eastWest = !northSouth
 
       } else if (parts[0] == "down" || parts[0] == "up") {
-
+        var across = parts[1] == "across"
         var flat = true
 
       } else {
@@ -44,11 +44,11 @@ var drawPlan = (function() {
         eastWest = !northSouth
       }
 
-      if (options.name == "left-side-bottom-plate") {
+      if (options.name == "right-side-top-plate") {
         // debugger
       }
 
-      if (topView && o=="north" || sideView && o=="up" && options.xSize|| frontView && o=="up" && options.zSize
+      if (topView && o=="north" || sideView && o=="up-across" && options.xSize|| frontView && o=="up"
       ) {
 
         // U-shape
@@ -58,7 +58,7 @@ var drawPlan = (function() {
           "height": stud.WIDTH+"em"
         })
 
-      } else if (topView && o=="south" || sideView && o=="down" || frontView && o=="down" && options.zSize
+      } else if (topView && o=="south" || sideView && o=="down-across" || frontView && o=="down"
       ) {
 
         // n-shape
@@ -96,7 +96,7 @@ var drawPlan = (function() {
           "height": stud.DEPTH+"em"
         })
 
-      } else if (topView && horizontal && northSouth || sideView && flat && options.zSize || frontView && flat && options.xSize) {
+      } else if (topView && horizontal && northSouth || sideView && flat && !across || frontView && flat && across) {
 
         // short horizontal
         this.appendStyles({
@@ -104,7 +104,7 @@ var drawPlan = (function() {
           "height": stud.WIDTH+"em"
         })
 
-      } else if (topView && flat && options.zSize || sideView && vertical && eastWest || frontView && vertical && northSouth) {
+      } else if (topView && flat && !across || sideView && vertical && eastWest || frontView && vertical && northSouth) {
 
         // wide vertical
         this.appendStyles({
@@ -831,7 +831,7 @@ var drawPlan = (function() {
       "text-decoration": "none",
       "font-family": "sans-serif",
       "margin-right": "0.25em",
-      "line-height": "2em",
+      "line-height": "2.5em",
       "margin-bottom": "0.25em"
     }),
     function(view) {

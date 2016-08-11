@@ -494,7 +494,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, position
     part: stud,
     slope: SLOPE,
     name: whichOne+"-side-top-plate",
-    orientation: "up",
+    orientation: "down",
     ySize: stud.WIDTH,
     yPos: -leftStudHeightAt(0),
     zPos: 0,
@@ -641,7 +641,7 @@ function backWall(section, plywood, stud, trim, sloped) {
   stud({
     section: back,
     name: "back-bottom-plate",
-    orientation: "up",
+    orientation: "up-across",
     xPos: stud.DEPTH + plywood.THICKNESS,
     xSize: plateLength,
     yPos: -stud.WIDTH
@@ -650,7 +650,7 @@ function backWall(section, plywood, stud, trim, sloped) {
   stud({
     section: back,
     name: "back-top-plate",
-    orientation: "down",
+    orientation: "down-across",
     xPos: stud.DEPTH + plywood.THICKNESS,
     xSize: plateLength,
     yPos: -BACK_STUD_HEIGHT
@@ -681,7 +681,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
   stud({
     section: header,
     name: "header-top-plate",
-    orientation: "down",
+    orientation: "down-across",
     xPos: stud.DEPTH + plywood.THICKNESS,
     xSize: headerLength,
     zPos: -stud.DEPTH,
@@ -691,7 +691,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
   stud({
     section: header,
     name: "header-bottom-plate",
-    orientation: "up",
+    orientation: "up-across",
     xPos: stud.DEPTH + plywood.THICKNESS,
     xSize: headerLength,
     zPos: -stud.DEPTH,
@@ -842,7 +842,7 @@ function frontWall(section, plywood, trim, stud, door) {
   stud({
     section: front,
     name: "front-top-plate",
-    orientation: "down",
+    orientation: "down-across",
     xSize: frontWallWidth,
     zPos: -stud.DEPTH,
   })
@@ -850,7 +850,7 @@ function frontWall(section, plywood, trim, stud, door) {
   stud({
     section: front,
     name: "front-top-plate",
-    orientation: "up",
+    orientation: "up-across",
     xSize: frontWallWidth,
     yPos: doorOpeningHeight - stud.WIDTH,
     zPos: -stud.DEPTH
