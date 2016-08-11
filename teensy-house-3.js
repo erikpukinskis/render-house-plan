@@ -737,23 +737,11 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 
   var toTop = verticalSlice(RAFTER_HEIGHT, SLOPE) + (plywood.THICKNESS + trim.THICKNESS)*SLOPE
 
-  sloped({
-    section: header,
-    part: trim,
-    name: "front-left-corner-batten",
-    xPos: -plywood.THICKNESS,
-    xSize: BATTEN_WIDTH,
-    zPos: plywood.THICKNESS,
-    yPos: -toTop,
-    ySize: toTop + headerHeight + DOOR_GAP - BATTEN_WIDTH,
-    zSize: trim.THICKNESS,
-    slope: SLOPE
-  })
-
   stud({
     section: header,
     name: "header-stud-1",
     xPos: stud.DEPTH + plywood.THICKNESS,
+    ySize: headerHeight,
     zPos: -stud.DEPTH,
     orientation: "east"
   })
@@ -773,6 +761,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
     section: header,
     name: "header-stud-"+(i+1),
     xPos: 96 - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH,
+    ySize: headerHeight,
     zPos: -stud.DEPTH,
     orientation: "west"
   })
@@ -786,7 +775,7 @@ function frontWall(section, plywood, trim, stud, door) {
 
   var doorOpeningHeight = trim.THICKNESS*2 + door.HEIGHT + DOOR_GAP
 
-  var frontWallWidth = 96 - distanceIn - plywood.THICKNESS
+  var frontWallWidth = 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH
 
   var front = section({
     name: "front-wall",
@@ -798,7 +787,7 @@ function frontWall(section, plywood, trim, stud, door) {
   plywood({
     section: front,
     name: "front-sheathing",
-    xSize: frontWallWidth,
+    xSize: frontWallWidth + plywood.THICKNESS*2 + stud.DEPTH,
     ySize: doorOpeningHeight + floorSectionHeight,
     orientation: "south"
   })
@@ -806,7 +795,7 @@ function frontWall(section, plywood, trim, stud, door) {
   plywood({
     section: front,
     name: "front-interior",
-    xSize: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH,
+    xSize: frontWallWidth,
     ySize: doorOpeningHeight,
     zPos: -stud.DEPTH,
     zSize: -plywood.THICKNESS,

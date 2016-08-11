@@ -44,7 +44,7 @@ var drawPlan = (function() {
         eastWest = !northSouth
       }
 
-      if (options.name == "right-side-top-plate") {
+      if (options.name == "header-stud-1") {
         // debugger
       }
 
@@ -571,15 +571,21 @@ var drawPlan = (function() {
         var maxZ = originZ + depth
       }
 
-      var zIntersect = zDepth - minZ
+      var zIntersect = zDepth - originZ
       var boost = zIntersect * options.slope
+
+      var zPos = options.zPos || 0
+
+      var zTravel = zDepth - options.section.origin.zPos
+
+      var newYPos = options.yPos - zTravel*options.slope
 
       if (maxZ < zDepth || minZ > zDepth) {
         return
       }
 
       var newOptions = merge(options, {
-        yPos: options.yPos - boost
+        yPos: newYPos
       })
 
       return generator.call(null, newOptions)
@@ -702,6 +708,8 @@ var drawPlan = (function() {
 
       addStylesFromOptions(options, this)
 
+      this.origin = options
+
       sections.push(this)
     }
   )
@@ -792,7 +800,7 @@ var drawPlan = (function() {
 
 
   var sections
-  var zoomFactor = 0.39
+  var zoomFactor = localStorage.zoomFactor || 0.39
 
   var container = element.template(
     ".plan",
@@ -1086,6 +1094,7 @@ var drawPlan = (function() {
     } else {
       zoomFactor = zoomFactor*by
     }
+    localStorage.zoomFactor = zoomFactor
     document.querySelector(".plan").style["font-size"] = zoomFactor+"em"
   }
 
