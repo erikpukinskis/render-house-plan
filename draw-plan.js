@@ -1,4 +1,18 @@
 var drawPlan = (function() {
+
+  var PLAN_ORIGIN = {
+    left: 26,
+    top: 10
+  }
+
+  // if (localStorage.zDepth) {
+  //   var zDepth = parseFloat(localStorage.zDepth)
+  // } else {
+  //   var zDepth = 72
+  // }
+
+  var zDepth = 72
+
   var stud = element.template(
     ".stud",
     element.style({
@@ -454,10 +468,20 @@ var drawPlan = (function() {
     }
   }
 
-  var zDepth = 0
+  function zDepthToLeft(depth) {
+    return (zDepth + PLAN_ORIGIN.left)*zoomFactor - 1
+  }
 
   function setZDepth(d) {
+    if (d != zDepth) {
+      localStorage.zDepth = d
+    }
+
     zDepth = d
+
+    var left = zDepthToLeft(d)
+
+    document.querySelector(".depth-slider").style.left = left+"em"
   }
 
   function sloped(options) {
@@ -807,14 +831,20 @@ var drawPlan = (function() {
 
 
   var sections
-  var zoomFactor = localStorage.zoomFactor || 0.39
+
+  if (localStorage.zoomFactor) {
+    var zoomFactor = parseFloat(localStorage.zoomFactor)
+  } else {
+    var zoomFactor = 0.39
+  }
 
   var container = element.template(
     ".plan",
     element.style({
+      "z-index": "10",
       "position": "relative",
-      "left": "26em",
-      "top": "10em",
+      "left": PLAN_ORIGIN.left+"em",
+      "top": PLAN_ORIGIN.top+"em",
       "min-width": "120em",
       "min-height": "120em",
       "font-size": zoomFactor+"em",
@@ -906,6 +936,62 @@ var drawPlan = (function() {
     element(".section-toggles")
   ])
 
+  var depthSlider = element.template(
+    ".depth-slider",
+    element.style({
+      "color": "white",
+      "position": "absolute",
+      "width": "2em",
+      "line-height": "1.9em",
+      "font-family": "sans-serif",
+      "text-align": "center",
+      "top": "0.4em",
+      "height": "2em",
+      "border-radius": "1em",
+      "background": "rgba(255,0,0,0.1)",
+      "-webkit-user-select": "none",
+      "cursor": "pointer"
+    }),
+    { 
+      ondragstart: "drawPlan.zDragStart(event)",
+      ondrag: "drawPlan.dragZ(event)"
+    },
+    function() {
+      this.appendStyles({
+        left: zDepthToLeft(zDepth)+"em"
+      })
+    }
+  )
+
+
+  var startXPixels
+  var startZDepth
+
+  function dragZ(event) {
+    if (event.screenX == 0) { return }
+    var dx = event.screenX - startXPixels
+    var newZDepth = startZDepth + dx / 7.5
+    setZDepth(newZDepth)
+  }
+
+  function zDragStart(event) {
+    startXPixels = event.screenX
+    startZDepth = zDepth
+  }
+
+  var depthSliderBar = element.style(
+    ".depth-slider::after",
+    {
+      "position": "absolute",
+      "z-index": "0",
+      "content": "\\00a0",
+      "height": "50em",
+      "left": "0.95em",
+      "width": "0.1em",
+      "top": "2em",
+      "background": "rgba(255,0,0,0.1)" 
+    }
+  )
 
   addHtml(
     element.stylesheet(
@@ -929,13 +1015,18 @@ var drawPlan = (function() {
       zoomButton,
       resetZoom,
       sectionToggle,
-      sectionToggleOn
+      sectionToggleOn,
+      depthSlider,
+      depthSliderBar
     ).html()
   )
 
   addHtml(element(".plan").html())
 
+  addHtml(depthSlider().html())
+
   addHtml(controls.html())
+
 
 
   var generators = []
@@ -1093,6 +1184,8 @@ var drawPlan = (function() {
     }
 
     if (draw !== false) { redraw() }
+
+    document.querySelector(".depth-slider").style.display = sideView ? "block" : "none"
   }
 
   function zoom(by) {
@@ -1103,19 +1196,17 @@ var drawPlan = (function() {
     }
     localStorage.zoomFactor = zoomFactor
     document.querySelector(".plan").style["font-size"] = zoomFactor+"em"
+    setZDepth(zDepth)
   }
 
   drawPlan.addStylesFromOptions = addStylesFromOptions
-
   drawPlan.parts = parts
-
   drawPlan.toggleSection = toggleSection
-
   drawPlan.setView = setView
-
   drawPlan.setZDepth = setZDepth
-
   drawPlan.zoom = zoom
+  drawPlan.dragZ = dragZ
+  drawPlan.zDragStart = zDragStart
 
   return drawPlan
 })()
