@@ -1,1 +1,1 @@
-![screenshot of side view](/erikpukinskis/house-plan/screenshot.png)
+![screenshot of side view](/screenshot.png)
