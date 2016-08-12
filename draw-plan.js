@@ -469,7 +469,7 @@ var drawPlan = (function() {
   }
 
   function zDepthToLeft(depth) {
-    return (zDepth + PLAN_ORIGIN.left)*zoomFactor - 1
+    return (zDepth + PLAN_ORIGIN.left)*zoomFactor - 0.5
   }
 
   function setZDepth(d) {
@@ -970,7 +970,7 @@ var drawPlan = (function() {
   function dragZ(event) {
     if (event.screenX == 0) { return }
     var dx = event.screenX - startXPixels
-    var newZDepth = startZDepth + dx / 7.5
+    var newZDepth = startZDepth + dx / (16*zoomFactor)
     setZDepth(newZDepth)
   }
 
