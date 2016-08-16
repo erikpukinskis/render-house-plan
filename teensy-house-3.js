@@ -41,13 +41,11 @@ drawPlan(backWall)
 drawPlan(frontWall)
 drawPlan(roof)
 drawPlan(sideWall, {
-  name: "left-wall",
   xPos: 0,
   yPos: FLOOR_TOP,
   zPos: 0
 }, "left")
 drawPlan(sideWall, {
-  name: "right-wall",
   xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
   yPos: FLOOR_TOP,
   zPos: 0
@@ -193,7 +191,7 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice) {
 function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
 
   var opening = section({
-    name: "door",
+    name: "doors",
     yPos: doorFramingTop,
     zPos: 72,
     xPos: stud.DEPTH+plywood.THICKNESS
@@ -503,62 +501,67 @@ function floor(section, plywood, stud) {
 
 function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, verticalSlice, position, whichOne) {
 
-  var side = section(position)
+  var short = section(merge({
+    name: whichOne+"-wall-short"}, position))
+
+  var tall = section(merge({
+    name: whichOne+"-wall-tall"}, position))
+
   var flip = whichOne == "right"
 
   sloped({
-    section: side,
+    section: short,
     name: whichOne+"-side-wide-sheathing",
     part: plywood,
     xPos: flip ? stud.DEPTH : -plywood.THICKNESS,
     zPos: 0,
     zSize: 48,
-    ySize: -sheathingHeightAt(48),
+    ySize: -sideSheathingHeightAt(48),
     slope: SLOPE,
     orientation: flip ? "east" : "west",
     yPos: floorSectionHeight
   })
 
   sloped({
-    section: side,
+    section: tall,
     name: whichOne+"-side-narrow-sheathing",
     part: plywood,
     xPos: flip ? stud.DEPTH : -plywood.THICKNESS,
     zPos: 48,
     zSize: 24,
-    ySize: -sheathingHeightAt(48 + 24),
+    ySize: -sideSheathingHeightAt(48 + 24),
     slope: SLOPE,
     orientation: flip ? "east" : "west",
     yPos: floorSectionHeight
   })
 
   sloped({
-    section: side,
+    section: short,
     name: whichOne+"side-wide-interior",
     part: plywood,
     xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
     zPos: 0,
     orientation: flip ? "west" : "east",
     zSize: 48,
-    ySize: -interiorHeightAt(48),
+    ySize: -interiorSideHeightAt(48),
     slope: SLOPE,
     yPos: 0
   })
 
   sloped({
-    section: side,
+    section: tall,
     name: whichOne+"side-narrow-interior",
     part: plywood,
     xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
     zPos: 48,
     orientation: flip ? "west" : "east",
     zSize: 24,
-    ySize: -interiorHeightAt(48 + 24),
+    ySize: -interiorSideHeightAt(48 + 24),
     slope: SLOPE,
     yPos: 0
   })
 
-  function interiorHeightAt(offset) {
+  function interiorSideHeightAt(offset) {
     var lowestHeight = BACK_STUD_HEIGHT - stud.DEPTH*SLOPE
 
     var rightSideHeight = lowestHeight + offset*SLOPE
@@ -566,30 +569,74 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     return rightSideHeight
   }
 
-  function sheathingHeightAt(offset) {
-    var height = interiorHeightAt(offset) + floorSectionHeight + verticalSlice(RAFTER_HEIGHT, SLOPE)
+  function sideSheathingHeightAt(offset) {
+    var height = interiorSideHeightAt(offset) + floorSectionHeight + verticalSlice(RAFTER_HEIGHT, SLOPE)
 
     return height
   }
 
-  studAtOffset(0, 1)
-  studAtOffset(16-stud.WIDTH/2, 2)
-  studAtOffset(16*2-stud.WIDTH/2, 3)
-  studAtOffset(16*3-stud.WIDTH/2, 4)
-  studAtOffset(48+12-stud.WIDTH/2, 5)
-  studAtOffset(72-stud.WIDTH, 6)
+  studAtOffset(1, short, 0, "south")
+  studAtOffset(2, short, 16-stud.WIDTH/2)
+  studAtOffset(3, short, 16*2-stud.WIDTH/2)
+  studAtOffset(4, short, 16*3-stud.WIDTH/2)
 
-  function studAtOffset(offset, id) {
+  stud({
+    section: short,
+    name: whichOne+"-side-bottom-plate",
+    zSize: 48,
+    orientation: "up",
+    yPos: -stud.WIDTH
+  })
 
-    var orientation = offset == 0 ? "south" : "north"
+  tilted({
+    section: short,
+    part: stud,
+    slope: SLOPE,
+    name: whichOne+"-side-top-plate",
+    orientation: "down",
+    ySize: stud.WIDTH,
+    yPos: -leftStudHeightAt(0),
+    zPos: 0,
+    zSize: 48
+  })
+
+
+  // TALL 
+
+  studAtOffset(5, tall, 16*3-stud.WIDTH/2 + stud.WIDTH, "south")
+  studAtOffset(6, tall, 48+12-stud.WIDTH/2)
+  studAtOffset(7, tall, 72-stud.WIDTH)
+
+  stud({
+    section: tall,
+    name: whichOne+"-side-tall-bottom-plate",
+    zPos: 48,
+    zSize: 24,
+    orientation: "up",
+    yPos: -stud.WIDTH
+  })
+
+  tilted({
+    section: tall,
+    part: stud,
+    slope: SLOPE,
+    name: whichOne+"-side-tall-top-plate",
+    orientation: "down",
+    ySize: stud.WIDTH,
+    yPos: -leftStudHeightAt(0),
+    zPos: 48,
+    zSize: 24
+  })
+
+  function studAtOffset(id, section, offset, orientation) {
 
     var rightSideHeight = leftStudHeightAt(offset) + stud.WIDTH*SLOPE
 
     sloped({
-      section: side,
+      section: section,
       name: whichOne+"side-stud-"+id,
       part: stud,
-      orientation: orientation,
+      orientation: orientation || "north",
       zSize: stud.WIDTH,
       ySize: -rightSideHeight,
       slope: 1/6,
@@ -606,45 +653,26 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     return leftSideHeight
   }
 
-  stud({
-    section: side,
-    name: whichOne+"-side-bottom-plate",
-    zSize: 72,
-    orientation: "up",
-    yPos: -stud.WIDTH
-  })
-
-  tilted({
-    section: side,
-    part: stud,
-    slope: SLOPE,
-    name: whichOne+"-side-top-plate",
-    orientation: "down",
-    ySize: stud.WIDTH,
-    yPos: -leftStudHeightAt(0),
-    zPos: 0,
-    zSize: 72
-  })
 
   var battenHeightAtFloorBack = BACK_STUD_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + floorSectionHeight + verticalSlice(RAFTER_HEIGHT, SLOPE)
 
 
-  sideBatten(1, -plywood.THICKNESS)
+  sideBatten(1, -plywood.THICKNESS, short)
 
-  sideBatten(2, 24 - BATTEN_WIDTH/2)
+  sideBatten(2, 24 - BATTEN_WIDTH/2, short)
 
-  sideBatten(3, 48 - BATTEN_WIDTH/2)
+  sideBatten(3, 48 - BATTEN_WIDTH/2, tall)
 
-  sideBatten(4, 48 + 24 - BATTEN_WIDTH + plywood.THICKNESS)
+  sideBatten(4, 48 + 24 - BATTEN_WIDTH + plywood.THICKNESS, tall)
 
-  function sideBatten(index, zPos) {
+  function sideBatten(index, zPos, section) {
 
     var ySize = battenHeightAtFloorBack + (BATTEN_WIDTH+zPos)*SLOPE
 
     var xPos = flip ? stud.DEPTH + plywood.THICKNESS : -plywood.THICKNESS - trim.THICKNESS
 
     sloped({
-      section: side,
+      section: section,
       name: "left-side-batten-"+index,
       part: trim,
       slope: SLOPE,

@@ -1,8 +1,8 @@
 var drawPlan = (function() {
 
   var PLAN_ORIGIN = {
-    left: 26,
-    top: 10
+    left: 36,
+    top: 20
   }
 
   // if (localStorage.zDepth) {
@@ -730,7 +730,9 @@ var drawPlan = (function() {
     element.style({
       "position": "absolute",
       "width": "0",
-      "height": "0"
+      "height": "0",
+      "transition": "transform 100ms",
+      "transition-timing-function": "linear",
     }),
     function(options) {
       if (options.name) {
@@ -878,6 +880,7 @@ var drawPlan = (function() {
     "a.button",
     element.style({
       "display": "inline-block",
+      "cursor": "pointer",
       "color": "white",
       "padding": "0px 6px",
       "background": "#1ef",
@@ -932,6 +935,46 @@ var drawPlan = (function() {
     {"background": "#6f5"}
   )
 
+
+  var explodeButton = element.template(
+    ".explode.button",
+    element.style({
+      "color": "white",
+      "background": "black",
+      "display": "block"
+    }),
+    {
+      onclick: "drawPlan.explode()"
+    },
+    "disassemble"
+  )
+
+
+  var transforms = {
+    "left-wall-short": [-10, -3],
+    "doors": [0, 30],
+    "header": [0, 10],
+  }
+
+  var exploded = false
+
+  function explode() {
+
+    for(name in transforms) {
+      var d = exploded ? [0,0] : transforms[name]
+
+      var el = document.querySelector("[data-name="+name+"]")
+
+      if (!el) { continue }
+
+      el.style.transform = "translateX("+d[0]+"em) translateY("+d[1]+"em)"
+
+    }
+
+    exploded = !exploded
+
+  }
+
   var controls = overlay([
     viewButton("side"),
     viewButton("front"),
@@ -941,7 +984,8 @@ var drawPlan = (function() {
       resetZoom(),
       zoomButton(1.2, "+")
     ]),
-    element(".section-toggles")
+    element(".section-toggles"),
+    explodeButton()
   ])
 
   var depthSlider = element.template(
@@ -1025,7 +1069,8 @@ var drawPlan = (function() {
       sectionToggle,
       sectionToggleOn,
       depthSlider,
-      depthSliderBar
+      depthSliderBar,
+      explodeButton
     ).html()
   )
 
@@ -1215,6 +1260,7 @@ var drawPlan = (function() {
   drawPlan.zoom = zoom
   drawPlan.dragZ = dragZ
   drawPlan.zDragStart = zDragStart
+  drawPlan.explode = explode
 
   return drawPlan
 })()
