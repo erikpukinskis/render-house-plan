@@ -152,6 +152,14 @@ var drawPlan = (function() {
       styles["border-color"] = options.color
     }
 
+    if (options.background) {
+      styles["background"] = options.background
+    }
+
+    if (options["z-index"]) {
+      styles["z-index"] = options["z-index"]
+    }
+
     if (options.name) {
       el.attributes["data-name"] = options.name
     }
