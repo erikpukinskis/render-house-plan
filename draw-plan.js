@@ -5,13 +5,13 @@ var drawPlan = (function() {
     top: 20
   }
 
-  // if (localStorage.zDepth) {
-  //   var zDepth = parseFloat(localStorage.zDepth)
-  // } else {
-  //   var zDepth = 72
-  // }
+  var resetZDepth = false
 
-  var zDepth = 72
+  if (resetZDepth || !localStorage.zDepth) {
+    var zDepth = 72
+  } else {
+    var zDepth = parseFloat(localStorage.zDepth)
+  }
 
   var stud = element.template(
     ".stud",
@@ -497,9 +497,57 @@ var drawPlan = (function() {
     var generator = options.part
     delete options.part
 
-    if (topView || frontView) {
+    if (topView) {
       return generator.call(null, options)
+    } else if (frontView) {
+      var sectionZ = options.section.origin.zPos
+      if (typeof sectionZ == "undefined") {
+        throw new Error("can't slope "+options.name+" unless you give section "+options.section.name+" a zPos")
+      }
+
+      var originZ = sectionZ + (options.zPos || 0)
+
+      var depth = Math.abs(options.zSize)
+
+      if (options.zSize < 0) {
+        var minZ = originZ - depth
+        var maxZ = originZ
+      } else {
+        var minZ = originZ
+        var maxZ = originZ + depth
+      }
+
+      var zTravel = maxZ - zDepth
+
+      var yPos = options.yPos || 0
+
+      var yTravel = zTravel*options.slope
+
+      var ySize = options.ySize
+      var yDirection = ySize / Math.abs(ySize)
+
+      var isPinnedAtBottom = yDirection < 0
+
+      if (isPinnedAtBottom) {
+        var newYPos = yPos
+        var newYSize = ySize + yTravel
+      } else {
+        var newYPos = yPos + yTravel
+        var newYSize = ySize - yTravel
+      }
+
+      if (maxZ < zDepth || minZ > zDepth) {
+        return
+      }
+
+      var newOptions = merge(options, {
+        yPos: newYPos,
+        ySize: newYSize
+      })
+
+      return generator.call(null, newOptions)
     }
+
 
     if (!options.slope) {
       throw new Error("You need to pass a slope option when you create a sloped piece. You passed options "+JSON.stringify(options))
