@@ -511,7 +511,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
   sloped({
     section: short,
-    name: whichOne+"-side-wide-sheathing",
+    name: whichOne+"-side-short-sheathing",
     part: plywood,
     xPos: flip ? stud.DEPTH : -plywood.THICKNESS,
     zPos: 0,
@@ -523,40 +523,14 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
   })
 
   sloped({
-    section: tall,
-    name: whichOne+"-side-narrow-sheathing",
-    part: plywood,
-    xPos: flip ? stud.DEPTH : -plywood.THICKNESS,
-    zPos: 48,
-    zSize: 24,
-    ySize: -sideSheathingHeightAt(48 + 24),
-    slope: SLOPE,
-    orientation: flip ? "east" : "west",
-    yPos: floorSectionHeight
-  })
-
-  sloped({
     section: short,
-    name: whichOne+"side-wide-interior",
+    name: whichOne+"side-short-interior",
     part: plywood,
     xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
     zPos: 0,
     orientation: flip ? "west" : "east",
     zSize: 48,
     ySize: -interiorSideHeightAt(48),
-    slope: SLOPE,
-    yPos: 0
-  })
-
-  sloped({
-    section: tall,
-    name: whichOne+"side-narrow-interior",
-    part: plywood,
-    xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
-    zPos: 48,
-    orientation: flip ? "west" : "east",
-    zSize: 24,
-    ySize: -interiorSideHeightAt(48 + 24),
     slope: SLOPE,
     yPos: 0
   })
@@ -582,7 +556,8 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
   stud({
     section: short,
-    name: whichOne+"-side-bottom-plate",
+    name: whichOne+"-side-short-bottom-plate",
+    zPos: 0,
     zSize: 48,
     orientation: "up",
     yPos: -stud.WIDTH
@@ -592,7 +567,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     section: short,
     part: stud,
     slope: SLOPE,
-    name: whichOne+"-side-top-plate",
+    name: whichOne+"-side-short-top-plate",
     orientation: "down",
     ySize: stud.WIDTH,
     yPos: -leftStudHeightAt(0),
@@ -600,9 +575,46 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     zSize: 48
   })
 
+  tilted({
+    section: short,
+    part: stud,
+    slope: SLOPE,
+    name: whichOne+"-side-short-top-plate",
+    orientation: "up",
+    ySize: stud.WIDTH,
+    yPos: -leftStudHeightAt(0) - verticalSlice(stud.WIDTH, SLOPE),
+    zPos: 0,
+    zSize: 48+24
+  })
+
 
   // TALL 
 
+  sloped({
+    section: tall,
+    name: whichOne+"-side-tall-sheathing",
+    part: plywood,
+    xPos: flip ? stud.DEPTH : -plywood.THICKNESS,
+    zPos: 48,
+    zSize: 24,
+    ySize: -sideSheathingHeightAt(48 + 24),
+    slope: SLOPE,
+    orientation: flip ? "east" : "west",
+    yPos: floorSectionHeight
+  })
+
+  sloped({
+    section: tall,
+    name: whichOne+"side-tall-interior",
+    part: plywood,
+    xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
+    zPos: 48,
+    orientation: flip ? "west" : "east",
+    zSize: 24,
+    ySize: -interiorSideHeightAt(48 + 24),
+    slope: SLOPE,
+    yPos: 0
+  })
   studAtOffset(5, tall, 16*3-stud.WIDTH/2 + stud.WIDTH, "south")
   studAtOffset(6, tall, 48+12-stud.WIDTH/2)
   studAtOffset(7, tall, 72-stud.WIDTH)
@@ -648,7 +660,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
   function leftStudHeightAt(offset) {
 
-    var leftSideHeight = BACK_STUD_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + offset*SLOPE
+    var leftSideHeight = BACK_STUD_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + offset*SLOPE - verticalSlice(stud.WIDTH, SLOPE)
 
     return leftSideHeight
   }
