@@ -364,10 +364,33 @@ var drawPlan = (function() {
         options.section.children.push(this)
       }
 
+      if (options.border) {
+        this.appendStyles({border: options.border})
+      }
+
       drawPlan.addStylesFromOptions(options, this)
     }
   )
   trim.THICKNESS = 0.75
+
+
+
+  var shade = element.template(
+    ".shade",
+    element.style({
+      "box-sizing": "border-box",
+      "border": "0.2em dotted #bcc",
+      "position": "absolute"
+    }),
+    function(options) {
+
+      if (options.section) {
+        options.section.children.push(this)
+      }
+
+      drawPlan.addStylesFromOptions(options, this)
+    }
+  )
 
 
   var topDoorContainer = element.template(
@@ -500,9 +523,10 @@ var drawPlan = (function() {
     if (topView) {
       return generator.call(null, options)
     } else if (frontView) {
-      var sectionZ = options.section.origin.zPos
+      var sectionZ = options.section && options.section.origin.zPos
       if (typeof sectionZ == "undefined") {
-        throw new Error("can't slope "+options.name+" unless you give section "+options.section.name+" a zPos")
+        console.log("options", options)
+        throw new Error("can't slope "+options.name+" unless you give section "+(options.section && options.section.name)+" a zPos")
       }
 
       var originZ = sectionZ + (options.zPos || 0)
@@ -873,6 +897,7 @@ var drawPlan = (function() {
     section: section,
     door: door,
     trim: trim,
+    shade: shade,
     sloped: sloped,
     twinWall: twinWall,
     twinWallSide: twinWallSide,
@@ -1002,6 +1027,7 @@ var drawPlan = (function() {
     "left-wall-short": [-10, -3],
     "doors": [0, 30],
     "header": [0, 10],
+    "back-wall-right": [10, -10],
   }
 
   var exploded = false
@@ -1102,6 +1128,7 @@ var drawPlan = (function() {
       // sectionBefore,
       // sectionAfter,
       trim,
+      shade,
       topDoorContainer,
       basicDoor,
       doorKnob,
