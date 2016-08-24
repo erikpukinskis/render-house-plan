@@ -53,8 +53,6 @@ plan.add(sideWall, {
 }, "right")
 plan.add(doors)
 
-plan.draw()
-
 
 function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, shade) {
 
