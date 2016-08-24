@@ -1,4 +1,4 @@
-var BACK_WALL_INSIDE_HEIGHT = drawPlan.parts.door.HEIGHT
+var BACK_WALL_INSIDE_HEIGHT = plan.parts.door.HEIGHT
 var BATTEN_WIDTH = 1.75
 var FLOOR_TOP = 96
 var DOOR_GAP = 1/4 // no gap below?
@@ -8,10 +8,10 @@ var TWIN_WALL_THICKNESS = 7/16
 var RAFTER_HEIGHT = 3.5
 var RAFTER_WIDTH = 1.5
 
-var floorSectionHeight = SUBFLOOR_THICKNESS + drawPlan.parts.stud.DEPTH + drawPlan.parts.plywood.THICKNESS
+var floorSectionHeight = SUBFLOOR_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
 
 var rafterStart = {
-  zPos: drawPlan.parts.stud.DEPTH + drawPlan.parts.plywood.THICKNESS,
+  zPos: plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS,
   yPos: FLOOR_TOP - BACK_WALL_INSIDE_HEIGHT
 }
 
@@ -25,33 +25,35 @@ var headerRafterIntersection = {
   yPos: rafterStart.yPos - elevationBetweenIntersections
 }
 
-var doorFramingTop = FLOOR_TOP - drawPlan.parts.door.HEIGHT - 0.75*2 - DOOR_GAP
+var doorFramingTop = FLOOR_TOP - plan.parts.door.HEIGHT - 0.75*2 - DOOR_GAP
 
 var headerHeight = doorFramingTop - headerRafterIntersection.yPos
 
 
-var backPlateLeftHeight = RAFTER_HEIGHT - (drawPlan.parts.stud.DEPTH+drawPlan.parts.plywood.THICKNESS*SLOPE)*SLOPE
+var backPlateLeftHeight = RAFTER_HEIGHT - (plan.parts.stud.DEPTH+plan.parts.plywood.THICKNESS*SLOPE)*SLOPE
 
 var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
 
 
-drawPlan(floor)
-drawPlan(header)
-drawPlan(backWall)
-drawPlan(frontWall)
-drawPlan(roof)
-drawPlan(sideWall, {
+
+plan.add(floor)
+plan.add(header)
+plan.add(backWall)
+plan.add(frontWall)
+plan.add(roof)
+plan.add(sideWall, {
   xPos: 0,
   yPos: FLOOR_TOP,
   zPos: 0
 }, "left")
-drawPlan(sideWall, {
-  xPos: 96 - drawPlan.parts.stud.DEPTH - drawPlan.parts.plywood.THICKNESS*2,
+plan.add(sideWall, {
+  xPos: 96 - plan.parts.stud.DEPTH - plan.parts.plywood.THICKNESS*2,
   yPos: FLOOR_TOP,
   zPos: 0
 }, "right")
-drawPlan(doors)
+plan.add(doors)
 
+plan.draw()
 
 
 function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, shade) {

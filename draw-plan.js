@@ -1,4 +1,4 @@
-var drawPlan = (function() {
+var plan = (function() {
 
   var PLAN_ORIGIN = {
     left: 36,
@@ -1156,33 +1156,50 @@ var drawPlan = (function() {
   addHtml(controls.html())
 
 
-
+  var parameterSets = []
   var generators = []
 
-  function drawPlan(generator) {
-    sections = []
- 
-    if (!view) { setView("top", false) }
-
-    var args = argsFor(generator)
+  function add(generator) {
+    var parameters = []
 
     for(var i=1; i<arguments.length; i++) {
-      args.push(arguments[i])
+      parameters.push(arguments[i])
     }
 
-    var draw = Function.prototype.apply.bind(generator, null, args)
+    generators.push(generator)
+    parameterSets.push(parameters)
+  }
 
-    draw()
+  var renderers = []
 
-    generators.push(draw)
+  function draw() {
+    sections = []
+
+    if (!view) { setView("top", false) }
+
+    for(var i=0; i<generators.length; i++) {
+
+      var generator = generators[i]
+
+      var args = argsFor(generator).concat(parameterSets[i])
+
+      var draw = Function.prototype.apply.bind(generator, null, args)
+
+      draw()
+
+      renderers.push(draw)
+    }
 
     sections.forEach(addToPage)
+
   }
+
+  var drawPlan = {}
 
   function redraw() {
     emptyNode(container)
     sections = []
-    generators.map(call)
+    renderers.map(call)
     sections.forEach(addToPage)
     drawing = false
   }
@@ -1197,7 +1214,7 @@ var drawPlan = (function() {
   }
 
   drawPlan.clear = function() {
-    generators = []
+    renderers = []
     emptyNode(container)
   }
 
@@ -1327,6 +1344,8 @@ var drawPlan = (function() {
     setZDepth(zDepth)
   }
 
+  drawPlan.add = add
+  drawPlan.draw = draw
   drawPlan.addStylesFromOptions = addStylesFromOptions
   drawPlan.parts = parts
   drawPlan.toggleSection = toggleSection
@@ -1336,6 +1355,7 @@ var drawPlan = (function() {
   drawPlan.dragZ = dragZ
   drawPlan.zDragStart = zDragStart
   drawPlan.explode = explode
+  drawPlan.add = add
 
   return drawPlan
 })()
