@@ -1271,7 +1271,61 @@ var plan = (function() {
   }
 
   function plywoodMaterial(options) {
-    var dimensions = lumberDimensions(options, plywood.THICKNESS)
+    var dimensions = lumberDimensions(
+      options,
+      {
+        defaultThickness: plywood.THICKNESS,
+        maxThickness: 1,
+        maxWidth: 48
+      }
+    )
+
+    if (dimensions.length <= 48) {
+      throw new Error("We don't need a full length of plywood for this piece")
+    }
+
+    if (dimensions.width < 2) {
+      throw new Error("Use scrap for plywood pieces < 2in")
+    }
+
+    if (dimensions.width > 48) {
+      throw new Error("plywood can't be wider than 4ft")
+    }
+
+    if (dimensions.length > 96) {
+      throw new Error("plywood can't be wider than 8ft")
+    }
+
+    var finish = options.sanded ? "sanded" : "rough"
+
+    var description = dimensions.thickness+"in "+finish+" plywood"
+
+    if (dimensions.width > 45) {
+      var sheet = getMaterial(description, "cross", dimensions.length)
+
+      var scrap = cutMaterial(sheet, "cross", dimensions.length, options.name)
+
+      scrap.width = dimensions.width
+
+    } else {
+      var sheet = getMaterial(description, "rip", dimensions.width)
+
+      var scrap = cutMaterial(sheet, "rip", dimensions.width, options.name)
+
+      scrap.length = dimensions.length
+    }
+  }
+  plywoodMaterial.THICKNESS = plywood.THICKNESS
+
+  function trimMaterial(options) {
+    return
+    var dimensions = lumberDimensions(
+      options,
+      {
+        defaultThickness: trim.THICKNESS,
+        maxWidth: 5.5
+      }
+    )
 
     if (dimensions.length <= 48) {
       throw new Error("We don't need a full length of plywood for this piece")
@@ -1295,15 +1349,6 @@ var plan = (function() {
 
       scrap.length = dimensions.length
     }
-
-    // debugger
-  }
-
-  plywoodMaterial.THICKNESS = plywood.THICKNESS
-
-  function trimMaterial(options) {
-
-
   }
   trimMaterial.THICKNESS = trim.THICKNESS
 
@@ -1339,14 +1384,19 @@ var plan = (function() {
 
 
   /** TESTS ******/
+  var options = {
+    defaultThickness: 0.5,
+    maxThickness: 1,
+    maxWidth: 48,
+  }
   var dim = lumberDimensions({
-    xSize: 0.5, ySize: 48, zSize: 60
-  })
+    ySize: 48, zSize: 60
+  }, options)
   if (dim.thickness != 0.5 || dim.width != 48 || dim.length != 60) { th() }
 
   dim = lumberDimensions({
     xSize: 65, ySize: 1, zSize: 38
-  })
+  }, options)
   if (dim.thickness != 1 || dim.width != 38 || dim.length != 65) { th() }
 
   function th() { throw new Error("lumberDimensions is not working") }
@@ -1354,51 +1404,39 @@ var plan = (function() {
 
 
 
-  function lumberDimensions(shape, defaultSize) {
-    var xSize = Math.abs(shape.xSize || defaultSize)
-    var ySize = Math.abs(shape.ySize || defaultSize)
-    var zSize = Math.abs(shape.zSize || defaultSize)
+  function lumberDimensions(shape, options) {
+    var xSize = Math.abs(shape.xSize || options.defaultThickness)
+    var ySize = Math.abs(shape.ySize || options.defaultThickness)
+    var zSize = Math.abs(shape.zSize || options.defaultThickness)
 
 
-    if (xSize <= 1) {
+    if (xSize <= options.maxThickness) {
       var thickness = xSize
-      if (ySize <= 48) {
+      if (ySize <= options.maxWidth) {
         var width = ySize
         var length = zSize
       } else {
         var length = ySize
         var width = zSize
       }
-    } else if (ySize <= 1) {
+    } else if (ySize <= options.maxThickness) {
       var thickness = ySize
-      if (xSize <= 48) {
+      if (xSize <= options.maxWidth) {
         var width = xSize
         var length = zSize
       } else {
         var length = xSize
         var width = zSize
       }      
-    } else if (zSize <= 1) {
+    } else if (zSize <= options.maxThickness) {
       var thickness = zSize
-      if (xSize <= 48) {
+      if (xSize <= options.maxWidth) {
         var width = xSize
         var length = ySize
       } else {
         var length = xSize
         var width = ySize
       }            
-    }
-
-    if (width < 2) {
-      throw new Error("Use scrap for plywood pieces < 2in")
-    }
-
-    if (width > 48) {
-      throw new Error("plywood can't be wider than 4ft")
-    }
-
-    if (length > 96) {
-      throw new Error("plywood can't be wider than 8ft")
     }
 
     return {
