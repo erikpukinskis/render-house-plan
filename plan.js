@@ -1206,11 +1206,11 @@ var plan = (function() {
 
   var sheets = []
 
-  function getSheet(sanded, cut, size) {
+  function getSheet(thickness, sanded, cut, size) {
     for(var i=0; i<sheets.length; i++) {
       var sheet = sheets[i]
 
-      if (sheet.cut != cut || sheet.sanded != sanded) {
+      if (sheet.cut != cut || sheet.sanded != sanded || sheet.thickness != thickness) {
         continue
       }
 
@@ -1225,7 +1225,8 @@ var plan = (function() {
       length: 96,
       width: 48,
       parts: [],
-      sanded: sanded || false
+      sanded: sanded || false,
+      thickness: thickness,
     }
 
     sheets.push(sheet)
@@ -1266,14 +1267,14 @@ var plan = (function() {
     }
 
     if (dimensions.width > 45) {
-      var sheet = getSheet(options.sanded, "cross", dimensions.length)
+      var sheet = getSheet(dimensions.thickness, options.sanded, "cross", dimensions.length)
 
       var scrap = cutSheet(sheet, "cross", dimensions.length, options.name)
 
       scrap.width = dimensions.width
 
     } else {
-      var sheet = getSheet(options.sanded, "rip", dimensions.width)
+      var sheet = getSheet(dimensions.thickness, options.sanded, "rip", dimensions.width)
 
       var scrap = cutSheet(sheet, "rip", dimensions.width, options.name)
 
@@ -1388,6 +1389,11 @@ var plan = (function() {
     }
   }
 
+  var prices = {
+    "0.5in rough plywood": 1795,
+    "0.375in rough plywood": 1533,
+    "0.375in sanded plywood": 2723,
+  }
 
   function orderMaterials() {
 
@@ -1401,14 +1407,19 @@ var plan = (function() {
 
     }
 
-    var sandedEls = []
-    var roughEls = []
+    var plywoodSets = {}
 
     for(var i=0; i<sheets.length; i++) {
       var sheet = sheets[i]
+      var finish = sheet.sanded ? "sanded" : "rough"
 
-      var collection = sheet.sanded ? sandedEls : roughEls
-      console.log(sheet.sanded)
+      var description = sheet.thickness+"in "+finish+" plywood"
+
+      var collection = plywoodSets[description]
+
+      if (!collection) {
+        collection = plywoodSets[description] = []
+      }
 
       if (sheet.parts.length < 2) {
         collection.push(element(" -  FULL "+sheet.parts[0]))
@@ -1417,17 +1428,29 @@ var plan = (function() {
       }
     }
 
-    addHtml(
-      element("3/8in SANDED plywood: "+sandedEls.length).html()
-    )
-    addHtml(element(sandedEls).html())
+    for(var description in plywoodSets) {
+      var els = plywoodSets[description]
 
-    addHtml(
-      element("3/8in ROUGH plywood: "+roughEls.length).html()
-    )
-    addHtml(element(roughEls).html())
+      var price = prices[description]
+      var subtotal = els.length * price
 
+      addHtml(
+        element(description+": "+els.length+"x @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
+      )
+      addHtml(element(els).html())
+    }
 
+  }
+
+  function toDollarString(cents) {
+
+    var dollars = Math.floor(cents / 100)
+    var remainder = cents - dollars*100
+    if (remainder < 10) {
+      remainder = "0"+remainder
+    }
+
+    return dollars+"."+remainder
   }
 
   function materialPartsFor(generator) {

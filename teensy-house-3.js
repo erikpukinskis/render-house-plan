@@ -487,7 +487,7 @@ function floor(section, plywood, stud) {
     xPos: 0,
     xSize: 48,
     yPos: 0,
-    ySize: SUBFLOOR_THICKNESS,
+    ySize: 1/2,
     zSize: 72,
     orientation: "up"
   })
@@ -507,7 +507,7 @@ function floor(section, plywood, stud) {
     xPos: 48,
     xSize: 48 - plywood.THICKNESS*2,
     yPos: 0,
-    ySize: SUBFLOOR_THICKNESS,
+    ySize: 1/2,
     zSize: 72,
     orientation: "up"
   })
