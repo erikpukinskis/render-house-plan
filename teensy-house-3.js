@@ -668,7 +668,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
   sloped({
     section: tall,
-    name: whichSide+"side-tall-interior",
+    name: whichSide+"-side-tall-interior",
     part: plywood,
     sanded: true,
     xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
@@ -728,7 +728,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
     sloped({
       section: section,
-      name: whichSide+"side-stud-"+id,
+      name: whichSide+"-side-stud-"+id,
       part: stud,
       orientation: orientation || "north",
       zSize: stud.WIDTH,

@@ -1225,7 +1225,7 @@ var plan = (function() {
       length: 96,
       width: 48,
       parts: [],
-      sanded: sanded
+      sanded: sanded || false
     }
 
     sheets.push(sheet)
@@ -1266,7 +1266,7 @@ var plan = (function() {
     }
 
     if (dimensions.width > 45) {
-      var sheet = getSheet("cross", dimensions.length)
+      var sheet = getSheet(options.sanded, "cross", dimensions.length)
 
       var scrap = cutSheet(sheet, "cross", dimensions.length, options.name)
 
@@ -1401,21 +1401,32 @@ var plan = (function() {
 
     }
 
-    var total = element("3/8in plywood: "+sheets.length)
-
-    addHtml(total.html())
+    var sandedEls = []
+    var roughEls = []
 
     for(var i=0; i<sheets.length; i++) {
       var sheet = sheets[i]
-      var finish = sheet.sanded ? "sanded" : "rough"
+
+      var collection = sheet.sanded ? sandedEls : roughEls
+      console.log(sheet.sanded)
 
       if (sheet.parts.length < 2) {
-        var sheetEl = element(" - "+finish+" FULL "+sheet.parts[0])
+        collection.push(element(" -  FULL "+sheet.parts[0]))
       } else {
-        var sheetEl = element(" - "+finish+", "+sheet.cut.toUpperCase()+": "+sheet.parts.join(", "))
+        collection.push(element(" - "+sheet.cut.toUpperCase()+": "+sheet.parts.join(", ")))
       }
-      addHtml(sheetEl.html())
     }
+
+    addHtml(
+      element("3/8in SANDED plywood: "+sandedEls.length).html()
+    )
+    addHtml(element(sandedEls).html())
+
+    addHtml(
+      element("3/8in ROUGH plywood: "+roughEls.length).html()
+    )
+    addHtml(element(roughEls).html())
+
 
   }
 
