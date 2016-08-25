@@ -921,7 +921,7 @@ var plan = (function() {
     var zoomFactor = 0.39
   }
 
-  var container = element.template(
+  var planTemplate = element.template(
     ".plan",
     element.style({
       "z-index": "10",
@@ -965,7 +965,7 @@ var plan = (function() {
     }),
     function(view) {
       this.children.push(view)
-      this.attributes.href = "javascript: drawPlan.setView(\""+view+"\")"
+      this.attributes.href = "javascript: plan.setView(\""+view+"\")"
     }
   ) 
 
@@ -1119,11 +1119,16 @@ var plan = (function() {
     }
   )
 
-  function addEditor() {
+  var container
+  var addedEditor
+  function ensureEditor(callback) {
+    if (addedEditor) {
+      return callback()
+    }
 
     addHtml(
       element.stylesheet(
-        container,
+        planTemplate,
         stud,
         plywood,
         section,
@@ -1151,13 +1156,20 @@ var plan = (function() {
       ).html()
     )
 
-    addHtml(element(".plan").html())
+    addHtml(planTemplate().html())
 
     addHtml(depthSlider().html())
 
     addHtml(controls.html())
 
-    setView(localStorage.view)
+    setView(localStorage.view || "top", false)
+
+    setTimeout(function() {
+      toggles = document.querySelector(".section-toggles")
+      container = document.querySelector(".plan")
+      addedEditor = true
+      callback()
+    })
   }
 
   var parameterSets = []
@@ -1175,11 +1187,10 @@ var plan = (function() {
   }
 
   var renderers = []
+  var addedEditor = false
 
   function draw() {
     sections = []
-
-    if (!view) { setView("top", false) }
 
     for(var i=0; i<generators.length; i++) {
 
@@ -1187,14 +1198,12 @@ var plan = (function() {
 
       var args = drawablePartsFor(generator).concat(parameterSets[i])
 
-      var draw = Function.prototype.apply.bind(generator, null, args)
+      var renderer = Function.prototype.apply.bind(generator, null, args)
 
-      draw()
-
-      renderers.push(draw)
+      renderers.push(renderer)
     }
 
-    sections.forEach(addToPage)
+    ensureEditor(redraw)
 
   }
 
@@ -1475,6 +1484,7 @@ var plan = (function() {
     renderers.map(call)
     sections.forEach(addToPage)
     drawing = false
+    document.querySelector(".depth-slider").style.display = sideView ? "block" : "none"
   }
 
   function addToPage(section) {
@@ -1497,8 +1507,7 @@ var plan = (function() {
     var showSection = {}
   }
 
-  var toggles = document.querySelector(".section-toggles")
-
+  var toggles
   var togglesAdded = {}
 
   function ensureToggle(name) {
@@ -1522,7 +1531,6 @@ var plan = (function() {
   }
 
   var drawing = false
-  var container = document.querySelector(".plan")
 
   function toggleSection(name) {
     if (drawing) { return }
@@ -1548,7 +1556,6 @@ var plan = (function() {
   }
 
   function emptyNode(node) {
-    throw new Error()
     while (node.firstChild) {
       node.removeChild(node.firstChild)
     }
@@ -1601,8 +1608,6 @@ var plan = (function() {
     }
 
     if (draw !== false) { redraw() }
-
-    document.querySelector(".depth-slider").style.display = sideView ? "block" : "none"
   }
 
   function zoom(by) {
