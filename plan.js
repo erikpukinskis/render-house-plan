@@ -1119,42 +1119,46 @@ var plan = (function() {
     }
   )
 
-  addHtml(
-    element.stylesheet(
-      container,
-      stud,
-      plywood,
-      section,
-      // sectionBefore,
-      // sectionAfter,
-      trim,
-      shade,
-      topDoorContainer,
-      basicDoor,
-      doorKnob,
-      doorBox,
-      doorSwing,
-      slopeWrapper,
-      twinWall,
-      twinWallSide,
-      overlay,
-      viewButton,
-      zoomButton,
-      resetZoom,
-      sectionToggle,
-      sectionToggleOn,
-      depthSlider,
-      depthSliderBar,
-      explodeButton
-    ).html()
-  )
+  function addEditor() {
 
-  addHtml(element(".plan").html())
+    addHtml(
+      element.stylesheet(
+        container,
+        stud,
+        plywood,
+        section,
+        // sectionBefore,
+        // sectionAfter,
+        trim,
+        shade,
+        topDoorContainer,
+        basicDoor,
+        doorKnob,
+        doorBox,
+        doorSwing,
+        slopeWrapper,
+        twinWall,
+        twinWallSide,
+        overlay,
+        viewButton,
+        zoomButton,
+        resetZoom,
+        sectionToggle,
+        sectionToggleOn,
+        depthSlider,
+        depthSliderBar,
+        explodeButton
+      ).html()
+    )
 
-  addHtml(depthSlider().html())
+    addHtml(element(".plan").html())
 
-  addHtml(controls.html())
+    addHtml(depthSlider().html())
 
+    addHtml(controls.html())
+
+    setView(localStorage.view)
+  }
 
   var parameterSets = []
   var generators = []
@@ -1400,6 +1404,12 @@ var plan = (function() {
 
     addHtml(total.html())
 
+    for(var i=0; i<sheets.length; i++) {
+      var sheet = sheets[i]
+      var sheetEl = element(" - "+sheet.cut+": "+sheet.parts.join(", "))
+      addHtml(sheetEl.html())
+    }
+
   }
 
   function materialPartsFor(generator) {
@@ -1497,6 +1507,7 @@ var plan = (function() {
   }
 
   function emptyNode(node) {
+    throw new Error()
     while (node.firstChild) {
       node.removeChild(node.firstChild)
     }
@@ -1531,8 +1542,6 @@ var plan = (function() {
   var frontView
   var topView
   var view
-
-  setView(localStorage.view)
 
   function setView(newView, draw) {
     if (!newView) { return }
