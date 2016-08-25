@@ -890,7 +890,7 @@ var plan = (function() {
 
   // All of the parts and helpers:
 
-  var parts = {
+  var drawableParts = {
     section: section,
     stud: stud,
     plywood: plywood,
@@ -1181,7 +1181,7 @@ var plan = (function() {
 
       var generator = generators[i]
 
-      var args = argsFor(generator).concat(parameterSets[i])
+      var args = drawablePartsFor(generator).concat(parameterSets[i])
 
       var draw = Function.prototype.apply.bind(generator, null, args)
 
@@ -1193,6 +1193,224 @@ var plan = (function() {
     sections.forEach(addToPage)
 
   }
+
+
+  function noop() {}
+
+  var longPlywoodScraps = []
+  var widePlywoodScraps = []
+
+  var sheets = []
+
+  function getSheet(cut, size) {
+    for(var i=0; i<sheets.length; i++) {
+      var sheet = sheets[i]
+
+      if (sheet.cut != cut) {
+        continue
+      }
+
+      if (cut == "rip" && sheet.width >= size) {
+        return sheet
+      } else if (cut == "cross" && sheet.length >= size) {
+        return sheet
+      }
+    }
+
+    var sheet = {
+      length: 96,
+      width: 48,
+      parts: []
+    }
+
+    sheets.push(sheet)
+
+    return sheet
+  }
+
+  function cutSheet(sheet, cut, size, name) {
+    if (sheet.cut && cut != sheet.cut) {
+      throw new Error("trying to cut sheet the wrong way")
+    }
+
+    var constraint = cut == "cross" ? "length" : "width"
+
+    if (sheet[constraint] < size) {
+      return
+    }
+
+    sheet[constraint] = sheet[constraint] - size - 1/4
+    sheet.cut = cut
+    sheet.parts.push(name)
+
+    var scrap = {
+      cut: cut,
+      part: name
+    }
+    scrap[constraint] = size
+
+    return scrap
+
+  }
+
+  function plywoodMaterial(options) {
+    var dimensions = lumberDimensions(options)
+
+    if (dimensions.length <= 48) {
+      throw new Error("We don't need a full length of plywood for this piece")
+    }
+
+    if (dimensions.width > 45) {
+      var sheet = getSheet("cross", dimensions.length)
+
+      var scrap = cutSheet(sheet, "cross", dimensions.length, options.name)
+
+      scrap.width = dimensions.width
+
+    } else {
+      var sheet = getSheet("rip", dimensions.width)
+
+      var scrap = cutSheet(sheet, "rip", dimensions.width, options.name)
+
+      scrap.length = dimensions.length
+    }
+
+    // debugger
+  }
+  plywoodMaterial.THICKNESS = plywood.THICKNESS
+
+  function trimMaterial() {}
+  trimMaterial.THICKNESS = trim.THICKNESS
+
+  function doorMaterial() {}
+  doorMaterial.HEIGHT = door.HEIGHT
+  doorMaterial.WIDTH = door.WIDTH
+  doorMaterial.THICKNESS = door.THICKNESS
+
+  function studMaterial() {}
+  studMaterial.DEPTH = stud.DEPTH
+  studMaterial.WIDTH = stud.WIDTH
+
+  var materialParts = {
+    section: noop,
+    stud: studMaterial,
+    plywood: plywoodMaterial,
+    door: doorMaterial,
+    trim: trimMaterial,
+    shade: noop,
+    sloped: noop,
+    twinWall: noop,
+    twinWallSide: noop,
+    tilted: noop,
+    slopeToRadians: slopeToRadians,
+    slopeToDegrees: slopeToDegrees,
+    verticalSlice: verticalSlice
+  }
+
+
+
+  /** TESTS ******/
+  var dim = lumberDimensions({
+    xSize: 0.5, ySize: 48, zSize: 60
+  })
+  if (dim.thickness != 0.5 || dim.width != 48 || dim.length != 60) { th() }
+
+  dim = lumberDimensions({
+    xSize: 65, ySize: 1, zSize: 38
+  })
+  if (dim.thickness != 1 || dim.width != 38 || dim.length != 65) { th() }
+
+  function th() { throw new Error("lumberDimensions is not working") }
+  /****************/
+
+
+
+  function lumberDimensions(shape) {
+    var xSize = Math.abs(shape.xSize || plywood.THICKNESS)
+    var ySize = Math.abs(shape.ySize || plywood.THICKNESS)
+    var zSize = Math.abs(shape.zSize || plywood.THICKNESS)
+
+
+    if (xSize <= 1) {
+      var thickness = xSize
+      if (ySize <= 48) {
+        var width = ySize
+        var length = zSize
+      } else {
+        var length = ySize
+        var width = zSize
+      }
+    } else if (ySize <= 1) {
+      var thickness = ySize
+      if (xSize <= 48) {
+        var width = xSize
+        var length = zSize
+      } else {
+        var length = xSize
+        var width = zSize
+      }      
+    } else if (zSize <= 1) {
+      var thickness = zSize
+      if (xSize <= 48) {
+        var width = xSize
+        var length = ySize
+      } else {
+        var length = xSize
+        var width = ySize
+      }            
+    }
+
+    if (width < 2) {
+      throw new Error("Use scrap for plywood pieces < 2in")
+    }
+
+    if (width > 48) {
+      throw new Error("plywood can't be wider than 4ft")
+    }
+
+    if (length > 96) {
+      throw new Error("plywood can't be wider than 8ft")
+    }
+
+    return {
+      length: length,
+      width: width,
+      thickness: thickness
+    }
+  }
+
+
+  function orderMaterials() {
+
+    for(var i=0; i<generators.length; i++) {
+
+      var generator = generators[i]
+
+      var args = materialPartsFor(generator).concat(parameterSets[i])
+
+      generator.apply(null, args)
+
+    }
+
+    var total = element("3/8in plywood: "+sheets.length)
+
+    addHtml(total.html())
+
+  }
+
+  function materialPartsFor(generator) {
+    var names = argNames(generator)
+
+    var args = []
+    names.forEach(function(name) {
+      var helper = materialParts[name]
+      if (helper) { args.push(helper) }
+    })
+
+    return args
+  }
+
+
 
   var drawPlan = {}
 
@@ -1282,12 +1500,12 @@ var plan = (function() {
 
   function call(func) { func() }
 
-  function argsFor(generator) {
+  function drawablePartsFor(generator) {
     var names = argNames(generator)
 
     var args = []
     names.forEach(function(name) {
-      var helper = parts[name]
+      var helper = drawableParts[name]
       if (helper) { args.push(helper) }
     })
 
@@ -1344,10 +1562,12 @@ var plan = (function() {
     setZDepth(zDepth)
   }
 
+
+
   drawPlan.add = add
   drawPlan.draw = draw
   drawPlan.addStylesFromOptions = addStylesFromOptions
-  drawPlan.parts = parts
+  drawPlan.parts = drawableParts
   drawPlan.toggleSection = toggleSection
   drawPlan.setView = setView
   drawPlan.setZDepth = setZDepth
@@ -1355,7 +1575,7 @@ var plan = (function() {
   drawPlan.dragZ = dragZ
   drawPlan.zDragStart = zDragStart
   drawPlan.explode = explode
-  drawPlan.add = add
+  drawPlan.orderMaterials = orderMaterials
 
   return drawPlan
 })()
