@@ -1210,53 +1210,55 @@ var plan = (function() {
 
   function noop() {}
 
-  var longPlywoodScraps = []
-  var widePlywoodScraps = []
+  var materialSets = {}
 
-  var sheets = []
+  function getMaterial(description, cut, size) {
 
-  function getSheet(thickness, sanded, cut, size) {
-    for(var i=0; i<sheets.length; i++) {
-      var sheet = sheets[i]
+    var set = materialSets[description]
+    if (!set) {
+      set = materialSets[description] = []
+    }
 
-      if (sheet.cut != cut || sheet.sanded != sanded || sheet.thickness != thickness) {
+    for(var i=0; i<set.length; i++) {
+      var material = set[i]
+
+      if (material.cut != cut) {
         continue
       }
 
-      if (cut == "rip" && sheet.width >= size) {
-        return sheet
-      } else if (cut == "cross" && sheet.length >= size) {
-        return sheet
+      if (cut == "rip" && material.width >= size) {
+        return material
+      } else if (cut == "cross" && material.length >= size) {
+        return material
       }
     }
 
-    var sheet = {
+    var material = {
       length: 96,
       width: 48,
       parts: [],
-      sanded: sanded || false,
-      thickness: thickness,
+      description: description
     }
 
-    sheets.push(sheet)
+    set.push(material)
 
-    return sheet
+    return material
   }
 
-  function cutSheet(sheet, cut, size, name) {
-    if (sheet.cut && cut != sheet.cut) {
-      throw new Error("trying to cut sheet the wrong way")
+  function cutMaterial(material, cut, size, name) {
+    if (material.cut && cut != material.cut) {
+      throw new Error("trying to cut material the wrong way")
     }
 
     var constraint = cut == "cross" ? "length" : "width"
 
-    if (sheet[constraint] < size) {
+    if (material[constraint] < size) {
       return
     }
 
-    sheet[constraint] = sheet[constraint] - size - 1/4
-    sheet.cut = cut
-    sheet.parts.push(name)
+    material[constraint] = material[constraint] - size - 1/4
+    material.cut = cut
+    material.parts.push(name)
 
     var scrap = {
       cut: cut,
@@ -1269,32 +1271,40 @@ var plan = (function() {
   }
 
   function plywoodMaterial(options) {
-    var dimensions = lumberDimensions(options)
+    var dimensions = lumberDimensions(options, plywood.THICKNESS)
 
     if (dimensions.length <= 48) {
       throw new Error("We don't need a full length of plywood for this piece")
     }
 
-    if (dimensions.width > 45) {
-      var sheet = getSheet(dimensions.thickness, options.sanded, "cross", dimensions.length)
+    var finish = options.sanded ? "sanded" : "rough"
 
-      var scrap = cutSheet(sheet, "cross", dimensions.length, options.name)
+    var description = dimensions.thickness+"in "+finish+" plywood"
+
+    if (dimensions.width > 45) {
+      var sheet = getMaterial(description, "cross", dimensions.length)
+
+      var scrap = cutMaterial(sheet, "cross", dimensions.length, options.name)
 
       scrap.width = dimensions.width
 
     } else {
-      var sheet = getSheet(dimensions.thickness, options.sanded, "rip", dimensions.width)
+      var sheet = getMaterial(description, "rip", dimensions.width)
 
-      var scrap = cutSheet(sheet, "rip", dimensions.width, options.name)
+      var scrap = cutMaterial(sheet, "rip", dimensions.width, options.name)
 
       scrap.length = dimensions.length
     }
 
     // debugger
   }
+
   plywoodMaterial.THICKNESS = plywood.THICKNESS
 
-  function trimMaterial() {}
+  function trimMaterial(options) {
+
+
+  }
   trimMaterial.THICKNESS = trim.THICKNESS
 
   function doorMaterial() {}
@@ -1344,10 +1354,10 @@ var plan = (function() {
 
 
 
-  function lumberDimensions(shape) {
-    var xSize = Math.abs(shape.xSize || plywood.THICKNESS)
-    var ySize = Math.abs(shape.ySize || plywood.THICKNESS)
-    var zSize = Math.abs(shape.zSize || plywood.THICKNESS)
+  function lumberDimensions(shape, defaultSize) {
+    var xSize = Math.abs(shape.xSize || defaultSize)
+    var ySize = Math.abs(shape.ySize || defaultSize)
+    var zSize = Math.abs(shape.zSize || defaultSize)
 
 
     if (xSize <= 1) {
@@ -1416,29 +1426,21 @@ var plan = (function() {
 
     }
 
-    var plywoodSets = {}
 
-    for(var i=0; i<sheets.length; i++) {
-      var sheet = sheets[i]
-      var finish = sheet.sanded ? "sanded" : "rough"
+    for(var description in materialSets) {
+      var set = materialSets[description]
 
-      var description = sheet.thickness+"in "+finish+" plywood"
+      var els = []
 
-      var collection = plywoodSets[description]
+      for(var i=0; i<set.length; i++) {
+        var item = set[i]
 
-      if (!collection) {
-        collection = plywoodSets[description] = []
+        if (item.parts.length < 2) {
+          els.push(element(" -  FULL "+item.parts[0]))
+        } else {
+          els.push(element(" - "+item.cut.toUpperCase()+": "+item.parts.join(", ")))
+        }
       }
-
-      if (sheet.parts.length < 2) {
-        collection.push(element(" -  FULL "+sheet.parts[0]))
-      } else {
-        collection.push(element(" - "+sheet.cut.toUpperCase()+": "+sheet.parts.join(", ")))
-      }
-    }
-
-    for(var description in plywoodSets) {
-      var els = plywoodSets[description]
 
       var price = prices[description]
       var subtotal = els.length * price
@@ -1447,7 +1449,10 @@ var plan = (function() {
         element(description+": "+els.length+"x @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
       )
       addHtml(element(els).html())
+
     }
+
+
 
   }
 
