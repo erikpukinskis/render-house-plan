@@ -555,6 +555,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     section: short,
     name: whichSide+"side-short-interior",
     part: plywood,
+    sanded: true,
     "z-index": "100",
     xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
     zPos: stud.DEPTH + plywood.THICKNESS,
@@ -669,6 +670,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     section: tall,
     name: whichSide+"side-tall-interior",
     part: plywood,
+    sanded: true,
     xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
     zPos: 48,
     orientation: flip ? "west" : "east",
@@ -857,6 +859,7 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice) {
   plywood({
     section: backLeft,
     name: "back-left-interior",
+    sanded: true,
     xPos: 0,
     xSize: 48 - plywood.THICKNESS,
     yPos: 0,
@@ -890,6 +893,7 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice) {
   plywood({
     section: backRight,
     name: "back-right-interior",
+    sanded: true,
     xSize: 48 - plywood.THICKNESS,
     xPos: 48-plywood.THICKNESS,
     yPos: 0,
@@ -1071,6 +1075,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
   plywood({
     section: header,
     name: "header-interior",
+    sanded: true,
     xPos: stud.DEPTH + plywood.THICKNESS,
     xSize: headerLength,
     ySize: headerHeight,
@@ -1165,6 +1170,7 @@ function frontWall(section, plywood, trim, stud, door) {
   plywood({
     section: front,
     name: "front-interior",
+    sanded: true,
     xSize: frontWallWidth,
     ySize: doorOpeningHeight,
     zPos: -stud.DEPTH,

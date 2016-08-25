@@ -1206,11 +1206,11 @@ var plan = (function() {
 
   var sheets = []
 
-  function getSheet(cut, size) {
+  function getSheet(sanded, cut, size) {
     for(var i=0; i<sheets.length; i++) {
       var sheet = sheets[i]
 
-      if (sheet.cut != cut) {
+      if (sheet.cut != cut || sheet.sanded != sanded) {
         continue
       }
 
@@ -1224,7 +1224,8 @@ var plan = (function() {
     var sheet = {
       length: 96,
       width: 48,
-      parts: []
+      parts: [],
+      sanded: sanded
     }
 
     sheets.push(sheet)
@@ -1272,7 +1273,7 @@ var plan = (function() {
       scrap.width = dimensions.width
 
     } else {
-      var sheet = getSheet("rip", dimensions.width)
+      var sheet = getSheet(options.sanded, "rip", dimensions.width)
 
       var scrap = cutSheet(sheet, "rip", dimensions.width, options.name)
 
@@ -1406,7 +1407,13 @@ var plan = (function() {
 
     for(var i=0; i<sheets.length; i++) {
       var sheet = sheets[i]
-      var sheetEl = element(" - "+sheet.cut+": "+sheet.parts.join(", "))
+      var finish = sheet.sanded ? "sanded" : "rough"
+
+      if (sheet.parts.length < 2) {
+        var sheetEl = element(" - "+finish+" FULL "+sheet.parts[0])
+      } else {
+        var sheetEl = element(" - "+finish+", "+sheet.cut.toUpperCase()+": "+sheet.parts.join(", "))
+      }
       addHtml(sheetEl.html())
     }
 
