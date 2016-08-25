@@ -1291,6 +1291,10 @@ var plan = (function() {
   studMaterial.DEPTH = stud.DEPTH
   studMaterial.WIDTH = stud.WIDTH
 
+  function slopedMaterial(options) {
+    options.part(options)
+  }
+
   var materialParts = {
     section: noop,
     stud: studMaterial,
@@ -1298,7 +1302,7 @@ var plan = (function() {
     door: doorMaterial,
     trim: trimMaterial,
     shade: noop,
-    sloped: noop,
+    sloped: slopedMaterial,
     twinWall: noop,
     twinWallSide: noop,
     tilted: noop,
