@@ -1211,6 +1211,28 @@ var plan = (function() {
   function noop() {}
 
   var materialSets = {}
+  var BASE_MATERIALS = {
+    "0.5in rough plywood": {
+      length: 96,
+      width: 48
+    },
+    "0.375in rough plywood": {
+      length: 96,
+      width: 48
+    },
+    "0.375in sanded plywood": {
+      length: 96,
+      width: 48
+    },
+    "8ft 2x4": {
+      length: 96,
+      width: 3.5
+    },
+    "8ft 2x6": {
+      length: 96,
+      width: 5.5
+    },
+  }
 
   function getMaterial(description, cut, size) {
 
@@ -1233,12 +1255,16 @@ var plan = (function() {
       }
     }
 
-    var material = {
-      length: 96,
-      width: 48,
+    var material = BASE_MATERIALS[description]
+
+    if (!material) {
+      throw new Error("Add "+description+" to base materials")
+    }
+
+    material = merge(material, {
       parts: [],
       description: description
-    }
+    })
 
     set.push(material)
 
@@ -1256,7 +1282,7 @@ var plan = (function() {
       return
     }
 
-    material[constraint] = material[constraint] - size - 1/4
+    material[constraint] = material[constraint] - size - 1/8
     material.cut = cut
     material.parts.push(name)
 
@@ -1318,37 +1344,53 @@ var plan = (function() {
   plywoodMaterial.THICKNESS = plywood.THICKNESS
 
   function trimMaterial(options) {
-    return
     var dimensions = lumberDimensions(
       options,
       {
         defaultThickness: trim.THICKNESS,
-        maxWidth: 5.5
+        maxThickness: 1.5,
+        maxWidth: 7.5,
       }
     )
 
-    if (dimensions.length <= 48) {
-      throw new Error("We don't need a full length of plywood for this piece")
-    }
+    // if (options.name == "left-shade-rail") { debugger }
 
-    var finish = options.sanded ? "sanded" : "rough"
 
-    var description = dimensions.thickness+"in "+finish+" plywood"
-
-    if (dimensions.width > 45) {
-      var sheet = getMaterial(description, "cross", dimensions.length)
-
-      var scrap = cutMaterial(sheet, "cross", dimensions.length, options.name)
-
-      scrap.width = dimensions.width
-
+    if (dimensions.thickness == 1.5) {
+      var description = "8ft 2x"
+    } else if (dimensions.thickness == 0.75) {
+      return
+      var description = "8ft 1x"
     } else {
-      var sheet = getMaterial(description, "rip", dimensions.width)
-
-      var scrap = cutMaterial(sheet, "rip", dimensions.width, options.name)
-
-      scrap.length = dimensions.length
+      throw new Error("no trim pieces "+dimensions.thickness+"in thick")
     }
+
+    if (dimensions.width > 7.5) {
+      console.log("offender:", options)
+      console.log("dimensions:", dimensions)
+      throw new Error(dimensions.width+" is too wide!")
+    } else if (dimensions.width > 5.5) {
+      description = description+"8"
+    } else if (dimensions.width > 3.5) {
+      description = description+"6"
+    } else if (dimensions.width > 2.5) {
+      description = description+"4"
+    } else if (dimensions.width > 1.5) {
+      description = description+"6"
+    } else {
+      description = description+"4"
+    }
+
+    if (dimensions.length < 60) {
+      return
+    }
+
+    var sheet = getMaterial(description, "rip", dimensions.width)
+
+    var scrap = cutMaterial(sheet, "rip", dimensions.width, options.name)
+
+    scrap.length = dimensions.length
+
   }
   trimMaterial.THICKNESS = trim.THICKNESS
 
@@ -1365,6 +1407,24 @@ var plan = (function() {
     options.part(options)
   }
 
+  function tiltedMaterial(options) {
+    if (!options.zSize) {
+      console.log("offending part:", options)
+      throw new Error("can't tilt a part without a zSize")
+    }
+
+    var rise = options.slope * options.zSize
+
+    var newZSize = Math.sqrt(
+      Math.pow(options.zSize, 2) + Math.pow(rise, 2)
+    )
+
+    options.part(merge(options, {
+      zSize: newZSize
+    }))
+
+  }
+
   var materialParts = {
     section: noop,
     stud: studMaterial,
@@ -1375,7 +1435,7 @@ var plan = (function() {
     sloped: slopedMaterial,
     twinWall: noop,
     twinWallSide: noop,
-    tilted: noop,
+    tilted: tiltedMaterial,
     slopeToRadians: slopeToRadians,
     slopeToDegrees: slopeToDegrees,
     verticalSlice: verticalSlice
@@ -1446,10 +1506,12 @@ var plan = (function() {
     }
   }
 
-  var prices = {
+  var PRICES = {
     "0.5in rough plywood": 1795,
     "0.375in rough plywood": 1533,
     "0.375in sanded plywood": 2723,
+    "8ft 2x6": 483,
+    "8ft 2x4": 321,
   }
 
   function orderMaterials() {
@@ -1480,9 +1542,9 @@ var plan = (function() {
         }
       }
 
-      var price = prices[description]
+      var price = PRICES[description]
       var subtotal = els.length * price
-
+      if (!subtotal) { debugger }
       addHtml(
         element(description+": "+els.length+"x @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
       )
@@ -1563,7 +1625,7 @@ var plan = (function() {
       showSection[name] = show
 
       var link = element("a.section-toggle.button", name, {
-        href: "javascript: drawPlan.toggleSection(\""+name+"\")"
+        href: "javascript: plan.toggleSection(\""+name+"\")"
       })
       if (show) {
         link.classes.push("on")

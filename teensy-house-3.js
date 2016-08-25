@@ -3,12 +3,13 @@ var BATTEN_WIDTH = 1.75
 var FLOOR_TOP = 96
 var DOOR_GAP = 1/4 // no gap below?
 var SLOPE = 1/8
-var SUBFLOOR_THICKNESS = 0.75
+var FLOORING_THICKNESS = 0.75 // inc subfloor
+var SUBFLOOR_THICKNESS = 0.5
 var TWIN_WALL_THICKNESS = 7/16
 var RAFTER_HEIGHT = 3.5
 var RAFTER_WIDTH = 1.5
 
-var floorSectionHeight = SUBFLOOR_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
+var floorSectionHeight = FLOORING_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
 
 var rafterStart = {
   zPos: plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS,
@@ -428,7 +429,7 @@ function floor(section, plywood, stud) {
     section: floor,
     name: "back-floor-joist",
     xSize: 96 - plywood.THICKNESS*2,
-    yPos: SUBFLOOR_THICKNESS,
+    yPos: FLOORING_THICKNESS,
     orientation: "horizontal-south"
   })
 
@@ -436,7 +437,7 @@ function floor(section, plywood, stud) {
     section: floor,
     name: "front-floor-joist",
     xSize: 96 - plywood.THICKNESS*2,
-    yPos: SUBFLOOR_THICKNESS,
+    yPos: FLOORING_THICKNESS,
     zPos: 72 - stud.WIDTH,
     orientation: "horizontal-north"
   })
@@ -446,7 +447,7 @@ function floor(section, plywood, stud) {
     section: floor,
     name: "back-floor-joist",
     orientation: "horizontal-south",
-    yPos: SUBFLOOR_THICKNESS
+    yPos: FLOORING_THICKNESS
   })
 
 
@@ -455,7 +456,7 @@ function floor(section, plywood, stud) {
     name: "floor-joist-left",
     orientation: "horizontal-east",
     xPos: 0,
-    yPos: SUBFLOOR_THICKNESS,
+    yPos: FLOORING_THICKNESS,
     ySize: stud.DEPTH,
     zSize: 72
   })
@@ -467,7 +468,7 @@ function floor(section, plywood, stud) {
       name: "floor-joist-"+(i+1),
       orientation: "horizontal-west",
       xPos: i*16 - stud.WIDTH/2,
-      yPos: SUBFLOOR_THICKNESS,
+      yPos: FLOORING_THICKNESS,
       zSize: 72
     })
   }
@@ -477,7 +478,7 @@ function floor(section, plywood, stud) {
     name: "floor-joist-right",
     orientation: "horizontal-west",
     xPos: 96 - plywood.THICKNESS*2 - stud.WIDTH,
-    yPos: SUBFLOOR_THICKNESS,
+    yPos: FLOORING_THICKNESS,
     zSize: 72,
   })
 
@@ -487,7 +488,7 @@ function floor(section, plywood, stud) {
     xPos: 0,
     xSize: 48,
     yPos: 0,
-    ySize: 1/2,
+    ySize: SUBFLOOR_THICKNESS,
     zSize: 72,
     orientation: "up"
   })
@@ -496,7 +497,7 @@ function floor(section, plywood, stud) {
     section: floor,
     name: "left-floor-sheathing",
     xSize: 48,
-    yPos: SUBFLOOR_THICKNESS + stud.DEPTH,
+    yPos: FLOORING_THICKNESS + stud.DEPTH,
     zSize: 72,
     orientation: "down"
   })
@@ -507,7 +508,7 @@ function floor(section, plywood, stud) {
     xPos: 48,
     xSize: 48 - plywood.THICKNESS*2,
     yPos: 0,
-    ySize: 1/2,
+    ySize: SUBFLOOR_THICKNESS,
     zSize: 72,
     orientation: "up"
   })
@@ -517,7 +518,7 @@ function floor(section, plywood, stud) {
     name: "right-floor-sheathing",
     xPos: 48,
     xSize: 48 - plywood.THICKNESS*2,
-    yPos: SUBFLOOR_THICKNESS + stud.DEPTH,
+    yPos: FLOORING_THICKNESS + stud.DEPTH,
     zSize: 72,
     orientation: "down"
   })
@@ -962,9 +963,11 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice) {
   trim({
     section: backRight,
     name: "back-wall-joining-stud",
-    xSize: 1.5,
-    zSize: stud.DEPTH,
     xPos: 48 - plywood.THICKNESS - 0.75,
+    xSize: 1.5,
+    yPos: 0,
+    ySize: -studHeight,
+    zSize: stud.DEPTH,
     zPos: 0
   })
 
