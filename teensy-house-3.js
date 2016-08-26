@@ -442,15 +442,6 @@ function floor(section, plywood, stud) {
     orientation: "horizontal-north"
   })
 
-
-  stud({
-    section: floor,
-    name: "back-floor-joist",
-    orientation: "horizontal-south",
-    yPos: FLOORING_THICKNESS
-  })
-
-
   stud({
     section: floor,
     name: "floor-joist-left",
@@ -906,13 +897,6 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice) {
 
   // STUDS
 
-  backStud({
-    section: backLeft,
-    name: "back-left-stud-1",
-    orientation: "east",
-    xPos: 0,
-  })
-
   trim({
     section: backLeft,
     name: "back-wall-joining-plate",
@@ -940,6 +924,13 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice) {
     xPos: 0,
     xSize: 48 - plywood.THICKNESS - 0.75,
     yPos: -studHeight
+  })
+
+  backStud({
+    section: backLeft,
+    name: "back-left-stud-1",
+    orientation: "east",
+    xPos: 0,
   })
 
   backStud({

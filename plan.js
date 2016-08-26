@@ -988,7 +988,7 @@ var plan = (function() {
       "color": "#1ef"
     }),
     {
-      href: "javascript: drawPlan.zoom(\"default\")"
+      href: "javascript: plan.zoom(\"default\")"
     }
   )
 
@@ -1255,6 +1255,14 @@ var plan = (function() {
       width: 1.5,
       price: 91,
     },
+    "steel stud": {
+      length: 96,
+      price: 357,
+    },
+    "steel track": {
+      length: 120,
+      price: 433,
+    }
   }
 
 
@@ -1287,6 +1295,7 @@ var plan = (function() {
 
     material = merge(material, {
       parts: [],
+      cutLengths: [],
       description: description
     })
 
@@ -1303,12 +1312,13 @@ var plan = (function() {
     var constraint = cut == "cross" ? "length" : "width"
 
     if (material[constraint] < size) {
-      return
+      throw new Error("not enough material")
     }
 
     material[constraint] = material[constraint] - size - 1/8
     material.cut = cut
     material.parts.push(name)
+    material.cutLengths.push(size)
 
     var scrap = {
       cut: cut,
@@ -1355,14 +1365,10 @@ var plan = (function() {
 
       var scrap = cutMaterial(sheet, "cross", dimensions.length, options.name)
 
-      scrap.width = dimensions.width
-
     } else {
       var sheet = getMaterial(description, "rip", dimensions.width)
 
       var scrap = cutMaterial(sheet, "rip", dimensions.width, options.name)
-
-      scrap.length = dimensions.length
     }
   }
   plywoodMaterial.THICKNESS = plywood.THICKNESS
@@ -1391,6 +1397,8 @@ var plan = (function() {
 
     if (dimensions.width == 1.5 && dimensions.thickness == 0.75) {
       description = "8ft furring strip"
+      crossCut = true
+
     } else if (dimensions.width > 7.5) {
       throw new Error(dimensions.width+" is too wide!")
     } else if (dimensions.width > 5.5) {
@@ -1410,17 +1418,11 @@ var plan = (function() {
 
       var scrap = cutMaterial(board, "cross", dimensions.length, options.name)
 
-      if (!scrap) { throw new Error("cut failed") }
-
-      scrap.length = dimensions.length
-
     } else {
 
       var board = getMaterial(description, "rip", dimensions.width)
 
       var scrap = cutMaterial(board, "rip", dimensions.width, options.name)
-      if (!scrap) { throw new Error("cut failed") }
-      scrap.length = dimensions.length
 
     }
 
@@ -1433,7 +1435,30 @@ var plan = (function() {
   doorMaterial.WIDTH = door.WIDTH
   doorMaterial.THICKNESS = door.THICKNESS
 
-  function studMaterial() {}
+  function studMaterial(options) {
+    var dimensions = lumberDimensions(
+      options,
+      {
+        defaultThickness: stud.WIDTH,
+        maxThickness: stud.WIDTH,
+        maxWidth: stud.DEPTH,
+      }
+    )
+
+    if (dimensions.length < 5) {
+      throw new Error("can't make stud less than 5 inches tall")
+    }
+
+    var isTrack = ["down", "up", "down-across", "up-across", "horizontal-south", "horizontal-north"].indexOf(options.orientation) != -1
+
+    var description = isTrack ? "steel track" : "steel stud"
+
+    var steel = getMaterial(description, "cross", dimensions.length)
+
+    var scrap = cutMaterial(steel, "cross", dimensions.length, options.name)
+  }
+
+
   studMaterial.DEPTH = stud.DEPTH
   studMaterial.WIDTH = stud.WIDTH
 
@@ -1566,9 +1591,12 @@ var plan = (function() {
         var item = set[i]
 
         if (item.parts.length < 2) {
-          els.push(element(" -  FULL "+item.parts[0]))
+          els.push(element(" -  FULL "+item.parts[0]+" ("+dimensionText(item.cutLengths[0])+")"))
         } else {
-          els.push(element(" - "+item.cut.toUpperCase()+": "+item.parts.join(", ")))
+          var cutPlan = element(
+            " - "+cutPlanText(item)
+          )
+          els.push(cutPlan)
         }
       }
 
@@ -1584,6 +1612,45 @@ var plan = (function() {
 
 
 
+  }
+
+  function cutPlanText(item) {
+    var text = item.cut.toUpperCase()+": "
+
+    for(var i=0; i<item.parts.length; i++) {
+      if (i > 0) {
+        text = text + ", "
+      }
+      text = text + item.parts[i] + " ("+dimensionText(item.cutLengths[i])+")"
+    }
+
+    return text
+  }
+
+  function dimensionText(number) {
+    var integer = Math.floor(number)
+    var remainder = number - integer
+    var sixteenths = Math.round(remainder*16)
+
+    var text = integer.toString()+"\""
+
+    // if (sixteenths == 6) { debugger }
+    if (sixteenths == 0) {
+    } else if (sixteenths == 8) {
+      text = text+" 1/2"
+    } else if (sixteenths % 4 == 0) {
+      text = text+" "+(sixteenths/4)+"/4"
+    } else if (sixteenths % 2 == 0) {
+      text = text+" "+(sixteenths/2)+"/8"
+    } else {
+      text = text+" "+sixteenths+"/16"
+    }
+
+    // text = text+"in"
+
+    console.log(number, sixteenths, "->", text)
+
+    return text
   }
 
   function toDollarString(cents) {
