@@ -418,7 +418,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
 
 
 
-function floor(section, plywood, stud) {
+function floor(section, plywood, stud, insulation) {
 
   var floor = section({
     name: "floor",
@@ -426,6 +426,17 @@ function floor(section, plywood, stud) {
     yPos: FLOOR_TOP,
     zPos: 0
   })
+
+  for(var i=0; i<6; i++) {
+    insulation({
+      section: floor,
+      xPos: i*16 - stud.WIDTH/2,
+      xSize: 16,
+      yPos: FLOORING_THICKNESS,
+      ySize: stud.DEPTH,
+      zSize: 72
+    })
+  }
 
   stud({
     section: floor,
@@ -522,7 +533,7 @@ function floor(section, plywood, stud) {
 
 
 
-function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, verticalSlice, position, whichSide) {
+function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, verticalSlice, insulation, position, whichSide) {
 
   var short = section(merge({
     name: whichSide+"-wall-short"}, position))
@@ -531,6 +542,18 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     name: whichSide+"-wall-tall"}, position))
 
   var flip = whichSide == "right"
+
+  for(var i=0; i<5; i++) {
+    sloped({
+      part: insulation,
+      slope: SLOPE,
+      section: i<3 ? short : tall,
+      zPos: stud.DEPTH + i*14,
+      zSize: 14,
+      yPos: 0,
+      ySize: -83 - 14*i*SLOPE
+    })
+  }
 
   sloped({
     section: short,
@@ -776,7 +799,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
 
 
-function backWall(section, plywood, stud, trim, sloped, verticalSlice) {
+function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulation) {
 
   var backLeft = section({
     name: "back-wall-left",
@@ -796,6 +819,18 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice) {
   var backBattenHeight = BACK_WALL_INSIDE_HEIGHT + floorSectionHeight + backPlateLeftHeight - plywood.THICKNESS*SLOPE
 
   var shortBattenHeight = backBattenHeight - verticalSlice(TWIN_WALL_THICKNESS, SLOPE)
+
+  for(var i=0; i<6; i++) {
+    insulation({
+      section: i<3 ? backLeft : backRight,
+      xPos: i*16,
+      xSize: 16,
+      yPos: 0,
+      zPos: 0,
+      zSize: stud.DEPTH,
+      ySize: -80,
+    })
+  }
 
   backBatten({
     section: backLeft,
@@ -1042,11 +1077,24 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice) {
 
 
 
-function header(section, stud, plywood, trim, sloped, verticalSlice) {
+function header(section, stud, plywood, trim, sloped, verticalSlice, insulation) {
 
   var header = section(headerRafterIntersection)
 
   var headerLength = 96 - plywood.THICKNESS*4 - stud.DEPTH*2
+
+  for(var i=0; i<6; i++) {
+    insulation({
+      section: header,
+      xPos: stud.DEPTH + i*15,
+      xSize: 15,
+      yPos: 0,
+      zPos: 0,
+      zSize: stud.DEPTH,
+      ySize: headerHeight,
+    })
+  }
+
 
   stud({
     section: header,
@@ -1140,7 +1188,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice) {
 }
 
 
-function frontWall(section, plywood, trim, stud, door) {
+function frontWall(section, plywood, trim, stud, door, insulation) {
 
   var distanceIn = plywood.THICKNESS + stud.DEPTH + trim.THICKNESS*2 + door.WIDTH*2 + DOOR_GAP*2
 
@@ -1154,6 +1202,18 @@ function frontWall(section, plywood, trim, stud, door) {
     xPos: distanceIn,
     yPos: FLOOR_TOP - doorOpeningHeight
   })
+
+  for(var i=0; i<2; i++) {
+    insulation({
+      section: front,
+      xPos: i*12,
+      xSize: 12,
+      yPos: 0,
+      zPos: 0,
+      zSize: -stud.DEPTH,
+      ySize: 83,
+    })
+  }
 
   plywood({
     section: front,
@@ -1173,6 +1233,7 @@ function frontWall(section, plywood, trim, stud, door) {
     zSize: -plywood.THICKNESS,
     orientation: "north"
   })
+
 
   stud({
     section: front,

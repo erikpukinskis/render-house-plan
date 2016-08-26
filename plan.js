@@ -775,6 +775,25 @@ var plan = (function() {
 
 
 
+  var insulation = element.template(
+    ".insulation",
+    element.style({
+      "background-color": "rgba(255,0,0,0.1)",
+      "background-size": "1em",
+      "position": "absolute",
+      "box-sizing": "border-box",
+      "border": "0.5em dotted rgba(255,255,255,0.8)"
+    }),
+    function(options) {
+      if (options.section) {
+        options.section.children.push(this)
+      }
+      drawPlan.addStylesFromOptions(options, this)
+    }
+  )
+
+
+
 
   var section = element.template(
     ".section",
@@ -879,6 +898,7 @@ var plan = (function() {
     shade: shade,
     sloped: sloped,
     twinWall: twinWall,
+    insulation: insulation,
     tilted: tilted,
     slopeToRadians: slopeToRadians,
     slopeToDegrees: slopeToDegrees,
@@ -1121,6 +1141,7 @@ var plan = (function() {
         doorSwing,
         slopeWrapper,
         twinWall,
+        insulation,
         overlay,
         viewButton,
         zoomButton,
@@ -1250,6 +1271,11 @@ var plan = (function() {
     },
     "door": {
       price: 10000
+    },
+    "fiberglass insulation": {
+      length: 32*12,
+      width: 15,
+      price: 1498
     }
   }
 
@@ -1471,6 +1497,24 @@ var plan = (function() {
 
   }
 
+
+  function insulationMaterial(options) {
+    var dimensions = lumberDimensions(
+      options,
+      {
+        defaultThickness: stud.DEPTH,
+        maxThickness: 4,
+        maxWidth: 18,
+      }
+    )
+
+    var fiberglass = getMaterial("fiberglass insulation", "cross", dimensions.length)
+
+    cutMaterial(fiberglass, "cross", dimensions.length, options.name)
+
+  }
+
+
   function slopedMaterial(options) {
     options.part(options)
   }
@@ -1497,6 +1541,7 @@ var plan = (function() {
     section: noop,
     stud: studMaterial,
     plywood: plywoodMaterial,
+    insulation: insulationMaterial,
     door: doorMaterial,
     trim: trimMaterial,
     shade: noop,
@@ -1583,7 +1628,7 @@ var plan = (function() {
 
       var generator = generators[i]
 
-      var args = materialPartsFor(generator).concat(parameterSets[i])
+      var args = materialPartsFor(generator, parameterSets[i]).concat(parameterSets[i])
 
       generator.apply(null, args)
 
@@ -1613,6 +1658,7 @@ var plan = (function() {
       var price = BASE_MATERIALS[description].price
       var subtotal = els.length * price
       if (!subtotal) { debugger }
+      addHtml(element(element.raw("<br/>")).html())
       addHtml(
         element(description+": "+els.length+" CT @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
       )
@@ -1629,6 +1675,26 @@ var plan = (function() {
 
   }
 
+
+  // STILL LEFT TO ADD:
+
+  // Liquid nails, 4x $2.50 = $10
+  // Vinyl flooring = $150/sq ft x6x8 = $72
+  // 4 boxes of screws, $6.50/250 = $26
+  // Paint $72
+  // Reflectix 100-sq ft Reflective Roll Insulation, 1/2 roll = $44/2 = $22
+  // Miniature side flange/pole socket $2.77, x8 = $23
+  // 4x cut 4ft aluminium tube from discoutsteel: $54
+  // Cord = $5
+  // Weatherproof male receptacle/RV inlet = $18
+  // GFCI x2 = $40
+  // Wiring boxes x2 = $10
+  // 100ft wire = $50, 10ft = $10
+  // 6x concealed door hinge = $120
+  // 2x floor vents = $10
+
+
+
   function cutPlanText(item) {
     var text = item.cut.toUpperCase()+": "
 
@@ -1636,7 +1702,12 @@ var plan = (function() {
       if (i > 0) {
         text = text + ", "
       }
-      text = text + item.parts[i] + " ("+dimensionText(item.cutLengths[i])+")"
+      var name = item.parts[i]
+      if (name) {
+        text = text + item.parts[i] + " ("+dimensionText(item.cutLengths[i])+")"
+      } else {
+        text = text + dimensionText(item.cutLengths[i])
+      }
     }
 
     return text
