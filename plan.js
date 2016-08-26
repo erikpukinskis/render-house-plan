@@ -974,7 +974,7 @@ var plan = (function() {
     }),
     function(factor, label) {
       this.children.push(label)
-      this.attributes.href = "javascript: drawPlan.zoom("+factor+")"
+      this.attributes.href = "javascript: plan.zoom("+factor+")"
     }
   )
 
@@ -1377,7 +1377,7 @@ var plan = (function() {
       }
     )
 
-    // if (options.name == "back-batten-1") { debugger }
+    // if (options.name == "header-batten-1") { debugger }
 
     if (dimensions.thickness == 1.5) {
       var description = "8ft 2x"
@@ -1386,6 +1386,8 @@ var plan = (function() {
     } else {
       throw new Error("no trim pieces "+dimensions.thickness+"in thick")
     }
+
+    var crossCut = dimensions.length < 48
 
     if (dimensions.width == 1.5 && dimensions.thickness == 0.75) {
       description = "8ft furring strip"
@@ -1397,24 +1399,33 @@ var plan = (function() {
       description = description+"6"
     } else if (dimensions.width > 2.5) {
       description = description+"4"
-    } else if (dimensions.width > 1.5) {
+    } else if (!crossCut && dimensions.width > 1.5) {
       description = description+"6"
     } else {
       description = description+"4"
     }
 
-    if (dimensions.length < 60) {
-      return
+    if (crossCut) {
+      var board = getMaterial(description, "cross", dimensions.length)
+
+      var scrap = cutMaterial(board, "cross", dimensions.length, options.name)
+
+      if (!scrap) { throw new Error("cut failed") }
+
+      scrap.length = dimensions.length
+
+    } else {
+
+      var board = getMaterial(description, "rip", dimensions.width)
+
+      var scrap = cutMaterial(board, "rip", dimensions.width, options.name)
+      if (!scrap) { throw new Error("cut failed") }
+      scrap.length = dimensions.length
+
     }
 
-    var sheet = getMaterial(description, "rip", dimensions.width)
-
-    var scrap = cutMaterial(sheet, "rip", dimensions.width, options.name)
-
-    if (!scrap) { debugger }
-    scrap.length = dimensions.length
-
   }
+
   trimMaterial.THICKNESS = trim.THICKNESS
 
   function doorMaterial() {}

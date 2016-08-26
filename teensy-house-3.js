@@ -8,6 +8,7 @@ var SUBFLOOR_THICKNESS = 0.5
 var TWIN_WALL_THICKNESS = 7/16
 var RAFTER_HEIGHT = 3.5
 var RAFTER_WIDTH = 1.5
+var HEADER_TRIM = 3.5
 
 var floorSectionHeight = FLOORING_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
 
@@ -321,7 +322,6 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
   var fatTrimWidth = trim.THICKNESS*2 + plywood.THICKNESS*2 + stud.DEPTH + DOOR_GAP
 
   var skinnyTrimWidth = BATTEN_WIDTH
-  var headerTrim = 3.5
 
   trim({
     section: opening,
@@ -340,7 +340,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
     background: bg,
     xPos: DOOR_GAP + trim.THICKNESS - fatTrimWidth,
     xSize: 96 + trim.THICKNESS*2,
-    ySize: -headerTrim,
+    ySize: -HEADER_TRIM,
     yPos: DOOR_GAP + trim.THICKNESS,
     zPos: plywood.THICKNESS
   })
@@ -368,7 +368,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
   })
 
   var xOrigin = -plywood.THICKNESS*2 - stud.DEPTH - trim.THICKNESS
-  var headerRemainder = headerHeight + (plywood.THICKNESS + trim.THICKNESS)*SLOPE + DOOR_GAP + trim.THICKNESS - headerTrim
+  var headerRemainder = headerHeight + (plywood.THICKNESS + trim.THICKNESS)*SLOPE + DOOR_GAP + trim.THICKNESS - HEADER_TRIM
   var tallBatten = headerRemainder + RAFTER_HEIGHT
   var shortBatten = tallBatten - verticalSlice(TWIN_WALL_THICKNESS, SLOPE)
 
@@ -392,7 +392,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
       background: bg,
       xSize: xSize,
       xPos: xPos,
-      yPos: DOOR_GAP + trim.THICKNESS -headerTrim,
+      yPos: DOOR_GAP + trim.THICKNESS -HEADER_TRIM,
       ySize: -ySize,
       zPos: plywood.THICKNESS,
       zSize: trim.THICKNESS,
