@@ -1247,6 +1247,9 @@ var plan = (function() {
       length: 96,
       width: 48,
       price: 6100,
+    },
+    "door": {
+      price: 10000
     }
   }
 
@@ -1415,10 +1418,13 @@ var plan = (function() {
     }
 
   }
-
   trimMaterial.THICKNESS = trim.THICKNESS
 
-  function doorMaterial() {}
+  function doorMaterial(options) {
+    var door = getMaterial("door")
+    door.parts.push(options.name)
+    console.log(door)
+  }
   doorMaterial.HEIGHT = door.HEIGHT
   doorMaterial.WIDTH = door.WIDTH
   doorMaterial.THICKNESS = door.THICKNESS
@@ -1592,7 +1598,9 @@ var plan = (function() {
       for(var i=0; i<set.length; i++) {
         var item = set[i]
 
-        if (item.parts.length < 2) {
+        if (item.description == "door") {
+          els.push(element(" - "+item.parts[0]))
+        } else if (item.parts.length < 2) {
           els.push(element(" -  FULL "+item.parts[0]+" ("+dimensionText(item.cutLengths[0])+")"))
         } else {
           var cutPlan = element(

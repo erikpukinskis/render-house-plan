@@ -242,6 +242,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
 
   door({
     section: opening,
+    name: "left-door",
     xPos: DOOR_GAP + trim.THICKNESS,
     xSize: door.WIDTH,
     yPos: DOOR_GAP + trim.THICKNESS,
@@ -252,6 +253,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
 
   door({
     section: opening,
+    name: "right-door",
     xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH,
     xSize: door.WIDTH,
     yPos: DOOR_GAP + trim.THICKNESS,
