@@ -64,7 +64,7 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
     yPos: rafterStart.yPos
   })
 
-  var roofLength = Math.sqrt(96*96+12*12)
+  var roofLength = Math.sqrt(96*96 - 12*12)
 
   function rafter(xPos, name) {
 

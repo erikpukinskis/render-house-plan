@@ -732,24 +732,6 @@ var plan = (function() {
 
 
 
-
-  var twinWallSide = element.template(
-    ".twin-wall-side",
-    element.style({
-      "position": "absolute",
-      "border": "0.2em solid rgba(0,0,255,0.4)",
-      "box-sizing": "border-box"
-    }),
-    function(options) {
-      if (options.section) {
-        options.section.children.push(this)
-      }
-
-      drawPlan.addStylesFromOptions(options, this)
-    }
-  )
-
-
   function stockThicknessToEdgeHeight(stockThickness, slope) {
       // x^2 + (x*SLOPE)^2 = stockHeight^2
 
@@ -827,7 +809,7 @@ var plan = (function() {
       "z-index": "10",
       content: "\\00a0",
       background: "cyan",
-      width: "0.2em",
+      width: "1px",
       height: "10em",
       position: "absolute",
       top: "-5em"
@@ -841,7 +823,7 @@ var plan = (function() {
       content: "\\00a0",
       background: "cyan",
       width: "10em",
-      height: "0.2em",
+      height: "1px",
       position: "absolute",
       left: "-5em"
     }
@@ -897,7 +879,6 @@ var plan = (function() {
     shade: shade,
     sloped: sloped,
     twinWall: twinWall,
-    twinWallSide: twinWallSide,
     tilted: tilted,
     slopeToRadians: slopeToRadians,
     slopeToDegrees: slopeToDegrees,
@@ -1109,8 +1090,8 @@ var plan = (function() {
       "z-index": "0",
       "content": "\\00a0",
       "height": "50em",
-      "left": "0.95em",
-      "width": "0.1em",
+      "left": "1em",
+      "width": "1px",
       "top": "2em",
       "background": "rgba(255,0,0,0.1)" 
     }
@@ -1129,8 +1110,8 @@ var plan = (function() {
         stud,
         plywood,
         section,
-        // sectionBefore,
-        // sectionAfter,
+        sectionBefore,
+        sectionAfter,
         trim,
         shade,
         topDoorContainer,
@@ -1140,7 +1121,6 @@ var plan = (function() {
         doorSwing,
         slopeWrapper,
         twinWall,
-        twinWallSide,
         overlay,
         viewButton,
         zoomButton,
@@ -1262,9 +1242,15 @@ var plan = (function() {
     "steel track": {
       length: 120,
       price: 433,
+    },
+    "twin wall poly": {
+      length: 96,
+      width: 48,
+      price: 6100,
     }
   }
 
+  var grandSubtotal = 0
 
   function getMaterial(description, cut, size) {
 
@@ -1292,6 +1278,8 @@ var plan = (function() {
     if (!material) {
       throw new Error("Add "+description+" to base materials")
     }
+
+    grandSubtotal += material.price
 
     material = merge(material, {
       parts: [],
@@ -1457,10 +1445,25 @@ var plan = (function() {
 
     var scrap = cutMaterial(steel, "cross", dimensions.length, options.name)
   }
-
-
   studMaterial.DEPTH = stud.DEPTH
   studMaterial.WIDTH = stud.WIDTH
+
+
+  function twinWallMaterial(options) {
+    var dimensions = lumberDimensions(
+      options,
+      {
+        defaultThickness: twinWall.THICKNESS,
+        maxThickness: 1,
+        maxWidth: 48,
+      }
+    )
+
+    var poly = getMaterial("twin wall poly", "cross", dimensions.length)
+
+    cutMaterial(poly, "cross", dimensions.length, options.name)
+
+  }
 
   function slopedMaterial(options) {
     options.part(options)
@@ -1492,8 +1495,7 @@ var plan = (function() {
     trim: trimMaterial,
     shade: noop,
     sloped: slopedMaterial,
-    twinWall: noop,
-    twinWallSide: noop,
+    twinWall: twinWallMaterial,
     tilted: tiltedMaterial,
     slopeToRadians: slopeToRadians,
     slopeToDegrees: slopeToDegrees,
@@ -1607,9 +1609,14 @@ var plan = (function() {
         element(description+": "+els.length+" CT @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
       )
       addHtml(element(els).html())
-
     }
 
+
+    addHtml(
+      element(element.raw(
+        "<br/>GRAND SUBTOTAL: $"+toDollarString(grandSubtotal)
+      )).html()
+    )
 
 
   }
@@ -1634,7 +1641,6 @@ var plan = (function() {
 
     var text = integer.toString()+"\""
 
-    // if (sixteenths == 6) { debugger }
     if (sixteenths == 0) {
     } else if (sixteenths == 8) {
       text = text+" 1/2"
@@ -1645,10 +1651,6 @@ var plan = (function() {
     } else {
       text = text+" "+sixteenths+"/16"
     }
-
-    // text = text+"in"
-
-    console.log(number, sixteenths, "->", text)
 
     return text
   }
