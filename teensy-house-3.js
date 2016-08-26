@@ -1,5 +1,5 @@
 var BACK_WALL_INSIDE_HEIGHT = plan.parts.door.HEIGHT
-var BATTEN_WIDTH = 1.75
+var BATTEN_WIDTH = 1.5
 var FLOOR_TOP = 96
 var DOOR_GAP = 1/4 // no gap below?
 var SLOPE = 1/8
@@ -768,7 +768,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
     sloped({
       section: section,
-      name: "left-side-batten-"+index,
+      name: whichSide+"-side-batten-"+index,
       part: trim,
       slope: SLOPE,
       xPos: xPos,

@@ -699,9 +699,6 @@ var plan = (function() {
       return generator.call(null, newOptions)
     }
 
-    if (options.name == "left-side-top-plate") {
-      // debugger
-    }
     if (typeof options.ySize == "undefined") {
       throw new Error("sloped parts need to specify a ySize")
     }
@@ -1017,7 +1014,7 @@ var plan = (function() {
       "display": "block"
     }),
     {
-      onclick: "drawPlan.explode()"
+      onclick: "plan.explode()"
     },
     "disassemble"
   )
@@ -1079,8 +1076,8 @@ var plan = (function() {
       "cursor": "pointer"
     }),
     { 
-      ondragstart: "drawPlan.zDragStart(event)",
-      ondrag: "drawPlan.dragZ(event)"
+      ondragstart: "plan.zDragStart(event)",
+      ondrag: "plan.dragZ(event)"
     },
     function() {
       this.appendStyles({
@@ -1211,28 +1208,55 @@ var plan = (function() {
   function noop() {}
 
   var materialSets = {}
+
   var BASE_MATERIALS = {
     "0.5in rough plywood": {
       length: 96,
-      width: 48
+      width: 48,
+      price: 1795,
     },
     "0.375in rough plywood": {
       length: 96,
-      width: 48
+      width: 48,
+      price: 1533,
     },
     "0.375in sanded plywood": {
       length: 96,
-      width: 48
+      width: 48,
+      price: 2723,
     },
     "8ft 2x4": {
       length: 96,
-      width: 3.5
+      width: 3.5,
+      price: 321,
     },
     "8ft 2x6": {
       length: 96,
-      width: 5.5
+      width: 5.5,
+      price: 483,
+    },
+    "8ft 1x4": {
+      length: 96,
+      width: 3.5,
+      price: 248,
+    },
+    "8ft 1x6": {
+      length: 96,
+      width: 5.5,
+      price: 752,
+    },
+    "8ft 1x8": { // http://www.homedepot.com/p/202603657
+      length: 96,
+      width: 7.5,
+      price: 678,
+    },
+    "8ft furring strip": {
+      length: 96,
+      width: 1.5,
+      price: 91,
     },
   }
+
 
   function getMaterial(description, cut, size) {
 
@@ -1353,21 +1377,19 @@ var plan = (function() {
       }
     )
 
-    // if (options.name == "left-shade-rail") { debugger }
-
+    // if (options.name == "back-batten-1") { debugger }
 
     if (dimensions.thickness == 1.5) {
       var description = "8ft 2x"
     } else if (dimensions.thickness == 0.75) {
-      return
       var description = "8ft 1x"
     } else {
       throw new Error("no trim pieces "+dimensions.thickness+"in thick")
     }
 
-    if (dimensions.width > 7.5) {
-      console.log("offender:", options)
-      console.log("dimensions:", dimensions)
+    if (dimensions.width == 1.5 && dimensions.thickness == 0.75) {
+      description = "8ft furring strip"
+    } else if (dimensions.width > 7.5) {
       throw new Error(dimensions.width+" is too wide!")
     } else if (dimensions.width > 5.5) {
       description = description+"8"
@@ -1389,6 +1411,7 @@ var plan = (function() {
 
     var scrap = cutMaterial(sheet, "rip", dimensions.width, options.name)
 
+    if (!scrap) { debugger }
     scrap.length = dimensions.length
 
   }
@@ -1459,18 +1482,22 @@ var plan = (function() {
   }, options)
   if (dim.thickness != 1 || dim.width != 38 || dim.length != 65) { th() }
 
-  function th() { throw new Error("lumberDimensions is not working") }
+  function th() {
+    throw new Error("lumberDimensions is not working")
+  }
   /****************/
 
 
 
   function lumberDimensions(shape, options) {
+
     var xSize = Math.abs(shape.xSize || options.defaultThickness)
     var ySize = Math.abs(shape.ySize || options.defaultThickness)
     var zSize = Math.abs(shape.zSize || options.defaultThickness)
 
+    var minDimension = Math.min(xSize, ySize, zSize)
 
-    if (xSize <= options.maxThickness) {
+    if (xSize == minDimension) {
       var thickness = xSize
       if (ySize <= options.maxWidth) {
         var width = ySize
@@ -1479,7 +1506,7 @@ var plan = (function() {
         var length = ySize
         var width = zSize
       }
-    } else if (ySize <= options.maxThickness) {
+    } else if (ySize == minDimension) {
       var thickness = ySize
       if (xSize <= options.maxWidth) {
         var width = xSize
@@ -1488,7 +1515,7 @@ var plan = (function() {
         var length = xSize
         var width = zSize
       }      
-    } else if (zSize <= options.maxThickness) {
+    } else if (zSize == minDimension) {
       var thickness = zSize
       if (xSize <= options.maxWidth) {
         var width = xSize
@@ -1504,14 +1531,6 @@ var plan = (function() {
       width: width,
       thickness: thickness
     }
-  }
-
-  var PRICES = {
-    "0.5in rough plywood": 1795,
-    "0.375in rough plywood": 1533,
-    "0.375in sanded plywood": 2723,
-    "8ft 2x6": 483,
-    "8ft 2x4": 321,
   }
 
   function orderMaterials() {
@@ -1542,11 +1561,11 @@ var plan = (function() {
         }
       }
 
-      var price = PRICES[description]
+      var price = BASE_MATERIALS[description].price
       var subtotal = els.length * price
       if (!subtotal) { debugger }
       addHtml(
-        element(description+": "+els.length+"x @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
+        element(description+": "+els.length+" CT @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
       )
       addHtml(element(els).html())
 
