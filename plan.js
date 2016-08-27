@@ -1763,31 +1763,53 @@ var plan = (function() {
 
     }
 
+    var extras = [
+      {name: "liquid nails", unit: " tubes", price: 250, quantity: 4},
+      {name: "screws", unit: "lb", price: 650, quantity: 4},
+      {name: "side flange", unit: "CT", price: 277, quantity: 8},
+      {name: "4ft aluminum tube", unit: "x", price: 1350, quantity: 4},
+      {name: "weatherproof inlet", unit: "x", price: 1800, quantity: 1},
+      {name: "cord", unit: " roll", price: 500, quantity: 1},
+      {name: "GFCI outlet", unit: "x", price: 2000, quantity: 2},
+      {name: "wiring box", unit: "x", price: 500, quantity: 2},
+      {name: "wire", unit: "100ft", price: 50, quantity: 1},
+      {name: "concealed door hinge", unit: "x", price: 2000, quantity: 6},
+      {name: "floor vent", unit: "x", price: 500, quantity: 2}
+    ]
+
+
+    var els = []
+    var extrasSubtotal = 0
+
+    for(var i=0; i<extras.length; i++) {
+      var extra = extras[i]
+
+      var cost = extra.quantity * extra.price
+      extrasSubtotal += cost
+
+      els.push(element(
+        extra.name+": "+extra.quantity+extra.unit+" @$"+toDollarString(extra.price)+" = $"+toDollarString(cost)
+      ))
+    }
+
+    addHtml(element(element.raw("<br/>EXTRAS: $"+toDollarString(extrasSubtotal))).html())
+
+    addHtml(element(els).html())
+
+    var subtotal = grandSubtotal+extrasSubtotal
+    var TAX_RATE = 0.095
+    var salesTax = subtotal*TAX_RATE
+    var total = subtotal + salesTax
 
     addHtml(
-      element(element.raw(
-        "<br/>GRAND SUBTOTAL: $"+toDollarString(grandSubtotal)
-      )).html()
+      "<br/>SUBTOTAL: $"+toDollarString(subtotal)+
+      "<br/>TAX: $"+toDollarString(salesTax)+
+      "<br/>GRAND TOTAL: $"+toDollarString(total)+"<br><br>"
     )
 
 
   }
 
-
-  // STILL LEFT TO ADD:
-
-  // Liquid nails, 4x $2.50 = $10
-  // 4 boxes of screws, $6.50/250 = $26
-  // Paint $72
-  // Miniature side flange/pole socket $2.77, x8 = $23
-  // 4x cut 4ft aluminium tube from discoutsteel: $54
-  // Cord = $5
-  // Weatherproof male receptacle/RV inlet = $18
-  // GFCI x2 = $40
-  // Wiring boxes x2 = $10
-  // 100ft wire = $50, 10ft = $10
-  // 6x concealed door hinge = $120
-  // 2x floor vents = $10
 
 
 
@@ -1835,6 +1857,8 @@ var plan = (function() {
   }
 
   function toDollarString(cents) {
+
+    cents = Math.ceil(cents)
 
     var dollars = Math.floor(cents / 100)
     var remainder = cents - dollars*100
