@@ -418,7 +418,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
 
 
 
-function floor(section, plywood, stud, insulation) {
+function floor(section, plywood, stud, insulation, flooring) {
 
   var floor = section({
     name: "floor",
@@ -491,10 +491,20 @@ function floor(section, plywood, stud, insulation) {
     name: "left-subfloor",
     xPos: 0,
     xSize: 48,
-    yPos: 0,
+    yPos: 1/4,
     ySize: SUBFLOOR_THICKNESS,
     zSize: 72,
     orientation: "up"
+  })
+
+  flooring({
+    section: floor,
+    name: "left-vinyl-flooring",
+    xPos: 0,
+    xSize: 48,
+    yPos: 0,
+    ySize: 1/4,
+    zSize: 72,
   })
 
   plywood({
@@ -511,12 +521,21 @@ function floor(section, plywood, stud, insulation) {
     name: "right-subfloor",
     xPos: 48,
     xSize: 48 - plywood.THICKNESS*2,
-    yPos: 0,
+    yPos: 1/4,
     ySize: SUBFLOOR_THICKNESS,
     zSize: 72,
     orientation: "up"
   })
 
+  flooring({
+    section: floor,
+    name: "right-vinyl-flooring",
+    xPos: 48,
+    xSize: 48 - plywood.THICKNESS*2,
+    yPos: 0,
+    ySize: 1/4,
+    zSize: 72
+  })
   plywood({
     section: floor,
     name: "right-floor-sheathing",

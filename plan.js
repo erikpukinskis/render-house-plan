@@ -759,7 +759,6 @@ var plan = (function() {
     ".twin-wall",
     element.style({
       "background-color": "rgba(0,0,255,0.02)",
-      "background-size": "1em",
       "position": "absolute",
       "box-sizing": "border-box",
       "border": "0.2em solid rgba(0,0,255,0.4)"
@@ -772,6 +771,21 @@ var plan = (function() {
     }
   )
 
+
+  var flooring = element.template(
+    ".flooring",
+    element.style({
+      "position": "absolute",
+      "box-sizing": "border-box",
+      "border": "0.2em solid brown"
+    }),
+    function(options) {
+      if (options.section) {
+        options.section.children.push(this)
+      }
+      drawPlan.addStylesFromOptions(options, this)
+    }
+  )
 
 
 
@@ -899,6 +913,7 @@ var plan = (function() {
     sloped: sloped,
     twinWall: twinWall,
     insulation: insulation,
+    flooring: flooring,
     tilted: tilted,
     slopeToRadians: slopeToRadians,
     slopeToDegrees: slopeToDegrees,
@@ -1142,6 +1157,7 @@ var plan = (function() {
         slopeWrapper,
         twinWall,
         insulation,
+        flooring,
         overlay,
         viewButton,
         zoomButton,
@@ -1276,10 +1292,31 @@ var plan = (function() {
       length: 32*12,
       width: 15,
       price: 1498
+    },
+    "vinyl flooring": {
+      unit: "sq ft",
+      price: 150,
     }
   }
 
   var grandSubtotal = 0
+
+  var bulkMaterialSets = {}
+
+  function getBulk(description, quantity, name) {
+
+
+    var set = bulkMaterialSets[description]
+    if (!set) {
+      set = bulkMaterialSets[description] = []
+    }
+
+    var price = BASE_MATERIALS[description].price
+
+    grandSubtotal += quantity * price
+
+    set.push({name: name, quantity: quantity})
+  }
 
   function getMaterial(description, cut, size) {
 
@@ -1514,6 +1551,13 @@ var plan = (function() {
 
   }
 
+  function flooringMaterial(options) {
+    var area = options.xSize/12 * options.zSize/12
+
+    var description = "vinyl flooring"
+
+    getBulk(description, area, options.name)
+  }
 
   function slopedMaterial(options) {
     options.part(options)
@@ -1542,6 +1586,7 @@ var plan = (function() {
     stud: studMaterial,
     plywood: plywoodMaterial,
     insulation: insulationMaterial,
+    flooring: flooringMaterial,
     door: doorMaterial,
     trim: trimMaterial,
     shade: noop,
@@ -1639,18 +1684,20 @@ var plan = (function() {
       var set = materialSets[description]
 
       var els = []
-
+      var ct = 1
       for(var i=0; i<set.length; i++) {
         var item = set[i]
 
         if (item.description == "door") {
-          els.push(element(" - "+item.parts[0]))
+          els.push(element(" ("+ct+") "+item.parts[0]))
         } else {
           var cutPlan = element(
-            " - "+cutPlanText(item)
+            " ("+ct+") "+cutPlanText(item)
           )
           els.push(cutPlan)
         }
+
+        ct++
       }
 
       var price = BASE_MATERIALS[description].price
@@ -1661,6 +1708,37 @@ var plan = (function() {
         element(description+": "+els.length+" CT @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
       )
       addHtml(element(els).html())
+    }
+
+
+    for (var description in bulkMaterialSets) {
+
+      var set = bulkMaterialSets[description]
+      var material = BASE_MATERIALS[description]
+      var totalQuantity = 0
+      var els = []
+      var ct = 1
+
+      for(var i=0; i<set.length; i++) {
+        var quantity = set[i].quantity
+        var name = set[i].name
+
+        totalQuantity = totalQuantity + quantity
+
+        els.push(element(
+          " ("+ct+") "+name+" ("+quantity+" "+material.unit+")"
+        ))
+
+        ct++
+      }
+
+      var subtotal = Math.ceil(totalQuantity * material.price)
+      addHtml(element(element.raw("<br/>")).html())
+      addHtml(
+        element(description+": "+totalQuantity+" "+material.unit+" @$"+toDollarString(material.price)+" = $"+toDollarString(subtotal)).html()
+      )
+      addHtml(element(els).html())
+
     }
 
 
@@ -1677,7 +1755,6 @@ var plan = (function() {
   // STILL LEFT TO ADD:
 
   // Liquid nails, 4x $2.50 = $10
-  // Vinyl flooring = $150/sq ft x6x8 = $72
   // 4 boxes of screws, $6.50/250 = $26
   // Paint $72
   // Reflectix 100-sq ft Reflective Roll Insulation, 1/2 roll = $44/2 = $22
