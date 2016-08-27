@@ -1256,11 +1256,11 @@ var plan = (function() {
       width: 1.5,
       price: 91,
     },
-    "steel stud": {
+    "8ft steel stud": {
       length: 96,
       price: 357,
     },
-    "steel track": {
+    "10ft steel track": {
       length: 120,
       price: 433,
     },
@@ -1471,7 +1471,7 @@ var plan = (function() {
 
     var isTrack = ["down", "up", "down-across", "up-across", "horizontal-south", "horizontal-north"].indexOf(options.orientation) != -1
 
-    var description = isTrack ? "steel track" : "steel stud"
+    var description = isTrack ? "10ft steel track" : "8ft steel stud"
 
     var steel = getMaterial(description, "cross", dimensions.length)
 
@@ -1645,8 +1645,6 @@ var plan = (function() {
 
         if (item.description == "door") {
           els.push(element(" - "+item.parts[0]))
-        } else if (item.parts.length < 2) {
-          els.push(element(" -  FULL "+item.parts[0]+" ("+dimensionText(item.cutLengths[0])+")"))
         } else {
           var cutPlan = element(
             " - "+cutPlanText(item)
@@ -1696,15 +1694,15 @@ var plan = (function() {
 
 
   function cutPlanText(item) {
-    var text = item.cut.toUpperCase()+": "
+    var text = ""
 
     for(var i=0; i<item.parts.length; i++) {
       if (i > 0) {
-        text = text + ", "
+        text = text + " PLUS "
       }
       var name = item.parts[i]
       if (name) {
-        text = text + item.parts[i] + " ("+dimensionText(item.cutLengths[i])+")"
+        text = text + item.parts[i] + " ("+dimensionText(item.cutLengths[i])+" "+item.cut+")"
       } else {
         text = text + dimensionText(item.cutLengths[i])
       }
@@ -1718,18 +1716,22 @@ var plan = (function() {
     var remainder = number - integer
     var sixteenths = Math.round(remainder*16)
 
-    var text = integer.toString()+"\""
-
-    if (sixteenths == 0) {
+    if (sixteenths == 16) {
+      integer++
+      var text = ""
+    } else if (sixteenths == 0) {
+      var text = ""
     } else if (sixteenths == 8) {
-      text = text+" 1/2"
+      var text = " 1/2"
     } else if (sixteenths % 4 == 0) {
-      text = text+" "+(sixteenths/4)+"/4"
+      var text = " "+(sixteenths/4)+"/4"
     } else if (sixteenths % 2 == 0) {
-      text = text+" "+(sixteenths/2)+"/8"
+      var text = " "+(sixteenths/2)+"/8"
     } else {
-      text = text+" "+sixteenths+"/16"
+      var text = " "+sixteenths+"/16"
     }
+
+    text = integer.toString()+"\""+text
 
     return text
   }
