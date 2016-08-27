@@ -1296,6 +1296,11 @@ var plan = (function() {
     "vinyl flooring": {
       unit: "sq ft",
       price: 150,
+    },
+    "reflectix roll": {
+      length: 25*12,
+      width: 48,
+      price: 4400,
     }
   }
 
@@ -1551,6 +1556,23 @@ var plan = (function() {
 
   }
 
+  function reflectixMaterial(options) {
+    var dimensions = lumberDimensions(
+      options,
+      {
+        defaultThickness: 0.5,
+        maxThickness: 0.5,
+        maxWidth: 48,
+      }
+    )
+
+    var shade = getMaterial("reflectix roll", "cross", dimensions.length)
+
+    cutMaterial(shade, "cross", dimensions.length, options.name)
+
+  }
+
+
   function flooringMaterial(options) {
     var area = options.xSize/12 * options.zSize/12
 
@@ -1589,7 +1611,7 @@ var plan = (function() {
     flooring: flooringMaterial,
     door: doorMaterial,
     trim: trimMaterial,
-    shade: noop,
+    shade: reflectixMaterial,
     sloped: slopedMaterial,
     twinWall: twinWallMaterial,
     tilted: tiltedMaterial,
@@ -1757,7 +1779,6 @@ var plan = (function() {
   // Liquid nails, 4x $2.50 = $10
   // 4 boxes of screws, $6.50/250 = $26
   // Paint $72
-  // Reflectix 100-sq ft Reflective Roll Insulation, 1/2 roll = $44/2 = $22
   // Miniature side flange/pole socket $2.77, x8 = $23
   // 4x cut 4ft aluminium tube from discoutsteel: $54
   // Cord = $5
