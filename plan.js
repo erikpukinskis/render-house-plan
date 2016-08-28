@@ -1231,67 +1231,81 @@ var plan = (function() {
       length: 96,
       width: 48,
       price: 1795,
+      extra: 0,
     },
     "0.375in rough plywood": {
       length: 96,
       width: 48,
       price: 1533,
+      extra: 1,
     },
     "0.375in sanded plywood": {
       length: 96,
       width: 48,
       price: 2723,
+      extra: 1,
     },
     "8ft 2x4": {
       length: 96,
       width: 3.5,
       price: 321,
+      extra: 1,
     },
     "8ft 2x6": {
       length: 96,
       width: 5.5,
       price: 483,
+      extra: 1,
     },
     "8ft 1x4": {
       length: 96,
       width: 3.5,
       price: 248,
+      extra: 1,
     },
     "8ft 1x6": {
       length: 96,
       width: 5.5,
       price: 752,
+      extra: 1,
     },
     "8ft 1x8": { // http://www.homedepot.com/p/202603657
       length: 96,
       width: 7.5,
       price: 678,
+      extra: 1,
     },
     "8ft furring strip": {
       length: 96,
       width: 1.5,
       price: 91,
+      extra: 2,
     },
     "8ft steel stud": {
       length: 96,
       price: 357,
+      extra: 2,
     },
     "10ft steel track": {
       length: 120,
       price: 433,
+      extra: 1,
     },
     "twin wall poly": {
       length: 96,
       width: 48,
       price: 6100,
+      extra: 0,
     },
     "door": {
-      price: 10000
+      price: 10000,
+      extra: 0,
     },
     "fiberglass insulation": {
       length: 32*12,
       width: 15,
-      price: 1498
+      price: 1498,
+      extra: 0,
     },
     "vinyl flooring": {
       unit: "sq ft",
@@ -1301,6 +1315,7 @@ var plan = (function() {
       length: 25*12,
       width: 48,
       price: 4400,
+      extra: 0,
     }
   }
 
@@ -1349,8 +1364,6 @@ var plan = (function() {
     if (!material) {
       throw new Error("Add "+description+" to base materials")
     }
-
-    grandSubtotal += material.price
 
     material = merge(material, {
       parts: [],
@@ -1722,12 +1735,24 @@ var plan = (function() {
         ct++
       }
 
-      var price = BASE_MATERIALS[description].price
-      var subtotal = els.length * price
+      var material = BASE_MATERIALS[description]
+      var count = els.length + (material.extra || 0)
+      var price = material.price
+
+      var subtotal = count * price
+      grandSubtotal += subtotal
       if (!subtotal) { debugger }
+
+      var header = description+": "+els.length+" CT "
+      if (material.extra) {
+        header += "+"+material.extra+" "
+      }
+      header += "@$"+toDollarString(price)+" = $"+toDollarString(subtotal)
+
+
       addHtml(element(element.raw("<br/>")).html())
       addHtml(
-        element(description+": "+els.length+" CT @$"+toDollarString(price)+" = $"+toDollarString(subtotal)).html()
+        element(header).html()
       )
       addHtml(element(els).html())
     }
