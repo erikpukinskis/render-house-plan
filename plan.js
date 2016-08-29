@@ -13,6 +13,18 @@ var plan = (function() {
     var zDepth = parseFloat(localStorage.zDepth)
   }
 
+  function joinObjects(iterable) {
+    var joined = {}
+
+    for(var i=0; i<iterable.length; i++) {
+      for(var key in iterable[i]) {
+        joined[key] = iterable[i][key]
+      }
+    }
+
+    return joined
+  }
+
   var stud = element.template(
     ".stud",
     element.style({
@@ -22,7 +34,9 @@ var plan = (function() {
       "border-radius": "0.2em",
       "position": "absolute"
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
+
       if (options.section) {
         options.section.children.push(this)
       }
@@ -56,10 +70,6 @@ var plan = (function() {
         vertical = true
         northSouth = parts[0] == "north" || parts[0] == "south"
         eastWest = !northSouth
-      }
-
-      if (options.name == "header-stud-1") {
-        // debugger
       }
 
       if (topView && o=="north" || sideView && o=="up-across" && options.xSize|| frontView && o=="up"
@@ -167,6 +177,10 @@ var plan = (function() {
     ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(
       function(attribute) {
         var value = options[attribute]
+        if (Number.isNaN(value)) {
+          console.log("offending options:", options)
+          throw new Error("option "+attribute+" is not a number")
+        }
         var screenAttr
 
         if (typeof value != "undefined") {
@@ -260,7 +274,8 @@ var plan = (function() {
       "box-sizing": "border-box",
       "position": "absolute"
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
 
       var size = "0.2em"
 
@@ -327,7 +342,9 @@ var plan = (function() {
       "border": "0.2em solid #ec4",
       "position": "absolute"
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
+
       this.borderBottom = "0.2em solid #ec4"
 
       var height = options.height
@@ -382,7 +399,8 @@ var plan = (function() {
       "border": "0.2em dotted #bcc",
       "position": "absolute"
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
 
       if (options.section) {
         options.section.children.push(this)
@@ -398,7 +416,9 @@ var plan = (function() {
     element.style({
       "position": "absolute"
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
+
       var swing = doorSwing()
       var box = doorBox(swing)
 
@@ -515,7 +535,8 @@ var plan = (function() {
     document.querySelector(".depth-slider").style.left = left+"em"
   }
 
-  function sloped(options) {
+  function sloped() {
+    var options = joinObjects(arguments)
 
     var generator = options.part
     delete options.part
@@ -661,7 +682,9 @@ var plan = (function() {
 
 
 
-  function tilted(options) {
+  function tilted() {
+    var options = joinObjects(arguments)
+
     var generator = options.part
     delete options.part
 
@@ -763,7 +786,9 @@ var plan = (function() {
       "box-sizing": "border-box",
       "border": "0.2em solid rgba(0,0,255,0.4)"
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
+
       if (options.section) {
         options.section.children.push(this)
       }
@@ -777,9 +802,11 @@ var plan = (function() {
     element.style({
       "position": "absolute",
       "box-sizing": "border-box",
-      "border": "0.2em solid brown"
+      "border": "0.2em solid #fa4"
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
+
       if (options.section) {
         options.section.children.push(this)
       }
@@ -798,7 +825,9 @@ var plan = (function() {
       "box-sizing": "border-box",
       "border": "0.5em dotted rgba(255,255,255,0.8)"
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
+
       if (options.section) {
         options.section.children.push(this)
       }
@@ -818,7 +847,9 @@ var plan = (function() {
       "transition": "transform 100ms",
       "transition-timing-function": "linear",
     }),
-    function(options) {
+    function() {
+      var options = joinObjects(arguments)
+
       if (options.name) {
         this.attributes["data-name"] = this.name = options.name
       }
@@ -1134,9 +1165,11 @@ var plan = (function() {
 
   var container
   var addedEditor
-  function ensureEditor(callback) {
-    if (addedEditor) {
-      return callback()
+  var addedStyles
+
+  function ensureStyles() {
+    if (addedStyles == true) {
+      return
     }
 
     addHtml(
@@ -1169,6 +1202,15 @@ var plan = (function() {
         explodeButton
       ).html()
     )
+    addedStyles = true
+  }
+
+  function ensureEditor(callback) {
+    if (addedEditor) {
+      return callback()
+    }
+
+    ensureStyles()
 
     addHtml(planTemplate().html())
 
@@ -1200,6 +1242,30 @@ var plan = (function() {
     parameterSets.push(parameters)
   }
 
+  function drawSection(generator, node, view) {
+
+    setView(view, false)
+
+    var parameters = []
+
+    for(var i=3; i<arguments.length; i++) {
+      parameters.push(arguments[i])
+    }
+
+    var args = drawablePartsFor(generator).concat(parameters)
+
+    sections = []
+    generator.apply(null, args)
+
+    ensureStyles()
+
+    addHtml.inside(
+      node,
+      sections[0].html()
+    )
+
+  }
+
   var renderers = []
   var addedEditor = false
 
@@ -1220,7 +1286,6 @@ var plan = (function() {
     ensureEditor(redraw)
 
   }
-
 
   function noop() {}
 
@@ -1454,8 +1519,6 @@ var plan = (function() {
         maxWidth: 7.5,
       }
     )
-
-    // if (options.name == "header-batten-1") { debugger }
 
     if (dimensions.thickness == 1.5) {
       var description = "8ft 2x"
@@ -1741,7 +1804,6 @@ var plan = (function() {
 
       var subtotal = count * price
       grandSubtotal += subtotal
-      if (!subtotal) { debugger }
 
       var header = description+": "+els.length+" CT "
       if (material.extra) {
@@ -1799,7 +1861,8 @@ var plan = (function() {
       {name: "wiring box", unit: "x", price: 500, quantity: 2},
       {name: "wire", unit: "100ft", price: 50, quantity: 1},
       {name: "concealed door hinge", unit: "x", price: 2000, quantity: 6},
-      {name: "floor vent", unit: "x", price: 500, quantity: 2}
+      {name: "floor vent", unit: "x", price: 500, quantity: 2},
+      {name: "lumber crayons", unit: "x", price: 100, quantity: 2},
     ]
 
 
@@ -2057,6 +2120,7 @@ var plan = (function() {
 
   drawPlan.add = add
   drawPlan.draw = draw
+  drawPlan.drawSection = drawSection
   drawPlan.addStylesFromOptions = addStylesFromOptions
   drawPlan.parts = drawableParts
   drawPlan.toggleSection = toggleSection
