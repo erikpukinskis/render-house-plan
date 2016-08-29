@@ -38,7 +38,21 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
 
 
 
-plan.add(floor)
+plan.add(floorSection, {
+  name: "floor-left",
+  xSize: 48,
+  zSize: 6*12,
+  join: "right"
+})
+
+plan.add(floorSection, {
+  name: "floor-right",
+  xPos: 48,
+  xSize: 48 - plan.parts.plywood.THICKNESS*2,
+  zSize: 6*12,
+  join: "left"
+})
+
 plan.add(header)
 plan.add(backWall)
 plan.add(frontWall)
@@ -417,137 +431,126 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
 
 
 
+function floorSection(section, plywood, stud, insulation, flooring, options) {
 
-function floor(section, plywood, stud, insulation, flooring) {
+  if (!options.zSize) {
+    console.log(options)
+    throw new Error("floor section must have a zSize")
+  }
+
+  var id = options.name
 
   var floor = section({
-    name: "floor",
-    xPos: 0,
+    name: id,
+    xPos: options.xPos,
     yPos: FLOOR_TOP,
     zPos: 0
   })
 
-  for(var i=0; i<6; i++) {
+  for(var i=0; i<3; i++) {
     insulation({
       section: floor,
-      xPos: i*16 - stud.WIDTH/2,
-      xSize: 16,
-      yPos: FLOORING_THICKNESS,
-      ySize: stud.DEPTH,
-      zSize: 72
+      xPos: 1+i*16,
+      xSize: 14,
+      yPos: 1,
+      ySize: 2,
+      zPos: 1,
+      zSize: options.zSize-2,
     })
+  }
+
+  var trackLength = options.xSize
+  if (options.join == "right" || options.join == "left") {
+    trackLength = trackLength - 0.75
+  }
+
+  var framingOffset = 0
+  if (options.join == "left") {
+    framingOffset = 0.75
   }
 
   stud({
     section: floor,
-    name: "back-floor-joist",
-    xSize: 96 - plywood.THICKNESS*2,
+    name: id+"-back-track",
+    xPos: framingOffset,
+    xSize: trackLength,
     yPos: FLOORING_THICKNESS,
     orientation: "horizontal-south"
   })
 
   stud({
     section: floor,
-    name: "front-floor-joist",
-    xSize: 96 - plywood.THICKNESS*2,
+    name: id+"-front-track",
+    xPos: framingOffset,
+    xSize: trackLength,
     yPos: FLOORING_THICKNESS,
-    zPos: 72 - stud.WIDTH,
+    zPos: options.zSize - stud.WIDTH,
     orientation: "horizontal-north"
   })
 
-  stud({
+  var joist = {
     section: floor,
     name: "floor-joist-left",
     orientation: "horizontal-east",
-    xPos: 0,
+    xPos: framingOffset,
     yPos: FLOORING_THICKNESS,
     ySize: stud.DEPTH,
     zSize: 72
-  })
-
-
-  for(var i=1; i<6; i++) {
-    stud({
-      section: floor,
-      name: "floor-joist-"+(i+1),
-      orientation: "horizontal-west",
-      xPos: i*16 - stud.WIDTH/2,
-      yPos: FLOORING_THICKNESS,
-      zSize: 72
-    })
   }
 
-  stud({
-    section: floor,
-    name: "floor-joist-right",
+  stud(joist, {
+    name: id+"-joist-A",
+    xPos: framingOffset,
+  })
+
+  stud(joist, {
+    name: id+"-joist-B",
+    xPos: framingOffset + 16,
+  })
+
+  stud(joist, {
+    name: id+"-joist-C",
+    xPos: framingOffset + 16*2,
+  })
+
+  stud(joist, {
+    name: id+"-joist-D",
     orientation: "horizontal-west",
-    xPos: 96 - plywood.THICKNESS*2 - stud.WIDTH,
-    yPos: FLOORING_THICKNESS,
-    zSize: 72,
+    xPos: framingOffset + trackLength - stud.WIDTH,
   })
 
   plywood({
     section: floor,
-    name: "left-subfloor",
+    name: id+"-subfloor",
     xPos: 0,
-    xSize: 48,
+    xSize: options.xSize,
     yPos: 1/4,
     ySize: SUBFLOOR_THICKNESS,
-    zSize: 72,
+    zSize: options.zSize,
     orientation: "up"
   })
 
   flooring({
     section: floor,
-    name: "left-vinyl-flooring",
+    name: id+"-flooring",
     xPos: 0,
-    xSize: 48,
+    xSize: options.xSize,
     yPos: 0,
     ySize: 1/4,
-    zSize: 72,
+    zSize: options.zSize,
   })
 
   plywood({
     section: floor,
-    name: "left-floor-sheathing",
-    xSize: 48,
+    name: id+"-sheathing",
+    xSize: options.xSize,
     yPos: FLOORING_THICKNESS + stud.DEPTH,
-    zSize: 72,
+    zSize: options.zSize,
     orientation: "down"
   })
 
-  plywood({
-    section: floor,
-    name: "right-subfloor",
-    xPos: 48,
-    xSize: 48 - plywood.THICKNESS*2,
-    yPos: 1/4,
-    ySize: SUBFLOOR_THICKNESS,
-    zSize: 72,
-    orientation: "up"
-  })
-
-  flooring({
-    section: floor,
-    name: "right-vinyl-flooring",
-    xPos: 48,
-    xSize: 48 - plywood.THICKNESS*2,
-    yPos: 0,
-    ySize: 1/4,
-    zSize: 72
-  })
-  plywood({
-    section: floor,
-    name: "right-floor-sheathing",
-    xPos: 48,
-    xSize: 48 - plywood.THICKNESS*2,
-    yPos: FLOORING_THICKNESS + stud.DEPTH,
-    zSize: 72,
-    orientation: "down"
-  })
 
 }
-
 
 
 
