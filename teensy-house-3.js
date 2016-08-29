@@ -1112,7 +1112,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice, insulation)
       xSize: 15,
       yPos: 0,
       zPos: 0,
-      zSize: stud.DEPTH,
+      zSize: -stud.DEPTH,
       ySize: headerHeight,
     })
   }

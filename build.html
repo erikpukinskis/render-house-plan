@@ -55,26 +55,31 @@ addHtml(element([
   step("Cut steel track"),
 ]).html())
 
+var floorLeft = {
+  name: "floor-left",
+  xSize: 48 - plan.parts.plywood.THICKNESS,
+  zSize: 6*12,
+  join: "right"
+}
+
 drawDiagram(
   "floor-left",
   floorSection,
-  {
-    name: "floor-left",
-    xSize: 48 - plan.parts.plywood.THICKNESS,
-    zSize: 6*12,
-    join: "right"
-  }
+  floorLeft
 )
+
+
+var floorRight = {
+  name: "floor-right",
+  xSize: 48 - plan.parts.plywood.THICKNESS,
+  zSize: 6*12,
+  join: "left"
+}
 
 drawDiagram(
   "floor-right",
   floorSection,
-  {
-    name: "floor-right",
-    xSize: 48 - plan.parts.plywood.THICKNESS,
-    zSize: 6*12,
-    join: "left"
-  }
+  floorRight
 )
 
 
