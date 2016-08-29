@@ -1,0 +1,94 @@
+<body>
+</body>
+
+<script src="../build/element.js"></script>
+<script src="../build/add-html.js"></script>
+<script src="plan.js"></script>
+<script src="teensy-house-3.js"></script>
+
+<script>
+
+
+var diagram = element.template(
+  ".diagram",
+  element.style({
+    "font-size": "0.1em",
+    "position": "relative",
+    "background": "#eef",
+    "border": "2em solid #eef",
+  }),
+  function(name, options) {
+    this.appendStyles({
+      width: options.xSize+"em",
+      height: options.zSize+"em",
+    })
+    this.classes.push("diagram-"+name)
+  }
+)
+
+var project = element.template(
+  "h2.project-title",
+  function(text) {
+    this.children.push(text)
+  }
+)
+
+var stepNumber = 0
+var step = element.template(
+  ".step",
+  function(text) {
+    stepNumber++
+    this.children.push(stepNumber+". "+text)
+  }
+)
+
+
+addHtml(element.stylesheet(
+  diagram,
+  project,
+  step
+).html())
+
+
+addHtml(element([
+  project("Floor Section 1"),
+  step("Cut steel track"),
+]).html())
+
+drawDiagram(
+  "floor-left",
+  floorSection,
+  {
+    name: "floor-left",
+    xSize: 48 - plan.parts.plywood.THICKNESS,
+    zSize: 6*12,
+    join: "right"
+  }
+)
+
+drawDiagram(
+  "floor-right",
+  floorSection,
+  {
+    name: "floor-right",
+    xSize: 48 - plan.parts.plywood.THICKNESS,
+    zSize: 6*12,
+    join: "left"
+  }
+)
+
+
+function drawDiagram(name, generator, options) {
+
+  addHtml(diagram(name, options).html())
+
+  var node = document.querySelector(".diagram-"+name)
+
+  plan.drawSection(floorSection, node, "top", options)
+}
+
+
+
+
+</script>
+
