@@ -4,7 +4,6 @@
 <script src="../build/element.js"></script>
 <script src="../build/add-html.js"></script>
 <script src="plan.js"></script>
-<script src="order_materials.js"></script>
 <script src="allocate_materials.js"></script>
 <script src="teensy-house-3.js"></script>
 
@@ -22,7 +21,7 @@ function orderMaterials(materialSets) {
   for(var description in materialSets) {
     var set = materialSets[description]
 
-    if (set.bulk) {
+    if (set[0].bulk) {
       describeBulk(set)
       continue
     }
@@ -68,7 +67,6 @@ function orderMaterials(materialSets) {
 
   function describeBulk(set) {
 
-    var set = bulkMaterialSets[description]
     var material = allocateMaterials.BASE_MATERIALS[description]
     var totalQuantity = 0
     var els = []

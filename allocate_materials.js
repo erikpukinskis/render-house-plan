@@ -272,7 +272,6 @@ var allocateMaterials = (function() {
   function doorMaterial(options) {
     var door = getMaterial("door")
     door.parts.push(options.name)
-    console.log(door)
   }
   doorMaterial.HEIGHT = plan.parts.door.HEIGHT
   doorMaterial.WIDTH = plan.parts.door.WIDTH
