@@ -5,10 +5,13 @@
 <script src="../build/add-html.js"></script>
 <script src="plan.js"></script>
 <script src="order_materials.js"></script>
+<script src="allocate_materials.js"></script>
 <script src="teensy-house-3.js"></script>
 
 <script>
 
-orderMaterials(plan)
+var sets = allocateMaterials(plan)
+
+orderMaterials(sets)
 
 </script>
