@@ -2,11 +2,264 @@
 </body>
 
 <script src="../build/element.js"></script>
+<script src="../build/function-call.js"></script>
 <script src="../build/add-html.js"></script>
 <script src="plan.js"></script>
+<script src="allocate_materials.js"></script>
 <script src="teensy-house-3.js"></script>
 
 <script>
+
+var lastStepRendered = 0
+var currentStep = 3
+var container
+
+var stepButton = element.template(
+  "button.next-button",
+  element.style({
+    "padding": "4px 8px",
+    "background": "transparent",
+    "border": "1px solid #7fc",
+    "border-radius": "2px",
+    "font-size": "1em",
+    "color": "#7fe",
+    "margin-top": "1em",
+    "margin-right": "1em",
+  }),
+  function(label, stepNumber, color) {
+    this.children.push(label)
+    var next = functionCall(advance).withArgs(stepNumber)
+    this.onclick(next.evalable())
+    if (color) {
+      this.appendStyles({
+        "color": color,
+        "border-color": color,
+      })
+    }
+  }
+)
+
+function advance(toStep) {
+  var target = document.querySelector(".step-"+(toStep))
+
+  if (!target) { return }
+
+  document.querySelector(".step-"+currentStep).style.display = "none"
+
+  target.style.display = "block"
+
+  currentStep = toStep
+}
+
+function step(text, generator) {
+  var stepNumber = lastStepRendered = lastStepRendered + 1
+
+  container = element(".step", 
+    element(
+      ".step-title",
+      stepNumber+". "+text
+    )
+  )
+
+  container.classes.push("step-"+stepNumber)
+
+  generator()
+
+  if (currentStep && stepNumber != currentStep) {
+    container.appendStyles({display: "none"})
+  } else {
+    currentStep = stepNumber
+  }
+
+
+  container.children.push(
+    element(".buttons", [
+      stepButton("<", stepNumber-1, "#ccc"),
+      stepButton("Next >", stepNumber+1)
+    ])
+  )
+
+  addHtml(container.html())
+
+}
+
+var stepTitle = element.template(
+  ".step-title",
+  element.style({
+    "margin": "1em 0",
+  }),
+  function(text) {
+    this.children.push()
+    addHtml(this.html())
+  }
+)
+
+function cutInstructions(parts) {
+  parts.forEach(function(scrap) {
+    var text = scrap.cut+" cut "+dimensionText(scrap.size)+" from "+scrap.material.description+" #"+scrap.material.number
+    container.children.push(
+      element(text)
+    )
+  })
+}
+
+function floorInstructions(options, materials) {
+
+  step("cut steel track", function() {
+
+    cutInstructions(
+      materials(
+        options.name+"-front-track",
+        options.name+"-back-track"
+      )
+
+    )
+
+  })
+
+  step("cut joists", function() {
+
+    cutInstructions(
+      materials(options.name+"-joist-A", options.name+"-joist-B", options.name+"-joist-C", options.name+"-joist-D")
+    )
+
+  })
+
+  step("cut sheathing", function() {
+
+    cutInstructions(materials(options.name+"-sheathing"))
+
+    return
+
+    addInstruction("Add chalk lines to the sheathing:")
+
+    var sheathingLayout =
+      addDiagram("top", [sheathing])
+      .chalkLine({fromTop: STUD_WIDTH/2})
+      .chalkLine({fromBotom: STUD_WIDTH/2})
+
+    ;["A", "B", "C", "D"].forEach(
+      function(letter) {
+
+      sheathingLayout.chalkLine({fromRight: materials("joist-"+letter).xPos + STUD_WIDTH/2})
+
+    })
+
+  })
+
+  return
+
+  step("cut subfloor", function() {
+
+    cutInstructions(materials("subfloor"))
+
+    addInstruction("Add chalk lines to subfloor")
+
+    var subfloorLayout = addDiagram("top", [subfloor])
+      .chalkLine({fromTop: STUD_WIDTH/2})
+      .chalkLine({fromBottom: STUD_WIDTH/2})
+
+    ;["A", "B", "C", "D"].forEach(
+      function(letter) {
+
+      subfloorLayout.chalkLine({fromLeft: materials("joist-"+letter).xPos + STUD_WIDTH/2})
+
+    })
+
+  })
+
+  step("lay out framing", function() {
+
+    addInstruction("Lay out the tracks and studs:")
+
+    addDiagram("bottom", [frontTrack, backTrack, a, b, c, d])
+      .measure({fromLeft: a, toLeft: b})
+      .measure({fromLeft: b, toLeft: c})
+
+    addInstruction("Crimp each stud to both tracks, with one single crimp on the top side of the stud")
+
+    addInstruction("Add shims underneath each of the four corners until the tracks and the outer studs are level")
+
+  })
+
+  step("attach sheathing", function() {
+
+    var inverseJoin = {
+      left: "right",
+      right: "left"
+    }[options.join]
+
+    addInstruction("Lay the sheathing plywood on top of the framing, so that "+itLinesUp(inverseJoin))
+
+    function itLinesUp(side) {
+      if (side == "left") {
+        return "the plywood hangs over 3/4in on the right side"
+      } else if (side == "right") {
+        return "the plywood hangs over 3/4in on the left side"
+      } else {
+        return "it lines up exactly with the framing"
+      }
+    }
+
+    addInstruction("Screw down the sheathing, one screw ever 8 inches on the chalk lines")
+
+  })
+
+  step("flip the section over")
+
+
+  step("add insulation", function() {
+
+    addInstruction("cut and add insulation between the joists")
+
+    cutInstructions(materials("insulation-A", "insulation-B", "insulation-C"))
+
+  })
+
+  step("attach subfloor", function() {
+
+    addInstruction("Lay the subfloor plywood on top of the framing, so that "+itLinesUp(options.join))
+
+    addInstruction("Screw down the subfloor, one screw ever 8 inches on the chalk lines")
+
+  })
+
+  step("flooring", function() {
+
+    addInstruction("Glue down flooring to cover the entire subflooor")
+
+  })
+
+}
+
+
+
+
+
+function dimensionText(number) {
+  var integer = Math.floor(number)
+  var remainder = number - integer
+  var sixteenths = Math.round(remainder*16)
+
+  if (sixteenths == 16) {
+    integer++
+    var text = ""
+  } else if (sixteenths == 0) {
+    var text = ""
+  } else if (sixteenths == 8) {
+    var text = " 1/2"
+  } else if (sixteenths % 4 == 0) {
+    var text = " "+(sixteenths/4)+"/4"
+  } else if (sixteenths % 2 == 0) {
+    var text = " "+(sixteenths/2)+"/8"
+  } else {
+    var text = " "+sixteenths+"/16"
+  }
+
+  text = integer.toString()+"\""+text
+
+  return text
+}
 
 
 var diagram = element.template(
@@ -26,61 +279,6 @@ var diagram = element.template(
   }
 )
 
-var project = element.template(
-  "h2.project-title",
-  function(text) {
-    this.children.push(text)
-  }
-)
-
-var stepNumber = 0
-var step = element.template(
-  ".step",
-  function(text) {
-    stepNumber++
-    this.children.push(stepNumber+". "+text)
-  }
-)
-
-
-addHtml(element.stylesheet(
-  diagram,
-  project,
-  step
-).html())
-
-
-addHtml(element([
-  project("Floor Section 1"),
-  step("Cut steel track"),
-]).html())
-
-var floorLeft = {
-  name: "floor-left",
-  xSize: 48 - plan.parts.plywood.THICKNESS,
-  zSize: 6*12,
-  join: "right"
-}
-
-drawDiagram(
-  "floor-left",
-  floorSection,
-  floorLeft
-)
-
-
-var floorRight = {
-  name: "floor-right",
-  xSize: 48 - plan.parts.plywood.THICKNESS,
-  zSize: 6*12,
-  join: "left"
-}
-
-drawDiagram(
-  "floor-right",
-  floorSection,
-  floorRight
-)
 
 
 function drawDiagram(name, generator, options) {
@@ -93,6 +291,49 @@ function drawDiagram(name, generator, options) {
 }
 
 
+var body = element.style("body", {
+  "font-family": "sans-serif",
+  "font-size": "1.1em",
+  "color": "#def",
+  "background": "#48e",
+  "-webkit-font-smoothing": "antialiased",
+})
+
+
+var buttons = element.style(".buttons", {
+  "position": "fixed",
+  "bottom": "10px",
+})
+
+
+
+
+var leftOptions = {
+  name: "floor-left",
+  xSize: 48 - plan.parts.plywood.THICKNESS,
+  zSize: 6*12,
+  join: "right"
+}
+
+// var floorRight = {
+//   name: "floor-right",
+//   xSize: 48 - plan.parts.plywood.THICKNESS,
+//   zSize: 6*12,
+//   join: "left"
+// }
+
+var materials = allocateMaterials(plan)
+
+floorInstructions(leftOptions, materials)
+
+
+addHtml(element.stylesheet(
+  body,
+  diagram,
+  stepTitle,
+  stepButton,
+  buttons
+).html())
 
 
 </script>

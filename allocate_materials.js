@@ -138,7 +138,8 @@ var allocateMaterials = (function() {
     material = merge(material, {
       parts: [],
       cutLengths: [],
-      description: description
+      description: description,
+      number: set.length + 1
     })
 
     set.push(material)
@@ -157,22 +158,34 @@ var allocateMaterials = (function() {
       throw new Error("not enough material")
     }
 
+    var scrap = {
+      cut: cut,
+      part: name,
+      material: material,
+      size: size
+    }
+    if (!name) {
+      throw new Error("every scrap needs a name")
+    }
+
+    // scrap[constraint] = size
+
     material[constraint] = material[constraint] - size - 1/8
     material.cut = cut
     material.parts.push(name)
     material.cutLengths.push(size)
 
-    var scrap = {
-      cut: cut,
-      part: name
-    }
-    scrap[constraint] = size
+    scrapsByName[name] = scrap
 
     return scrap
 
   }
 
-  function plywoodMaterial(options) {
+  var scrapsByName = {}
+
+  function plywoodMaterial() {
+    var options = joinObjects(arguments)
+
     var dimensions = lumberDimensions(
       options,
       {
@@ -205,17 +218,19 @@ var allocateMaterials = (function() {
     if (dimensions.width > 45) {
       var sheet = getMaterial(description, "cross", dimensions.length)
 
-      var scrap = cutMaterial(sheet, "cross", dimensions.length, options.name)
+      cutMaterial(sheet, "cross", dimensions.length, options.name)
 
     } else {
       var sheet = getMaterial(description, "rip", dimensions.width)
 
-      var scrap = cutMaterial(sheet, "rip", dimensions.width, options.name)
+      cutMaterial(sheet, "rip", dimensions.width, options.name)
     }
   }
   plywoodMaterial.THICKNESS = plan.parts.plywood.THICKNESS
 
-  function trimMaterial(options) {
+  function trimMaterial() {
+    var options = joinObjects(arguments)
+
     var dimensions = lumberDimensions(
       options,
       {
@@ -256,20 +271,22 @@ var allocateMaterials = (function() {
     if (crossCut) {
       var board = getMaterial(description, "cross", dimensions.length)
 
-      var scrap = cutMaterial(board, "cross", dimensions.length, options.name)
+      cutMaterial(board, "cross", dimensions.length, options.name)
 
     } else {
 
       var board = getMaterial(description, "rip", dimensions.width)
 
-      var scrap = cutMaterial(board, "rip", dimensions.width, options.name)
+      cutMaterial(board, "rip", dimensions.width, options.name)
 
     }
 
   }
   trimMaterial.THICKNESS = plan.parts.trim.THICKNESS
 
-  function doorMaterial(options) {
+  function doorMaterial() {
+    var options = joinObjects(arguments)
+
     var door = getMaterial("door")
     door.parts.push(options.name)
   }
@@ -277,7 +294,9 @@ var allocateMaterials = (function() {
   doorMaterial.WIDTH = plan.parts.door.WIDTH
   doorMaterial.THICKNESS = plan.parts.door.THICKNESS
 
-  function studMaterial(options) {
+  function studMaterial() {
+    var options = joinObjects(arguments)
+
     var dimensions = lumberDimensions(
       options,
       {
@@ -297,13 +316,15 @@ var allocateMaterials = (function() {
 
     var steel = getMaterial(description, "cross", dimensions.length)
 
-    var scrap = cutMaterial(steel, "cross", dimensions.length, options.name)
+    cutMaterial(steel, "cross", dimensions.length, options.name)
   }
   studMaterial.DEPTH = plan.parts.stud.DEPTH
   studMaterial.WIDTH = plan.parts.stud.WIDTH
 
 
-  function twinWallMaterial(options) {
+  function twinWallMaterial() {
+    var options = joinObjects(arguments)
+
     var dimensions = lumberDimensions(
       options,
       {
@@ -320,7 +341,9 @@ var allocateMaterials = (function() {
   }
   twinWallMaterial.THICKNESS = plan.parts.twinWall.THICKNESS
 
-  function insulationMaterial(options) {
+  function insulationMaterial() {
+    var options = joinObjects(arguments)
+
     var dimensions = lumberDimensions(
       options,
       {
@@ -336,7 +359,9 @@ var allocateMaterials = (function() {
 
   }
 
-  function reflectixMaterial(options) {
+  function reflectixMaterial() {
+    var options = joinObjects(arguments)
+
     var dimensions = lumberDimensions(
       options,
       {
@@ -353,7 +378,9 @@ var allocateMaterials = (function() {
   }
 
 
-  function flooringMaterial(options) {
+  function flooringMaterial() {
+    var options = joinObjects(arguments)
+
     var area = options.xSize/12 * options.zSize/12
 
     var description = "vinyl flooring"
@@ -361,11 +388,14 @@ var allocateMaterials = (function() {
     getBulk(description, area, options.name)
   }
 
-  function slopedMaterial(options) {
+  function slopedMaterial() {
+    var options = joinObjects(arguments)
     options.part(options)
   }
 
-  function tiltedMaterial(options) {
+  function tiltedMaterial() {
+    var options = joinObjects(arguments)
+
     if (!options.zSize) {
       console.log("offending part:", options)
       throw new Error("can't tilt a part without a zSize")
@@ -383,6 +413,17 @@ var allocateMaterials = (function() {
 
   }
 
+  function joinObjects(iterable) {
+    var joined = {}
+
+    for(var i=0; i<iterable.length; i++) {
+      for(var key in iterable[i]) {
+        joined[key] = iterable[i][key]
+      }
+    }
+
+    return joined
+  }
 
   function noop() {}
 
@@ -489,7 +530,26 @@ var allocateMaterials = (function() {
 
     materialSets = undefined
 
-    return sets
+    var materials = getPiece.bind(sets)
+    materials.groupedByDescription = sets
+    
+    return materials
+  }
+
+  function getPiece() {
+    var names = Array.prototype.slice.call(arguments)
+
+    var pieces = names.map(nameToScrap)
+
+    return pieces
+  }
+
+  function nameToScrap(name) {
+    var scrap = scrapsByName[name]
+    if (!scrap) {
+      throw new Error("Scrap "+name+" not found")
+    }
+    return scrap
   }
 
   function materialPartsFor(generator) {

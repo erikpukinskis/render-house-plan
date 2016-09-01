@@ -37,38 +37,38 @@ var backPlateLeftHeight = RAFTER_HEIGHT - (plan.parts.stud.DEPTH+plan.parts.plyw
 var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
 
 
+;(function() {
+  plan.add(floorSection, {
+    name: "floor-left",
+    xSize: 48,
+    zSize: 6*12,
+    join: "right"
+  })
 
-plan.add(floorSection, {
-  name: "floor-left",
-  xSize: 48,
-  zSize: 6*12,
-  join: "right"
-})
+  plan.add(floorSection, {
+    name: "floor-right",
+    xPos: 48,
+    xSize: 48 - plan.parts.plywood.THICKNESS*2,
+    zSize: 6*12,
+    join: "left"
+  })
 
-plan.add(floorSection, {
-  name: "floor-right",
-  xPos: 48,
-  xSize: 48 - plan.parts.plywood.THICKNESS*2,
-  zSize: 6*12,
-  join: "left"
-})
-
-plan.add(header)
-plan.add(backWall)
-plan.add(frontWall)
-plan.add(roof)
-plan.add(sideWall, {
-  xPos: 0,
-  yPos: FLOOR_TOP,
-  zPos: 0
-}, "left")
-plan.add(sideWall, {
-  xPos: 96 - plan.parts.stud.DEPTH - plan.parts.plywood.THICKNESS*2,
-  yPos: FLOOR_TOP,
-  zPos: 0
-}, "right")
-plan.add(doors)
-
+  plan.add(header)
+  plan.add(backWall)
+  plan.add(frontWall)
+  plan.add(roof)
+  plan.add(sideWall, {
+    xPos: 0,
+    yPos: FLOOR_TOP,
+    zPos: 0
+  }, "left")
+  plan.add(sideWall, {
+    xPos: 96 - plan.parts.stud.DEPTH - plan.parts.plywood.THICKNESS*2,
+    yPos: FLOOR_TOP,
+    zPos: 0
+  }, "right")
+  plan.add(doors)
+})()
 
 function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, shade) {
 
@@ -450,6 +450,7 @@ function floorSection(section, plywood, stud, insulation, flooring, options) {
   for(var i=0; i<3; i++) {
     insulation({
       section: floor,
+      name: options.name+"-insulation-"+(i+1),
       xPos: 1+i*16,
       xSize: 14,
       yPos: 1,
@@ -490,7 +491,6 @@ function floorSection(section, plywood, stud, insulation, flooring, options) {
 
   var joist = {
     section: floor,
-    name: "floor-joist-left",
     orientation: "horizontal-east",
     xPos: framingOffset,
     yPos: FLOORING_THICKNESS,
@@ -568,6 +568,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
   for(var i=0; i<5; i++) {
     sloped({
       part: insulation,
+      name: whichSide+"-side-wall-insulation-"+(i+1),
       slope: SLOPE,
       section: i<3 ? short : tall,
       zPos: stud.DEPTH + i*14,
@@ -845,6 +846,7 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
   for(var i=0; i<6; i++) {
     insulation({
       section: i<3 ? backLeft : backRight,
+      name: section.name+"-back-insulation-"+(i+1),
       xPos: i*16,
       xSize: 16,
       yPos: 0,
@@ -1108,6 +1110,7 @@ function header(section, stud, plywood, trim, sloped, verticalSlice, insulation)
   for(var i=0; i<6; i++) {
     insulation({
       section: header,
+      name: "header-insulation-"+(i+1),
       xPos: stud.DEPTH + i*15,
       xSize: 15,
       yPos: 0,
@@ -1228,6 +1231,7 @@ function frontWall(section, plywood, trim, stud, door, insulation) {
   for(var i=0; i<2; i++) {
     insulation({
       section: front,
+      name: "front-insulation-"+i,
       xPos: i*12,
       xSize: 12,
       yPos: 0,
