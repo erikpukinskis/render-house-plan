@@ -162,7 +162,7 @@ var allocateMaterials = (function() {
       cut: cut,
       part: name,
       material: material,
-      size: size
+      size: size,
     }
     if (!name) {
       throw new Error("every scrap needs a name")
@@ -532,7 +532,7 @@ var allocateMaterials = (function() {
 
     var materials = getPiece.bind(sets)
     materials.groupedByDescription = sets
-    
+
     return materials
   }
 

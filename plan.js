@@ -37,9 +37,7 @@ var plan = (function() {
     function() {
       var options = joinObjects(arguments)
 
-      if (options.section) {
-        options.section.children.push(this)
-      }
+      addPart(this, options)
 
       var size = "0.4em"
       var thin = "0.2em"
@@ -319,9 +317,7 @@ var plan = (function() {
 
       }
 
-      if (options.section) {
-        options.section.children.push(this)
-      }
+      addPart(this, options)
 
       addStylesFromOptions(options, this)
     }
@@ -377,9 +373,7 @@ var plan = (function() {
         })
       }
 
-      if (options.section) {
-        options.section.children.push(this)
-      }
+      addPart(this, options)
 
       if (options.border) {
         this.appendStyles({border: options.border})
@@ -402,9 +396,7 @@ var plan = (function() {
     function() {
       var options = joinObjects(arguments)
 
-      if (options.section) {
-        options.section.children.push(this)
-      }
+      addPart(this, options)
 
       drawPlan.addStylesFromOptions(options, this)
     }
@@ -437,9 +429,7 @@ var plan = (function() {
 
       this.children.push(box)
 
-      if (options.section) {
-        options.section.children.push(this)
-      }
+      addPart(this, options)
 
       drawPlan.addStylesFromOptions(options, this)
     }
@@ -485,9 +475,7 @@ var plan = (function() {
           options.ySize = door.HEIGHT
         }
 
-        if (options.section) {
-          options.section.children.push(this)
-        }
+        addPart(this, options)
 
         addStylesFromOptions(options, this)
       }
@@ -631,9 +619,7 @@ var plan = (function() {
 
     var wrapped = slopeWrapper(innerEl, wrapperOptions)
 
-    if (parentSection) {
-      parentSection.children.push(wrapped)
-    }
+    addPart(this, options)
 
     return wrapped
   }
@@ -789,9 +775,8 @@ var plan = (function() {
     function() {
       var options = joinObjects(arguments)
 
-      if (options.section) {
-        options.section.children.push(this)
-      }
+      addPart(this, options)
+
       drawPlan.addStylesFromOptions(options, this)
     }
   )
@@ -807,9 +792,8 @@ var plan = (function() {
     function() {
       var options = joinObjects(arguments)
 
-      if (options.section) {
-        options.section.children.push(this)
-      }
+      addPart(this, options)
+
       drawPlan.addStylesFromOptions(options, this)
     }
   )
@@ -828,9 +812,8 @@ var plan = (function() {
     function() {
       var options = joinObjects(arguments)
 
-      if (options.section) {
-        options.section.children.push(this)
-      }
+      addPart(this, options)
+
       drawPlan.addStylesFromOptions(options, this)
     }
   )
@@ -863,7 +846,9 @@ var plan = (function() {
 
       this.origin = options
 
-      sections.push(this)
+      if (sections) {
+        sections.push(this)
+      }
     }
   )
 
@@ -1239,6 +1224,7 @@ var plan = (function() {
     drawPlan.parameterSets.push(parameters)
   }
 
+
   function drawSection(generator, node, view) {
 
     setView(view, false)
@@ -1263,11 +1249,47 @@ var plan = (function() {
 
   }
 
-  var renderers = []
+  function addPart(el, options) {
+    if (elTrap) {
+      elTrap[options.name] = el
+    } else if (options.section) {
+      options.section.children.push(el)
+    }
+  }
+
+  var elTrap
+  var elsByView = {}
+
+  function drawScraps(scraps, view, el) {
+
+    setView(view, false)
+
+    elTrap = elsByView[view]
+    if (!elTrap) {
+      elTrap = elsByView[view] = {}
+    }
+
+    getRenderers().map(call)
+
+    var scrapBox = element()
+
+    scraps.map(function(scrap) {
+      scrapBox.children.push(elTrap[scrap.part])
+    })
+
+    elTrap = undefined
+
+    el.children.push(scrapBox)
+
+  }
+
+  var renderers
   var addedEditor = false
 
-  function draw() {
-    sections = []
+
+  function getRenderers() {
+    if (renderers) { return renderers}
+    renderers = []
 
     for(var i=0; i<drawPlan.generators.length; i++) {
 
@@ -1279,9 +1301,13 @@ var plan = (function() {
 
       renderers.push(renderer)
     }
+    
+    return renderers 
+  }
 
+  function draw() {
+    getRenderers()
     ensureEditor(redraw)
-
   }
 
 
@@ -1438,6 +1464,7 @@ var plan = (function() {
   drawPlan.add = add
   drawPlan.draw = draw
   drawPlan.drawSection = drawSection
+  drawPlan.drawScraps = drawScraps
   drawPlan.addStylesFromOptions = addStylesFromOptions
   drawPlan.parts = drawableParts
   drawPlan.toggleSection = toggleSection

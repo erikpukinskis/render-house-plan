@@ -17,7 +17,7 @@ var container
 var stepButton = element.template(
   "button.next-button",
   element.style({
-    "padding": "4px 8px",
+    "padding": "4px 12px 6px 12px",
     "background": "transparent",
     "border": "1px solid #7fc",
     "border-radius": "2px",
@@ -25,6 +25,7 @@ var stepButton = element.template(
     "color": "#7fe",
     "margin-top": "1em",
     "margin-right": "1em",
+    "cursor": "pointer",
   }),
   function(label, stepNumber, color) {
     this.children.push(label)
@@ -74,7 +75,7 @@ function step(text, generator) {
 
   container.children.push(
     element(".buttons", [
-      stepButton("<", stepNumber-1, "#ccc"),
+      stepButton("<", stepNumber-1, "#04f"),
       stepButton("Next >", stepNumber+1)
     ])
   )
@@ -90,9 +91,20 @@ var stepTitle = element.template(
   }),
   function(text) {
     this.children.push()
-    addHtml(this.html())
   }
 )
+
+var instruction = element.template(
+  ".instruction",
+  element.style({
+    "margin-top": "1em",
+  }),
+  function(text) {
+    this.children.push(text)
+  }
+)
+
+// Instruction helpers
 
 function cutInstructions(parts) {
   parts.forEach(function(scrap) {
@@ -102,6 +114,17 @@ function cutInstructions(parts) {
     )
   })
 }
+
+function addInstruction(text) {
+  container.children.push(instruction(text))
+}
+
+function diagram(view, scraps) {
+  var el = diagramContainer()
+  plan.drawScraps(scraps, view, el)
+  container.children.push(el)
+}
+
 
 function floorInstructions(options, materials) {
 
@@ -127,15 +150,16 @@ function floorInstructions(options, materials) {
 
   step("cut sheathing", function() {
 
+
     cutInstructions(materials(options.name+"-sheathing"))
 
-    return
-
-    addInstruction("Add chalk lines to the sheathing:")
+    addInstruction("Add chalk lines 3/4 inch from the short sides, and over each stud:")
 
     var sheathingLayout =
-      addDiagram("top", [sheathing])
-      .chalkLine({fromTop: STUD_WIDTH/2})
+      diagram("top", materials(options.name+"-sheathing"))
+
+    return
+      false.chalkLine({fromTop: STUD_WIDTH/2})
       .chalkLine({fromBotom: STUD_WIDTH/2})
 
     ;["A", "B", "C", "D"].forEach(
@@ -262,33 +286,22 @@ function dimensionText(number) {
 }
 
 
-var diagram = element.template(
-  ".diagram",
+var diagramContainer = element.template(
+  ".diagram-container",
   element.style({
     "font-size": "0.1em",
     "position": "relative",
     "background": "#eef",
     "border": "2em solid #eef",
   }),
-  function(name, options) {
+  function() {
     this.appendStyles({
-      width: options.xSize+"em",
-      height: options.zSize+"em",
+      width: 48+"em",
+      height: 72+"em",
     })
-    this.classes.push("diagram-"+name)
   }
 )
 
-
-
-function drawDiagram(name, generator, options) {
-
-  addHtml(diagram(name, options).html())
-
-  var node = document.querySelector(".diagram-"+name)
-
-  plan.drawSection(floorSection, node, "top", options)
-}
 
 
 var body = element.style("body", {
@@ -301,8 +314,8 @@ var body = element.style("body", {
 
 
 var buttons = element.style(".buttons", {
-  "position": "fixed",
-  "bottom": "10px",
+  // "position": "absolute",
+  // "top": "400px",
 })
 
 
@@ -329,10 +342,11 @@ floorInstructions(leftOptions, materials)
 
 addHtml(element.stylesheet(
   body,
-  diagram,
+  diagramContainer,
   stepTitle,
   stepButton,
-  buttons
+  buttons,
+  instruction
 ).html())
 
 
