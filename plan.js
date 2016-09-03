@@ -427,7 +427,7 @@ var plan = (function() {
         })
       }
 
-      this.children.push(box)
+      this.addChild(box)
 
       addPart(this, options)
 
@@ -660,7 +660,7 @@ var plan = (function() {
         "border-bottom": el.borderBottom
       })
 
-      this.children.push(el)
+      this.addChild(el)
 
       drawPlan.addStylesFromOptions(options, this)
     }
@@ -993,7 +993,7 @@ var plan = (function() {
       "margin-bottom": "0.25em"
     }),
     function(view) {
-      this.children.push(view)
+      this.addChild(view)
       this.attributes.href = "javascript: plan.setView(\""+view+"\")"
     }
   ) 
@@ -1005,7 +1005,7 @@ var plan = (function() {
       "padding-right": "1em"
     }),
     function(factor, label) {
-      this.children.push(label)
+      this.addChild(label)
       this.attributes.href = "javascript: plan.zoom("+factor+")"
     }
   )
@@ -1253,7 +1253,7 @@ var plan = (function() {
     if (elTrap) {
       elTrap[options.name] = el
     } else if (options.section) {
-      options.section.children.push(el)
+      options.section.addChild(el)
     }
   }
 
@@ -1274,12 +1274,21 @@ var plan = (function() {
     var scrapBox = element()
 
     scraps.map(function(scrap) {
-      scrapBox.children.push(elTrap[scrap.part])
+      if (!scrap.part) {
+        console.log("scrap:", scrap)
+        throw new Error("scrap doesn't have a part?")
+      }
+      var scrapEl = elTrap[scrap.part]
+      if (!scrapEl) {
+        console.log("scrap:", scrap)
+        throw new Error("never rendered a part called "+scrap.part)
+      }
+      scrapBox.addChild(scrapEl)
     })
 
     elTrap = undefined
 
-    el.children.push(scrapBox)
+    el.addChild(scrapBox)
 
   }
 

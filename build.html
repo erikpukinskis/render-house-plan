@@ -28,7 +28,7 @@ var stepButton = element.template(
     "cursor": "pointer",
   }),
   function(label, stepNumber, color) {
-    this.children.push(label)
+    this.addChild(label)
     var next = functionCall(advance).withArgs(stepNumber)
     this.onclick(next.evalable())
     if (color) {
@@ -61,6 +61,7 @@ function step(text, generator) {
       stepNumber+". "+text
     )
   )
+  container.html()
 
   container.classes.push("step-"+stepNumber)
 
@@ -73,7 +74,8 @@ function step(text, generator) {
   }
 
 
-  container.children.push(
+  container.html()
+  container.addChild(
     element(".buttons", [
       stepButton("<", stepNumber-1, "#04f"),
       stepButton("Next >", stepNumber+1)
@@ -90,7 +92,7 @@ var stepTitle = element.template(
     "margin": "1em 0",
   }),
   function(text) {
-    this.children.push()
+    this.addChild(text)
   }
 )
 
@@ -100,7 +102,7 @@ var instruction = element.template(
     "margin-top": "1em",
   }),
   function(text) {
-    this.children.push(text)
+    this.addChild(text)
   }
 )
 
@@ -109,24 +111,30 @@ var instruction = element.template(
 function cutInstructions(parts) {
   parts.forEach(function(scrap) {
     var text = scrap.cut+" cut "+dimensionText(scrap.size)+" from "+scrap.material.description+" #"+scrap.material.number
-    container.children.push(
+    container.addChild(
       element(text)
     )
+    container.html()
   })
 }
 
 function addInstruction(text) {
-  container.children.push(instruction(text))
+  container.addChild(instruction(text))
+  container.html()
 }
 
 function diagram(view, scraps) {
   var el = diagramContainer()
   plan.drawScraps(scraps, view, el)
-  container.children.push(el)
+  container.addChild(el)
+  container.html()
+  return el
 }
 
 
 function floorInstructions(options, materials) {
+
+  var STUD_WIDTH = plan.parts.stud.WIDTH
 
   step("cut steel track", function() {
 
@@ -150,18 +158,18 @@ function floorInstructions(options, materials) {
 
   step("cut sheathing", function() {
 
+    var sheathing = materials(options.name+"-sheathing")[0]
 
-    cutInstructions(materials(options.name+"-sheathing"))
+    cutInstructions([sheathing])
 
     addInstruction("Add chalk lines 3/4 inch from the short sides, and over each stud:")
 
     var sheathingLayout =
-      diagram("top", materials(options.name+"-sheathing"))
+      diagram("top", [sheathing])
+      .horizontalChalkLine(STUD_WIDTH/2)
+      .horizontalChalkLine(sheathing.size - STUD_WIDTH/2)
 
     return
-      false.chalkLine({fromTop: STUD_WIDTH/2})
-      .chalkLine({fromBotom: STUD_WIDTH/2})
-
     ;["A", "B", "C", "D"].forEach(
       function(letter) {
 
@@ -295,10 +303,38 @@ var diagramContainer = element.template(
     "border": "2em solid #eef",
   }),
   function() {
+    this.html()
     this.appendStyles({
       width: 48+"em",
       height: 72+"em",
     })
+    this.horizontalChalkLine = addChalkLine.bind(null, "horizontal", this)
+    this.verticalChalkLine = addChalkLine.bind(null, "vertical", this)
+    this.html()
+  }
+)
+
+
+function addChalkLine(orientation, diagramEl, distance) {
+
+  el = chalk({top: distance+"em"})
+
+  diagramEl.addChild(el)
+
+  return diagramEl
+}
+
+var chalk = element.template(
+  ".chalk-line",
+  element.style({
+    "position": "absolute",
+    "border": "1px solid #f88",
+  }),
+  function(options) {
+    if (typeof options.top != "undefined") {
+      options.width = "100%"
+    }
+    this.appendStyles(options)
   }
 )
 
@@ -346,7 +382,8 @@ addHtml(element.stylesheet(
   stepTitle,
   stepButton,
   buttons,
-  instruction
+  instruction,
+  chalk
 ).html())
 
 
