@@ -23,8 +23,8 @@ var stepButton = element.template(
     "border-radius": "2px",
     "font-size": "1em",
     "color": "#7fe",
-    "margin-top": "1em",
-    "margin-right": "1em",
+    "margin-top": "12pt",
+    "margin-right": "12pt",
     "cursor": "pointer",
   }),
   function(label, stepNumber, color) {
@@ -61,26 +61,23 @@ function step(text, generator) {
       stepNumber+". "+text
     )
   )
-  container.html()
 
   container.classes.push("step-"+stepNumber)
 
   generator()
 
   if (currentStep && stepNumber != currentStep) {
-    container.appendStyles({display: "none"})
+    // container.appendStyles({display: "none"})
   } else {
     currentStep = stepNumber
   }
 
-
-  container.html()
-  container.addChild(
-    element(".buttons", [
-      stepButton("<", stepNumber-1, "#04f"),
-      stepButton("Next >", stepNumber+1)
-    ])
-  )
+  // container.addChild(
+  //   element(".buttons", [
+  //     stepButton("<", stepNumber-1, "#04f"),
+  //     stepButton("Next >", stepNumber+1)
+  //   ])
+  // )
 
   addHtml(container.html())
 
@@ -89,7 +86,9 @@ function step(text, generator) {
 var stepTitle = element.template(
   ".step-title",
   element.style({
-    "margin": "1em 0",
+    "margin": "12pt 0",
+    "font-size": "1.5em",
+    "line-height": "1em",
   }),
   function(text) {
     this.addChild(text)
@@ -99,7 +98,7 @@ var stepTitle = element.template(
 var instruction = element.template(
   ".instruction",
   element.style({
-    "margin-top": "1em",
+    "margin-top": "12pt",
   }),
   function(text) {
     this.addChild(text)
@@ -110,24 +109,21 @@ var instruction = element.template(
 
 function cutInstructions(parts) {
   parts.forEach(function(scrap) {
-    var text = scrap.cut+" cut "+dimensionText(scrap.size)+" from "+scrap.material.description+" #"+scrap.material.number
+    var text = " - "+scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong> from "+scrap.material.description+" #"+scrap.material.number
     container.addChild(
       element(text)
     )
-    container.html()
   })
 }
 
 function addInstruction(text) {
   container.addChild(instruction(text))
-  container.html()
 }
 
 function diagram(view, scraps) {
   var el = diagramContainer()
   plan.drawScraps(scraps, view, el)
   container.addChild(el)
-  container.html()
   return el
 }
 
@@ -162,16 +158,32 @@ function floorInstructions(options, materials) {
 
     cutInstructions([sheathing])
 
-    addInstruction("Add chalk lines 3/4 inch from the short sides, and over each stud:")
+    addInstruction("Add chalk lines 3/4\" in from the front and back edge (the shorter sides)")
 
-    ;["A", "B", "C", "D"].forEach(
-      function(letter) {
+    if (options.join == "left") {
+      var overhang = "With the overhang to the left, "
+    } else if (options.join == "right") {
+      var overhang = "With the overhang to the right, "
+    } else {
+      var overhang = ""
+    }
 
-      sheathingLayout.chalkLine({fromRight: materials("joist-"+letter).xPos + STUD_WIDTH/2})
+    var joists = materials(
+      options.name+"-joist-A",
+      options.name+"-joist-B",
+      options.name+"-joist-C",
+      options.name+"-joist-D"
+    )
 
-    })
+    var distances = joists.map(toLeft).join(", ")
+
+    addInstruction(overhang+"add chalk lines at "+distances+" from the left (long side)")
 
   })
+
+  function toLeft(joist) {
+    return "<strong>"+dimensionText(joist.destination.xPos + 0.75)+"</strong>"
+  }
 
   return
 
@@ -282,7 +294,11 @@ function dimensionText(number) {
     var text = " "+sixteenths+"/16"
   }
 
-  text = integer.toString()+"\""+text
+  if (integer == 0) {
+    text = text+"\""
+  } else {
+    text = integer.toString()+"\""+text
+  }
 
   return text
 }
@@ -306,17 +322,49 @@ var diagramContainer = element.template(
 )
 
 
+function addChalkLine(orientation, diagramEl, distance) {
+
+  el = chalk({top: distance+"em"})
+
+  diagramEl.addChild(el)
+
+  return diagramEl
+}
+
+var chalk = element.template(
+  ".chalk-line",
+  element.style({
+    "position": "absolute",
+    "border": "1px solid #f88",
+  }),
+  function(options) {
+    if (typeof options.top != "undefined") {
+      options.width = "100%"
+    }
+    this.appendStyles(options)
+  }
+)
 
 
 
 var body = element.style("body", {
   "font-family": "sans-serif",
-  "font-size": "1.1em",
+  "line-height": "1.5em",
+  "font-size": "1.15em",
   "color": "#def",
   "background": "#48e",
   "-webkit-font-smoothing": "antialiased",
 })
 
+var em = element.style("strong", {
+  "font-weight": "bold",
+  "border": "1px solid #bef",
+  "color": "#dff",
+  "padding": "1px 3px 0px 3px",
+  "font-size": "1.2em",
+  "line-height": "1em",
+  "display": "inline-block",
+})
 
 var buttons = element.style(".buttons", {
   // "position": "absolute",
@@ -347,6 +395,7 @@ floorInstructions(leftOptions, materials)
 
 addHtml(element.stylesheet(
   body,
+  em,
   diagramContainer,
   stepTitle,
   stepButton,

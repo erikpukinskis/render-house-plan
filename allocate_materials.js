@@ -147,7 +147,9 @@ var allocateMaterials = (function() {
     return material
   }
 
-  function cutMaterial(material, cut, size, name) {
+  function cutMaterial(material, cut, size, options) {
+    var name = options.name
+
     if (material.cut && cut != material.cut) {
       throw new Error("trying to cut material the wrong way")
     }
@@ -163,6 +165,7 @@ var allocateMaterials = (function() {
       part: name,
       material: material,
       size: size,
+      destination: toDestination(options)
     }
     if (!name) {
       throw new Error("every scrap needs a name")
@@ -179,6 +182,16 @@ var allocateMaterials = (function() {
 
     return scrap
 
+  }
+
+  function toDestination(options) {
+    var destination = {}
+
+    ;["xPos", "xSize", "yPos", "ySize", "zPos", "zSize"].forEach(function(key) {
+      destination[key] = options[key] || 0
+    })
+
+    return destination
   }
 
   var scrapsByName = {}
@@ -218,12 +231,12 @@ var allocateMaterials = (function() {
     if (dimensions.width > 45) {
       var sheet = getMaterial(description, "cross", dimensions.length)
 
-      cutMaterial(sheet, "cross", dimensions.length, options.name)
+      cutMaterial(sheet, "cross", dimensions.length, options)
 
     } else {
       var sheet = getMaterial(description, "rip", dimensions.width)
 
-      cutMaterial(sheet, "rip", dimensions.width, options.name)
+      cutMaterial(sheet, "rip", dimensions.width, options)
     }
   }
   plywoodMaterial.THICKNESS = plan.parts.plywood.THICKNESS
@@ -271,13 +284,13 @@ var allocateMaterials = (function() {
     if (crossCut) {
       var board = getMaterial(description, "cross", dimensions.length)
 
-      cutMaterial(board, "cross", dimensions.length, options.name)
+      cutMaterial(board, "cross", dimensions.length, options)
 
     } else {
 
       var board = getMaterial(description, "rip", dimensions.width)
 
-      cutMaterial(board, "rip", dimensions.width, options.name)
+      cutMaterial(board, "rip", dimensions.width, options)
 
     }
 
@@ -316,7 +329,7 @@ var allocateMaterials = (function() {
 
     var steel = getMaterial(description, "cross", dimensions.length)
 
-    cutMaterial(steel, "cross", dimensions.length, options.name)
+    cutMaterial(steel, "cross", dimensions.length, options)
   }
   studMaterial.DEPTH = plan.parts.stud.DEPTH
   studMaterial.WIDTH = plan.parts.stud.WIDTH
@@ -336,7 +349,7 @@ var allocateMaterials = (function() {
 
     var poly = getMaterial("twin wall poly", "cross", dimensions.length)
 
-    cutMaterial(poly, "cross", dimensions.length, options.name)
+    cutMaterial(poly, "cross", dimensions.length, options)
 
   }
   twinWallMaterial.THICKNESS = plan.parts.twinWall.THICKNESS
@@ -355,7 +368,7 @@ var allocateMaterials = (function() {
 
     var fiberglass = getMaterial("fiberglass insulation", "cross", dimensions.length)
 
-    cutMaterial(fiberglass, "cross", dimensions.length, options.name)
+    cutMaterial(fiberglass, "cross", dimensions.length, options)
 
   }
 
@@ -373,7 +386,7 @@ var allocateMaterials = (function() {
 
     var shade = getMaterial("reflectix roll", "cross", dimensions.length)
 
-    cutMaterial(shade, "cross", dimensions.length, options.name)
+    cutMaterial(shade, "cross", dimensions.length, options)
 
   }
 
