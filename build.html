@@ -164,12 +164,6 @@ function floorInstructions(options, materials) {
 
     addInstruction("Add chalk lines 3/4 inch from the short sides, and over each stud:")
 
-    var sheathingLayout =
-      diagram("top", [sheathing])
-      .horizontalChalkLine(STUD_WIDTH/2)
-      .horizontalChalkLine(sheathing.size - STUD_WIDTH/2)
-
-    return
     ;["A", "B", "C", "D"].forEach(
       function(letter) {
 
@@ -308,35 +302,10 @@ var diagramContainer = element.template(
       width: 48+"em",
       height: 72+"em",
     })
-    this.horizontalChalkLine = addChalkLine.bind(null, "horizontal", this)
-    this.verticalChalkLine = addChalkLine.bind(null, "vertical", this)
-    this.html()
   }
 )
 
 
-function addChalkLine(orientation, diagramEl, distance) {
-
-  el = chalk({top: distance+"em"})
-
-  diagramEl.addChild(el)
-
-  return diagramEl
-}
-
-var chalk = element.template(
-  ".chalk-line",
-  element.style({
-    "position": "absolute",
-    "border": "1px solid #f88",
-  }),
-  function(options) {
-    if (typeof options.top != "undefined") {
-      options.width = "100%"
-    }
-    this.appendStyles(options)
-  }
-)
 
 
 
