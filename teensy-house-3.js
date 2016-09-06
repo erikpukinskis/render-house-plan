@@ -10,7 +10,7 @@ var RAFTER_HEIGHT = 3.5
 var RAFTER_WIDTH = 1.5
 var HEADER_TRIM = 3.5
 
-var floorSectionHeight = FLOORING_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
+var wholeFloorHeight = FLOORING_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
 
 var rafterStart = {
   zPos: plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS,
@@ -48,7 +48,7 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
   plan.add(floorSection, {
     name: "floor-right",
     xPos: 48,
-    xSize: 48 - plan.parts.plywood.THICKNESS*2,
+    xSize: 48,
     zSize: 6*12,
     join: "left"
   })
@@ -57,11 +57,23 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
   plan.add(backWall)
   plan.add(frontWall)
   plan.add(roof)
-  plan.add(sideWall, {
+
+  plan.add(wallSection, {
+    name: "left-wall-A",
     xPos: 0,
     yPos: FLOOR_TOP,
-    zPos: 0
-  }, "left")
+    zPos: -plan.parts.plywood.THICKNESS,
+    width: 48,
+    shortOverhang: plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS*2,
+    tallOverhang: 0.75,
+    whichSide: "left"
+  })
+
+  // plan.add(sideWall, {
+  //   xPos: 0,
+  //   yPos: FLOOR_TOP,
+  //   zPos: 0
+  // }, "left")
   plan.add(sideWall, {
     xPos: 96 - plan.parts.stud.DEPTH - plan.parts.plywood.THICKNESS*2,
     yPos: FLOOR_TOP,
@@ -249,7 +261,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
     name: "left-of-door-sheathing",
     xSize: stud.DEPTH + plywood.THICKNESS*2,
     xPos: -plywood.THICKNESS*2 - stud.DEPTH,
-    ySize: door.HEIGHT + DOOR_GAP + trim.THICKNESS*2 + floorSectionHeight,
+    ySize: door.HEIGHT + DOOR_GAP + trim.THICKNESS*2 + wholeFloorHeight,
     yPos: 0,
     orientation: "south"
   })
@@ -282,7 +294,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
     xPos: 0,
     xSize: door.WIDTH*2 + DOOR_GAP*2 + trim.THICKNESS*2,
     yPos: DOOR_GAP + trim.THICKNESS*2 + door.HEIGHT,
-    ySize: floorSectionHeight,
+    ySize: wholeFloorHeight,
     orientation: "south"
   })
 
@@ -333,7 +345,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
   var bg3 = "rgba(170,255,0,0.9)"
   var bg = bg2 = bg3 = null //"rgba(255,255,0,0.9)"
 
-  var belowDoorTrimHeight = floorSectionHeight + trim.THICKNESS
+  var belowDoorTrimHeight = wholeFloorHeight + trim.THICKNESS
 
   var fatTrimWidth = trim.THICKNESS*2 + plywood.THICKNESS*2 + stud.DEPTH + DOOR_GAP
 
@@ -368,7 +380,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
     xSize: fatTrimWidth,
     xPos: - trim.THICKNESS - plywood.THICKNESS*2 - stud.DEPTH,
     yPos: DOOR_GAP + trim.THICKNESS,
-    ySize: door.HEIGHT + trim.THICKNESS + floorSectionHeight,
+    ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
     zPos: plywood.THICKNESS
   })
 
@@ -379,7 +391,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
     xSize: fatTrimWidth,
     xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH * 2,
     yPos: DOOR_GAP + trim.THICKNESS,
-    ySize: door.HEIGHT + trim.THICKNESS + floorSectionHeight,
+    ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
     zPos: plywood.THICKNESS,
   })
 
@@ -421,7 +433,7 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice) {
     name: "front-right-corner-trim",
     background: bg3,
     yPos: DOOR_GAP + trim.THICKNESS,
-    ySize: door.HEIGHT + trim.THICKNESS + floorSectionHeight,
+    ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
     xSize: -skinnyTrimWidth,
     xPos: 96 - plywood.THICKNESS*2 - stud.DEPTH + trim.THICKNESS,
     zPos: plywood.THICKNESS,
@@ -556,6 +568,202 @@ function floorSection(section, plywood, stud, insulation, flooring, options) {
 
 
 
+function sideSheathingHeightAt(offset) {
+  var height = BACK_WALL_INSIDE_HEIGHT - plan.parts.stud.DEPTH*SLOPE + wholeFloorHeight + plan.parts.verticalSlice(RAFTER_HEIGHT, SLOPE)+ offset*SLOPE
+
+  return height
+}
+
+function joiningStud() {
+  sloped({
+    section: tall,
+    part: trim,
+    name: whichSide+"-side-joining-stud",
+    slope: SLOPE,
+    xPos: 0,
+    xSize: stud.DEPTH,
+    zPos: 48 - 0.75,
+    zSize: 1.5,
+    yPos: 0,
+    ySize: -studHeightAt(offset)
+  })
+}
+
+function wallSection(section, stud, plywood, sloped, trim, sloped, tilted, verticalSlice, insulation, options) {
+
+  // var options = {
+  //   name: "left-wall-A",
+  //   xPos: 0,
+  //   yPos: FLOOR_TOP,
+  //   zPos: 0,
+  //   shortOverhang: plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS*2,
+  //   tallOverhang: 0.75,
+  //   height: sideSheathingHeightAt(48-plywood.THICKNESS),
+  //   whichSide: "left"
+  // }
+
+  var wall = section(
+    pick(options, "name", "xPos", "yPos", "zPos")
+  )
+
+  var name = options.name
+  var whichSide = options.whichSide
+  var flip = whichSide == "right"
+
+  // for(var i=0; i<5; i++) {
+  //   sloped({
+  //     part: insulation,
+  //     name: name+"-insulation-"+(i+1),
+  //     slope: SLOPE,
+  //     section: wall,
+  //     zPos: stud.DEPTH + i*14,
+  //     zSize: 14,
+  //     yPos: 0,
+  //     ySize: -83 - 14*i*SLOPE
+  //   })
+  // }
+
+  var backWallWidth = stud.DEPTH + plywood.THICKNESS*2
+
+  var backCornerHeight = BACK_WALL_INSIDE_HEIGHT - backWallWidth*SLOPE + verticalSlice(RAFTER_HEIGHT, SLOPE) + wholeFloorHeight
+
+  var startOffset = options.zPos
+
+  var endOffset = startOffset + options.width
+
+  var sheathingHeight = backCornerHeight + endOffset*SLOPE
+
+  var interiorWidth = options.width - stud.DEPTH - plywood.THICKNESS*2
+
+  var interiorHeight = BACK_WALL_INSIDE_HEIGHT + verticalSlice(0.75, SLOPE) + interiorWidth*SLOPE
+
+  sloped({
+    section: wall,
+    name: name+"-sheathing",
+    part: plywood,
+    xPos: flip ? stud.DEPTH : -plywood.THICKNESS,
+    zPos: 0,
+    zSize: options.width,
+    ySize: -sheathingHeight,
+    slope: SLOPE,
+    orientation: flip ? "east" : "west",
+    yPos: wholeFloorHeight
+  })
+
+  sloped({
+    section: wall,
+    name: name+"-interior",
+    part: plywood,
+    sanded: true,
+    "z-index": "100",
+    xPos: flip ? -plywood.THICKNESS : stud.DEPTH,
+    zPos: stud.DEPTH + plywood.THICKNESS*2,
+    orientation: flip ? "west" : "east",
+    zSize: interiorWidth,
+    ySize: -interiorHeight,
+    slope: SLOPE,
+    yPos: 0
+  })
+
+  var leftSideHeight = BACK_WALL_INSIDE_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + offset*SLOPE
+
+
+  var studHeightAtZero = BACK_WALL_INSIDE_HEIGHT - backWallWidth*SLOPE + stud.WIDTH*SLOPE
+
+  var sideStud = {
+    part: stud,
+    orientation: "north",
+    zSize: stud.WIDTH,
+    slope: 1/6,
+    yPos: 0
+  }
+
+  var offset = stud.DEPTH + plywood.THICKNESS*2
+  sloped(sideStud, {
+    section: wall,
+    name: name+"-stud-1",
+    orientation: "south",
+    zPos: offset,
+    ySize: -studHeightAtZero - offset*SLOPE,
+  })
+
+  offset = 16-stud.WIDTH/2
+  sloped(sideStud, {
+    section: wall,
+    name: name+"-stud-2",
+    zPos: offset,
+    ySize: -studHeightAtZero - offset*SLOPE,
+  })
+
+  offset = 16*2-stud.WIDTH/2
+
+  sloped(sideStud, {
+    section: wall,
+    name: name+"-stud-3",
+    zPos: offset,
+    ySize: -studHeightAtZero - offset*SLOPE,
+  })
+
+  offset = 48 - 0.75 - stud.WIDTH
+  sloped(sideStud, {
+    section: wall,
+    name: name+"-stud-4",
+    zPos: offset,
+    ySize: -studHeightAtZero - offset*SLOPE,
+  })
+
+  var plateLength = options.width - stud.DEPTH - plywood.THICKNESS*2 - 0.75
+
+  stud({
+    section: wall,
+    name: name+"-bottom-plate",
+    orientation: "up",
+    yPos: -stud.WIDTH,
+    zPos: stud.DEPTH + plywood.THICKNESS*2,
+    zSize: plateLength,
+  })
+
+  tilted({
+    section: wall,
+    part: stud,
+    slope: SLOPE,
+    name: name+"-top-plate",
+    orientation: "down",
+    ySize: stud.WIDTH,
+    yPos: -BACK_WALL_INSIDE_HEIGHT,
+    zPos: stud.DEPTH + plywood.THICKNESS*2,
+    zSize: plateLength,
+  })
+
+  var battenHeightAtZero = BACK_WALL_INSIDE_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + wholeFloorHeight + verticalSlice(RAFTER_HEIGHT, SLOPE) + BATTEN_WIDTH*SLOPE
+
+  var battenXPos = flip ? stud.DEPTH + plywood.THICKNESS : -plywood.THICKNESS - trim.THICKNESS
+
+  var batten = {
+    section: wall,
+    part: trim,
+    slope: SLOPE,
+    xPos: battenXPos,
+    yPos: wholeFloorHeight,
+    zSize: BATTEN_WIDTH,
+  }
+
+  var offset = -plywood.THICKNESS
+  sloped(batten, {
+    name: name+"-batten-A",
+    ySize: -battenHeightAtZero - offset*SLOPE,
+    zPos: offset,
+  })
+
+  var offset = 24 - BATTEN_WIDTH/2, short
+  sloped(batten, {
+    name: name+"-batten-B",
+    ySize: -battenHeightAtZero - offset*SLOPE,
+    zPos: offset,
+  })
+
+}
+
 
 function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, verticalSlice, insulation, position, whichSide) {
 
@@ -590,7 +798,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     ySize: -sideSheathingHeightAt(48),
     slope: SLOPE,
     orientation: flip ? "east" : "west",
-    yPos: floorSectionHeight
+    yPos: wholeFloorHeight
   })
 
   sloped({
@@ -615,13 +823,6 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
     return rightSideHeight
   }
-
-  function sideSheathingHeightAt(offset) {
-    var height = BACK_WALL_INSIDE_HEIGHT - stud.DEPTH*SLOPE + offset*SLOPE + floorSectionHeight + verticalSlice(RAFTER_HEIGHT, SLOPE)
-
-    return height
-  }
-
 
   var offset = stud.DEPTH + plywood.THICKNESS
   sideStud({
@@ -705,7 +906,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
     ySize: -sideSheathingHeightAt(48 + 24),
     slope: SLOPE,
     orientation: flip ? "east" : "west",
-    yPos: floorSectionHeight
+    yPos: wholeFloorHeight
   })
 
   sloped({
@@ -790,7 +991,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
   }
 
 
-  var battenHeightAtFloorBack = BACK_WALL_INSIDE_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + floorSectionHeight + verticalSlice(RAFTER_HEIGHT, SLOPE)
+  var battenHeightAtFloorBack = BACK_WALL_INSIDE_HEIGHT - (stud.DEPTH + plywood.THICKNESS)*SLOPE + wholeFloorHeight + verticalSlice(RAFTER_HEIGHT, SLOPE)
 
 
   sideBatten(1, -plywood.THICKNESS, short)
@@ -813,7 +1014,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
       part: trim,
       slope: SLOPE,
       xPos: xPos,
-      yPos: floorSectionHeight,
+      yPos: wholeFloorHeight,
       ySize: -ySize,
       zPos: zPos,
       zSize: BATTEN_WIDTH,
@@ -841,7 +1042,7 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   var studHeight = BACK_WALL_INSIDE_HEIGHT - 1.5
 
-  var backBattenHeight = BACK_WALL_INSIDE_HEIGHT + floorSectionHeight + backPlateLeftHeight - plywood.THICKNESS*SLOPE
+  var backBattenHeight = BACK_WALL_INSIDE_HEIGHT + wholeFloorHeight + backPlateLeftHeight - plywood.THICKNESS*SLOPE
 
   var shortBattenHeight = backBattenHeight - verticalSlice(TWIN_WALL_THICKNESS, SLOPE)
 
@@ -902,7 +1103,7 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
       xPos: -plywood.THICKNESS - trim.THICKNESS,
       xSize: BATTEN_WIDTH,
       zSize: trim.THICKNESS,
-      yPos: floorSectionHeight,
+      yPos: wholeFloorHeight,
       zPos: -plywood.THICKNESS - trim.THICKNESS
     }, options))
 
@@ -926,10 +1127,10 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
   plywood({
     section: backLeft,
     name: "back-left-sheathing",
-    xPos: -plywood.THICKNESS,
+    xPos: 0,
     xSize: 48,
-    ySize: -(BACK_WALL_INSIDE_HEIGHT + floorSectionHeight + backPlateLeftHeight),
-    yPos: floorSectionHeight,
+    ySize: -(BACK_WALL_INSIDE_HEIGHT + wholeFloorHeight + backPlateLeftHeight),
+    yPos: wholeFloorHeight,
     zPos: -plywood.THICKNESS,
     orientation: "north"
   })
@@ -939,8 +1140,8 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     name: "back-right-sheathing",
     xSize: 48,
     xPos: 48-plywood.THICKNESS,
-    ySize: -(BACK_WALL_INSIDE_HEIGHT + floorSectionHeight + backPlateLeftHeight),
-    yPos: floorSectionHeight,
+    ySize: -(BACK_WALL_INSIDE_HEIGHT + wholeFloorHeight + backPlateLeftHeight),
+    yPos: wholeFloorHeight,
     zPos: -plywood.THICKNESS,
     orientation: "north"
   })
@@ -1247,7 +1448,7 @@ function frontWall(section, plywood, trim, stud, door, insulation) {
     section: front,
     name: "front-sheathing",
     xSize: frontWallWidth + plywood.THICKNESS*2 + stud.DEPTH,
-    ySize: doorOpeningHeight + floorSectionHeight,
+    ySize: doorOpeningHeight + wholeFloorHeight,
     orientation: "south"
   })
 
@@ -1315,4 +1516,13 @@ function merge(obj1,obj2){
   for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
   for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
   return obj3;
+}
+
+function pick(object) {
+  var keys = Array.prototype.slice.call(arguments, 1)
+  var light = {}
+  keys.forEach(function(key) {
+    light[key] = object[key]
+  })
+  return light
 }

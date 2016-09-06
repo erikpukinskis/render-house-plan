@@ -733,7 +733,7 @@ var plan = (function() {
     var el = generator.call(null, options)
 
     el.appendStyles({
-      "transform-origin": "0% 0%",
+      "transform-origin": options.zPos+"em 0",
       "transform": "skewY(-"+slopeToDegrees(options.slope)+"deg)",
     })
 
