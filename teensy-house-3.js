@@ -54,7 +54,45 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
   })
 
   plan.add(header)
-  plan.add(backWall)
+
+  plan.add(wallSection, {
+    name: "back-wall-left",
+    zPos: 0,
+    yPos: FLOOR_TOP,
+    overhangs: "none/join",
+  })
+
+  plan.add(wallSection, {
+    name: "back-wall-right",
+    xPos: 48,
+    zPos: 0,
+    yPos: FLOOR_TOP,
+    overhangs: "join/none",
+  })
+
+  // trim({
+  //   section: wall,
+  //   name: "back-wall-joining-plate",
+  //   xPos: 0,
+  //   xSize: 96 - plywood.THICKNESS*2,
+  //   zPos: 0,
+  //   zSize: stud.DEPTH,
+  //   yPos: -studHeight,
+  //   ySize: -1.5,
+  // })
+
+  // trim({
+  //   section: wall,
+  //   name: "back-wall-joining-stud",
+  //   xPos: 48 - plywood.THICKNESS - 0.75,
+  //   xSize: 1.5,
+  //   yPos: 0,
+  //   ySize: -studHeight,
+  //   zSize: stud.DEPTH,
+  //   zPos: 0
+  // })
+
+
   plan.add(frontWall)
   plan.add(roof)
 
@@ -78,8 +116,8 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     whichSide: "left",
   })
 
-  var rightWallOffset = 96 - plan.parts.stud.DEPTH - plan.parts.plywood.THICKNESS*2
-  
+  var rightWallOffset = 96 - plan.parts.stud.DEPTH
+
   plan.add(slopedWall, {
     name: "right-wall-A",
     xPos: rightWallOffset,
@@ -1077,20 +1115,9 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
 
 
-function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulation) {
+function wallSection(section, plywood, stud, trim, sloped, verticalSlice, insulation, options) {
 
-  var backLeft = section({
-    name: "back-wall-left",
-    zPos: 0,
-    yPos: FLOOR_TOP
-  })
-
-  var backRight = section({
-    name: "back-wall-right",
-    zPos: 0,
-    yPos: FLOOR_TOP
-  })
-
+  var wall = section(options)
 
   var studHeight = BACK_WALL_INSIDE_HEIGHT - 1.5
 
@@ -1098,10 +1125,26 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   var shortBattenHeight = backBattenHeight - verticalSlice(TWIN_WALL_THICKNESS, SLOPE)
 
-  for(var i=0; i<6; i++) {
+
+  var overhangs = options.overhangs.split("/")
+
+  if (overhangs[0] == "none") {
+    var leftHang = 0
+  } else {
+    var leftHang = 0.75
+  }
+
+  if (overhangs[1] == "none") {
+    var rightHang = 0
+  } else {
+    var rightHang = 0.75
+  }
+
+
+  for(var i=0; i<3; i++) {
     insulation({
-      section: i<3 ? backLeft : backRight,
-      name: section.name+"-back-insulation-"+(i+1),
+      section: wall,
+      name: options.name+"-insulation-"+(i+1),
       xPos: i*16,
       xSize: 16,
       yPos: 0,
@@ -1111,65 +1154,52 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     })
   }
 
-  backBatten({
-    section: backLeft,
-    name: "back-batten-1",
+  var batten = {
+    part: trim,
+    "z-index": 100,
+    slope: SLOPE,
     xPos: -plywood.THICKNESS - trim.THICKNESS,
+    xSize: BATTEN_WIDTH,
+    zSize: trim.THICKNESS,
+    yPos: wholeFloorHeight,
+    zPos: -plywood.THICKNESS - trim.THICKNESS
+  }
+
+  var battenOffset = overhangs[0] == "none" ? -plywood.THICKNESS : -BATTEN_WIDTH/2
+  sloped(batten, {
+    section: wall,
+    name: options.name+"-batten-1",
+    xPos: battenOffset,
     ySize: -backBattenHeight
   })
 
-  backBatten({
-    section: backLeft,
-    name: "back-batten-2",
+  sloped(batten, {
+    section: wall,
+    name: options.name+"-batten-2",
     xPos: 24,
     ySize: -shortBattenHeight
   })
 
-  backBatten({
-    section: backRight,
-    name: "back-batten-3",
-    xPos: 48 - plywood.THICKNESS - BATTEN_WIDTH/2,
-    ySize: -shortBattenHeight
-  })
-
-  backBatten({
-    section: backRight,
-    name: "back-batten-4",
-    xPos: 24+48,
-    ySize: -shortBattenHeight
-  })
-
-  backBatten({
-    section: backRight,
-    name: "back-batten-5",
-    xPos: 96 - plywood.THICKNESS - BATTEN_WIDTH + trim.THICKNESS,
-    ySize: -backBattenHeight
-  })
-
-  function backBatten(options) {
-
-    sloped(merge({
-      part: trim,
-      "z-index": 100,
-      slope: SLOPE,
-      xPos: -plywood.THICKNESS - trim.THICKNESS,
-      xSize: BATTEN_WIDTH,
-      zSize: trim.THICKNESS,
-      yPos: wholeFloorHeight,
-      zPos: -plywood.THICKNESS - trim.THICKNESS
-    }, options))
-
+  if (overhangs[1] == "none") {
+    sloped(batten, {
+      section: wall,
+      name: options.name+"-batten-2",
+      xPos: 48 - BATTEN_WIDTH + plywood.THICKNESS,
+      ySize: -shortBattenHeight
+    })
   }
 
+  var leftOverhang = overhangs[0] == "none" ? 0 : 0.75
+  var rightOverhang = overhangs[1] == "none" ? 0 : 0.75
 
   // PLYWOOD
 
   plywood({
-    section: backLeft,
+    section: wall,
     name: "back-left-interior",
     sanded: true,
     xPos: 0,
-    xSize: 48 - plywood.THICKNESS,
+    xSize: 48,
     yPos: 0,
     ySize: -BACK_WALL_INSIDE_HEIGHT,
     zPos: stud.DEPTH,
@@ -1177,7 +1207,7 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
   })
 
   plywood({
-    section: backLeft,
+    section: wall,
     name: "back-left-sheathing",
     xPos: 0,
     xSize: 48,
@@ -1187,144 +1217,52 @@ function backWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     orientation: "north"
   })
 
-  plywood({
-    section: backRight,
-    name: "back-right-sheathing",
-    xSize: 48,
-    xPos: 48-plywood.THICKNESS,
-    ySize: -(BACK_WALL_INSIDE_HEIGHT + wholeFloorHeight + backPlateLeftHeight),
-    yPos: wholeFloorHeight,
-    zPos: -plywood.THICKNESS,
-    orientation: "north"
-  })
-
-  plywood({
-    section: backRight,
-    name: "back-right-interior",
-    sanded: true,
-    xSize: 48 - plywood.THICKNESS,
-    xPos: 48-plywood.THICKNESS,
-    yPos: 0,
-    ySize: -BACK_WALL_INSIDE_HEIGHT,
-    zPos: stud.DEPTH,
-    orientation: "south"
-  })
-
 
   // STUDS
 
-  trim({
-    section: backLeft,
-    name: "back-wall-joining-plate",
-    xPos: 0,
-    xSize: 96 - plywood.THICKNESS*2,
-    zPos: 0,
-    zSize: stud.DEPTH,
-    yPos: -studHeight,
-    ySize: -1.5,
-  })
+  var plateSize = 48 - leftOverhang - rightOverhang
 
   stud({
-    section: backLeft,
+    section: wall,
     name: "back-left-bottom-plate",
     orientation: "up-across",
-    xPos: 0,
-    xSize: 48 - plywood.THICKNESS - 0.75,
+    xPos: leftOverhang,
+    xSize: plateSize,
     yPos: -stud.WIDTH
   })
 
   stud({
-    section: backLeft,
+    section: wall,
     name: "back-left-top-plate",
     orientation: "down-across",
-    xPos: 0,
-    xSize: 48 - plywood.THICKNESS - 0.75,
+    xPos: leftOverhang,
+    xSize: plateSize,
     yPos: -studHeight
   })
 
   backStud({
-    section: backLeft,
+    section: wall,
     name: "back-left-stud-1",
     orientation: "east",
-    xPos: 0,
+    xPos: leftOverhang,
   })
 
   backStud({
-    section: backLeft,
+    section: wall,
     name: "back-left-stud-2",
-    xPos: 16 - plywood.THICKNESS - stud.WIDTH/2,
+    xPos: 16 - stud.WIDTH/2,
   })
 
   backStud({
-    section: backLeft,
+    section: wall,
     name: "back-left-stud-3",
-    xPos: 16*2 - plywood.THICKNESS - stud.WIDTH/2,
+    xPos: 16*2 - stud.WIDTH/2,
   })
 
   backStud({
-    section: backLeft,
+    section: wall,
     name: "back-left-stud-4",
-    xPos: 48 - plywood.THICKNESS - stud.WIDTH - 0.75,
-  })
-
-  trim({
-    section: backRight,
-    name: "back-wall-joining-stud",
-    xPos: 48 - plywood.THICKNESS - 0.75,
-    xSize: 1.5,
-    yPos: 0,
-    ySize: -studHeight,
-    zSize: stud.DEPTH,
-    zPos: 0
-  })
-
-
-  // BACK RIGHT
-
-  var backRightFramingStart = 48 - plywood.THICKNESS + 0.75
-
-  backStud({
-    section: backRight,
-    name: "back-right-stud-1",
-    orientation: "east",
-    xPos: backRightFramingStart,
-  })
-
-  stud({
-    section: backRight,
-    name: "back-right-bottom-plate",
-    orientation: "up-across",
-    xPos: backRightFramingStart,
-    xSize: 48 - plywood.THICKNESS - 0.75,
-    yPos: -stud.WIDTH
-  })
-
-  stud({
-    section: backRight,
-    name: "back-right-top-plate",
-    orientation: "down-across",
-    xPos: backRightFramingStart,
-    xSize: 48 - plywood.THICKNESS - 0.75,
-    yPos: -studHeight
-  })
-
-  backStud({
-    section: backRight,
-    name: "back-right-stud-2",
-    xPos: 16*4 - plywood.THICKNESS - stud.WIDTH/2,
-  })
-
-  backStud({
-    section: backRight,
-    name: "back-right-stud-3",
-    xPos: 16*5 - plywood.THICKNESS - stud.WIDTH/2,
-  })
-
-  backStud({
-    section: backRight,
-    name: "back-right-stud-4",
-    orientation: "west",
-    xPos: 96 - plywood.THICKNESS*2 -stud.WIDTH,
+    xPos: 48 - rightOverhang - stud.WIDTH,
   })
 
   function backStud(options) {
