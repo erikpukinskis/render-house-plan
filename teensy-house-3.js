@@ -58,7 +58,7 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
   plan.add(frontWall)
   plan.add(roof)
 
-  plan.add(wallSection, {
+  plan.add(slopedWall, {
     name: "left-wall-A",
     xPos: 0,
     yPos: FLOOR_TOP,
@@ -68,7 +68,7 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     whichSide: "left",
   })
 
-  plan.add(wallSection, {
+  plan.add(slopedWall, {
     name: "left-wall-B",
     xPos: 0,
     yPos: FLOOR_TOP,
@@ -78,16 +78,28 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     whichSide: "left",
   })
 
-  // plan.add(sideWall, {
-  //   xPos: 0,
-  //   yPos: FLOOR_TOP,
-  //   zPos: 0
-  // }, "left")
-  plan.add(sideWall, {
-    xPos: 96 - plan.parts.stud.DEPTH - plan.parts.plywood.THICKNESS*2,
+  var rightWallOffset = 96 - plan.parts.stud.DEPTH - plan.parts.plywood.THICKNESS*2
+  
+  plan.add(slopedWall, {
+    name: "right-wall-A",
+    xPos: rightWallOffset,
     yPos: FLOOR_TOP,
-    zPos: 0
-  }, "right")
+    zPos: -plan.parts.plywood.THICKNESS,
+    width: 48,
+    overhangs: "wall/join",
+    whichSide: "right",
+  })
+
+  plan.add(slopedWall, {
+    name: "right-wall-B",
+    xPos: rightWallOffset,
+    yPos: FLOOR_TOP,
+    zPos: 48 - plan.parts.plywood.THICKNESS,
+    width: 24+plan.parts.plywood.THICKNESS*2,
+    overhangs: "join/wall",
+    whichSide: "right",
+  })
+
   plan.add(doors)
 })()
 
@@ -598,7 +610,7 @@ function joiningStud() {
   })
 }
 
-function wallSection(section, stud, plywood, sloped, trim, sloped, tilted, verticalSlice, insulation, options) {
+function slopedWall(section, stud, plywood, sloped, trim, sloped, tilted, verticalSlice, insulation, options) {
 
   var wall = section(
     pick(options, "name", "xPos", "yPos", "zPos")
@@ -611,42 +623,23 @@ function wallSection(section, stud, plywood, sloped, trim, sloped, tilted, verti
   var wallHang = plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS*2
   var joinHang = 0.75
 
-  switch(options.overhangs) {
-    case "wall/join":
-      var outerShortHang = wallHang
-      var innerShortHang = 0
-      var outerTallHang = joinHang
-      var innerTallHang = joinHang
-      break
-    case "join/wall":
-      var outerShortHang = joinHang
-      var innerShortHang = joinHang
-      var outerTallHang = wallHang
-      var innerTallHang = 0
-      break
-    case "join/join":
-      var outerShortHang = joinHang
-      var innerShortHang = joinHang
-      var outerTallHang = joinHang
-      var innerTallHang = joinHang
-      break
-    default:
-      throw new Error("overhangs should be wall/join, join/wall, etc")
+  var overhangs = options.overhangs.split("/")
+
+  if (overhangs[0] == "wall") {
+    var outerShortHang = wallHang
+    var innerShortHang = 0    
+  } else {
+    var outerShortHang = joinHang
+    var innerShortHang = joinHang
   }
 
-
-  // for(var i=0; i<5; i++) {
-  //   sloped({
-  //     part: insulation,
-  //     name: name+"-insulation-"+(i+1),
-  //     slope: SLOPE,
-  //     section: wall,
-  //     zPos: stud.DEPTH + i*14,
-  //     zSize: 14,
-  //     yPos: 0,
-  //     ySize: -83 - 14*i*SLOPE
-  //   })
-  // }
+  if (overhangs[1] == "wall") {
+    var outerTallHang = wallHang
+    var innerTallHang = 0
+  } else {
+    var outerTallHang = joinHang
+    var innerTallHang = joinHang
+  }
 
   var backWallWidth = stud.DEPTH + plywood.THICKNESS*2
 
@@ -715,6 +708,8 @@ function wallSection(section, stud, plywood, sloped, trim, sloped, tilted, verti
 
   var maxOffset = options.width - outerTallHang - stud.WIDTH
 
+  var distance = 0
+
   for(var i=1; i<4; i++) {
 
     var tryOffset = offset = 16*i - stud.WIDTH/2
@@ -730,6 +725,21 @@ function wallSection(section, stud, plywood, sloped, trim, sloped, tilted, verti
       zPos: offset,
       ySize: -studHeightAtZero - offset*SLOPE,
     })
+
+    var insulationWidth = offset - distance
+
+    sloped({
+      part: insulation,
+      name: name+"-insulation-"+(i+1),
+      slope: SLOPE,
+      section: wall,
+      zPos: distance,
+      zSize: insulationWidth,
+      yPos: 0,
+      ySize: -83 - (distance + insulationWidth)*SLOPE
+    })
+
+    distance = offset
 
     if (bail) { break }
   }
@@ -777,20 +787,33 @@ function wallSection(section, stud, plywood, sloped, trim, sloped, tilted, verti
     zSize: BATTEN_WIDTH,
   }
 
-  var offset = -plywood.THICKNESS
+  var shortBattenOffset = overhangs[0] == "wall" ? -trim.THICKNESS : -BATTEN_WIDTH/2
   sloped(batten, {
     name: name+"-batten-A",
-    ySize: -battenHeightAtZero - offset*SLOPE,
-    zPos: offset,
+    ySize: -battenHeightAtZero - shortBattenOffset*SLOPE,
+    zPos: shortBattenOffset,
   })
 
-  var offset = 24 - BATTEN_WIDTH/2, short
-  sloped(batten, {
-    name: name+"-batten-B",
-    ySize: -battenHeightAtZero - offset*SLOPE,
-    zPos: offset,
-  })
+  var tallBattenOverhang = overhangs[1] == "join" ? BATTEN_WIDTH/2 : trim.THICKNESS
+  var maxBattenOffset = options.width - BATTEN_WIDTH + tallBattenOverhang
 
+  for(var i=1; i<3; i++) {
+
+    var tryOffset = offset = 24*i - BATTEN_WIDTH/2
+    var bail = false
+    if (tryOffset + BATTEN_WIDTH + 1 > maxBattenOffset) {
+      offset = maxBattenOffset
+      bail = true
+    }
+
+    sloped(batten, {
+      name: name+"-batten-B",
+      ySize: -battenHeightAtZero - offset*SLOPE,
+      zPos: offset,
+    })
+
+    if (bail) { break }
+  }
 }
 
 
