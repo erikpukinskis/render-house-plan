@@ -543,16 +543,36 @@ var allocateMaterials = (function() {
 
     materialSets = undefined
 
-    var materials = getPiece.bind(sets)
+    var options = {}
+
+    var materials = getPiece.bind(null, options)
     materials.groupedByDescription = sets
+    materials.prefix = changePrefix.bind(options)
 
     return materials
   }
 
-  function getPiece() {
-    var names = Array.prototype.slice.call(arguments)
+  function changePrefix(newPrefix) {
+    this.prefix = newPrefix
+  }
 
-    var pieces = names.map(nameToScrap)
+  getMaterial.prefix = function(newPrefix) {
+    prefix = newPrefix
+  }
+  
+
+
+  function getPiece(options) {
+    var names = Array.prototype.slice.call(arguments, 1)
+    var pieces = []
+
+    for(var i=0; i<names.length; i++) {
+      var name = names[i]
+      if (options.prefix) {
+        name = options.prefix+"-"+name
+      }
+      pieces.push(nameToScrap(name))
+    }
 
     return pieces
   }

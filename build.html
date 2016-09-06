@@ -11,7 +11,7 @@
 <script>
 
 var lastStepRendered = 0
-var currentStep = 3
+var currentStep = 0
 var container
 
 var stepButton = element.template(
@@ -64,20 +64,20 @@ function step(text, generator) {
 
   container.classes.push("step-"+stepNumber)
 
-  generator()
+  generator && generator()
 
   if (currentStep && stepNumber != currentStep) {
-    // container.appendStyles({display: "none"})
+    container.appendStyles({display: "none"})
   } else {
     currentStep = stepNumber
   }
 
-  // container.addChild(
-  //   element(".buttons", [
-  //     stepButton("<", stepNumber-1, "#04f"),
-  //     stepButton("Next >", stepNumber+1)
-  //   ])
-  // )
+  container.addChild(
+    element(".buttons", [
+      stepButton("<", stepNumber-1, "#04f"),
+      stepButton("Next >", stepNumber+1)
+    ])
+  )
 
   addHtml(container.html())
 
@@ -132,12 +132,21 @@ function floorInstructions(options, materials) {
 
   var STUD_WIDTH = plan.parts.stud.WIDTH
 
+  materials.prefix(options.name)
+
+  var joists = materials(
+    "joist-A",
+    "joist-B",
+    "joist-C",
+    "joist-D"
+  )
+
   step("cut steel track", function() {
 
     cutInstructions(
       materials(
-        options.name+"-front-track",
-        options.name+"-back-track"
+        "front-track",
+        "back-track"
       )
 
     )
@@ -147,78 +156,66 @@ function floorInstructions(options, materials) {
   step("cut joists", function() {
 
     cutInstructions(
-      materials(options.name+"-joist-A", options.name+"-joist-B", options.name+"-joist-C", options.name+"-joist-D")
+      materials("joist-A", "joist-B", "joist-C", "joist-D")
     )
 
   })
 
   step("cut sheathing", function() {
 
-    var sheathing = materials(options.name+"-sheathing")[0]
+    var sheathing = materials("sheathing")[0]
 
     cutInstructions([sheathing])
 
+    chalkLines("right")
+  })
+
+
+
+  function chalkLines(direction) {
+
     addInstruction("Add chalk lines 3/4\" in from the front and back edge (the shorter sides)")
-
-    if (options.join == "left") {
-      var overhang = "With the overhang to the left, "
-    } else if (options.join == "right") {
-      var overhang = "With the overhang to the right, "
-    } else {
-      var overhang = ""
-    }
-
-    var joists = materials(
-      options.name+"-joist-A",
-      options.name+"-joist-B",
-      options.name+"-joist-C",
-      options.name+"-joist-D"
-    )
 
     var distances = joists.map(toLeft).join(", ")
 
-    addInstruction(overhang+"add chalk lines at "+distances+" from the left (long side)")
+    function toLeft(joist) {
+      return "<strong>"+dimensionText(joist.destination.xPos + 0.75)+"</strong>"
+    }
 
-  })
+    addInstruction("Add chalk lines at "+distances+" from the "+direction+" (long side)")
 
-  function toLeft(joist) {
-    return "<strong>"+dimensionText(joist.destination.xPos + 0.75)+"</strong>"
   }
 
-  return
 
   step("cut subfloor", function() {
 
     cutInstructions(materials("subfloor"))
 
-    addInstruction("Add chalk lines to subfloor")
-
-    var subfloorLayout = addDiagram("top", [subfloor])
-      .chalkLine({fromTop: STUD_WIDTH/2})
-      .chalkLine({fromBottom: STUD_WIDTH/2})
-
-    ;["A", "B", "C", "D"].forEach(
-      function(letter) {
-
-      subfloorLayout.chalkLine({fromLeft: materials("joist-"+letter).xPos + STUD_WIDTH/2})
-
-    })
+    chalkLines("left")
 
   })
 
   step("lay out framing", function() {
 
-    addInstruction("Lay out the tracks and studs:")
+    var trackLength = dimensionText(materials("front-track")[0].size
+    )
 
-    addDiagram("bottom", [frontTrack, backTrack, a, b, c, d])
-      .measure({fromLeft: a, toLeft: b})
-      .measure({fromLeft: b, toLeft: c})
+    addInstruction("Lay out the front and back tracks ("+trackLength+" long) "+dimensionText(options.zSize)+" apart.")
+
+    function toLeft(joist) {
+      return "<strong>"+dimensionText(joist.destination.xPos)+"</strong>"
+    }
+
+    addInstruction("Set the joists inthe tracks "+joists.map(toLeft)+" from the right")
+
+    // diagram("bottom", materials("front-track", "back-track", "joist-A", "joist-B", "joist-C", "joist-D"))
 
     addInstruction("Crimp each stud to both tracks, with one single crimp on the top side of the stud")
 
     addInstruction("Add shims underneath each of the four corners until the tracks and the outer studs are level")
 
   })
+
 
   step("attach sheathing", function() {
 
@@ -229,22 +226,21 @@ function floorInstructions(options, materials) {
 
     addInstruction("Lay the sheathing plywood on top of the framing, so that "+itLinesUp(inverseJoin))
 
-    function itLinesUp(side) {
-      if (side == "left") {
-        return "the plywood hangs over 3/4in on the right side"
-      } else if (side == "right") {
-        return "the plywood hangs over 3/4in on the left side"
-      } else {
-        return "it lines up exactly with the framing"
-      }
-    }
-
-    addInstruction("Screw down the sheathing, one screw ever 8 inches on the chalk lines")
+    addInstruction("Screw down the sheathing, one screw every 8 inches on the chalk lines")
 
   })
 
-  step("flip the section over")
+  function itLinesUp(side) {
+    if (side == "left") {
+      return "the plywood hangs over 3/4in on the right side"
+    } else if (side == "right") {
+      return "the plywood hangs over 3/4in on the left side"
+    } else {
+      return "it lines up exactly with the framing"
+    }
+  }
 
+  step("flip the section over")
 
   step("add insulation", function() {
 
@@ -267,6 +263,9 @@ function floorInstructions(options, materials) {
     addInstruction("Glue down flooring to cover the entire subflooor")
 
   })
+
+  step("you did it!")
+  return
 
 }
 
@@ -294,7 +293,7 @@ function dimensionText(number) {
     var text = " "+sixteenths+"/16"
   }
 
-  if (integer == 0) {
+  if (integer == 0 && sixteenths != 0) {
     text = text+"\""
   } else {
     text = integer.toString()+"\""+text
@@ -361,7 +360,7 @@ var em = element.style("strong", {
   "border": "1px solid #bef",
   "color": "#dff",
   "padding": "1px 3px 0px 3px",
-  "font-size": "1.2em",
+  "font-size": "1.15em",
   "line-height": "1em",
   "display": "inline-block",
 })
@@ -387,6 +386,14 @@ var leftOptions = {
 //   zSize: 6*12,
 //   join: "left"
 // }
+
+function diagram(view, scraps) {
+  var el = diagramContainer()
+  plan.drawScraps(scraps, view, el)
+  container.addChild(el)
+  container.html()
+  return el
+}
 
 var materials = allocateMaterials(plan)
 

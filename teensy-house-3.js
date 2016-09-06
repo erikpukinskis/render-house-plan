@@ -447,10 +447,12 @@ function floorSection(section, plywood, stud, insulation, flooring, options) {
     zPos: 0
   })
 
+  var letters = ["A","B","C", "D"]
+
   for(var i=0; i<3; i++) {
     insulation({
       section: floor,
-      name: options.name+"-insulation-"+(i+1),
+      name: options.name+"-insulation-"+letters[i],
       xPos: 1+i*16,
       xSize: 14,
       yPos: 1,
