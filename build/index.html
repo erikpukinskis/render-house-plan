@@ -1,0 +1,25 @@
+<body>
+</body>
+
+<script src="../../build/element.js"></script>
+<script src="../../build/add-html.js"></script>
+
+<script>
+addHtml(element("build").html())
+
+var body = element.style("body", {
+  "font-family": "sans-serif",
+  "line-height": "1.5em",
+  "font-size": "1.15em",
+  "color": "#def",
+  "background": "#48e",
+  "-webkit-font-smoothing": "antialiased",
+})
+
+addHtml(element.stylesheet(body).html())
+
+var sectionType = "floor"
+
+addHtml(element("a", {href: sectionType+".html"}, sectionType).html())
+</script>
+
