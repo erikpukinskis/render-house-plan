@@ -619,7 +619,7 @@ var plan = (function() {
 
     var wrapped = slopeWrapper(innerEl, wrapperOptions)
 
-    addPart(this, options)
+    addPart(wrapped, options)
 
     return wrapped
   }
@@ -1250,6 +1250,10 @@ var plan = (function() {
   }
 
   function addPart(el, options) {
+    if (!el.html) {
+      throw new Error("trying to add part to section, but it's not an element")
+    }
+
     if (elTrap) {
       elTrap[options.name] = el
     } else if (options.section) {
