@@ -2,11 +2,13 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   var wall = section(options)
 
-  var studHeight = options.height - 1.5
+  var studHeight = options.height
 
   var topOverhang = options.topOverhang || 0
 
   var bottomOverhang = options.bottomOverhang || 0
+
+  var insideTopOverhang = options.insideTopOverhang || 0
 
   var backBattenHeight = options.height + topOverhang + bottomOverhang + topOverhang - plywood.THICKNESS*SLOPE
 
@@ -35,7 +37,6 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     part: trim,
     "z-index": 100,
     slope: SLOPE,
-    xPos: -plywood.THICKNESS - trim.THICKNESS,
     xSize: BATTEN_WIDTH,
     zSize: trim.THICKNESS,
     yPos: bottomOverhang,
@@ -44,11 +45,11 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   var battenOffset = overhangs[0] == "none" ? -plywood.THICKNESS : -BATTEN_WIDTH/2
 
-  if (overhangs[0] == "none") {
+  if (typeof options.leftBattenOverhang != "undefined") {
     sloped(batten, {
       section: wall,
       name: options.name+"-batten-1",
-      xPos: battenOffset,
+      xPos: -options.leftBattenOverhang,
       ySize: -backBattenHeight
     })
   }
@@ -63,11 +64,11 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     })
   }
 
-  if (overhangs[1] == "none") {
+  if (typeof options.rightBattenOverhang != "undefined") {
     sloped(batten, {
       section: wall,
       name: options.name+"-batten-2",
-      xPos: options.width - BATTEN_WIDTH + plywood.THICKNESS,
+      xPos: options.width - BATTEN_WIDTH + options.rightBattenOverhang,
       ySize: -shortBattenHeight
     })
   }
@@ -76,35 +77,33 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   plywood({
     section: wall,
-    name: "back-left-interior",
+    name: options.name+"-interior",
     sanded: true,
     xPos: 0,
     xSize: options.width,
     yPos: 0,
-    ySize: -BACK_WALL_INSIDE_HEIGHT,
+    ySize: -options.height - insideTopOverhang,
     zPos: options.orientation == "south" ? -plywood.THICKNESS : stud.DEPTH,
     orientation: "south"
   })
 
   plywood({
     section: wall,
-    name: "back-left-sheathing",
+    name: options.name+"-sheathing",
     xPos: 0,
     xSize: options.width,
-    ySize: -(BACK_WALL_INSIDE_HEIGHT + bottomOverhang + topOverhang),
+    ySize: -(options.height + bottomOverhang + topOverhang),
     yPos: wholeFloorHeight,
     zPos: options.orientation == "south" ? stud.DEPTH : -plywood.THICKNESS,
     orientation: "north"
   })
 
 
-  // STUDS
-
   var plateSize = options.width - leftHang - rightHang
 
   stud({
     section: wall,
-    name: "back-left-bottom-plate",
+    name: options.name+"-bottom-plate",
     orientation: "up-across",
     xPos: leftHang,
     xSize: plateSize,
@@ -113,7 +112,7 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   stud({
     section: wall,
-    name: "back-left-top-plate",
+    name: options.name+"-top-plate",
     orientation: "down-across",
     xPos: leftHang,
     xSize: plateSize,
@@ -128,10 +127,9 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   stud(wallStud, {
     section: wall,
-    name: "back-left-stud-1",
+    name: options.name+"-stud-1",
     orientation: "east",
-    xPos: rightHang,
-
+    xPos: leftHang,
   })
 
   var maxStudOffset = options.width - rightHang - stud.WIDTH

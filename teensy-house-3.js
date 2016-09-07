@@ -64,6 +64,8 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     topOverhang: backPlateLeftHeight,
     bottomOverhang: wholeFloorHeight,
     overhangs: "none/join",
+    leftBattenOverhang: plan.parts.plywood.THICKNESS,
+    rightBattenOverhang: 0.75,
   })
 
   plan.add(faceWall, {
@@ -76,6 +78,7 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     topOverhang: backPlateLeftHeight,
     bottomOverhang: wholeFloorHeight,
     overhangs: "join/none",
+    rightBattenOverhang: plan.parts.plywood.THICKNESS,
   })
 
   var doorOpeningHeight = plan.parts.trim.THICKNESS*2 + plan.parts.door.HEIGHT + DOOR_GAP
@@ -91,6 +94,9 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     yPos: FLOOR_TOP,
     width: frontWallWidth,
     height: doorOpeningHeight,
+    bottomOverhang: wholeFloorHeight,
+    topOverhang: 0.75,
+    insideTopOverhang: 0.75,
     overhangs: "none/door",
     orientation: "south",
   })
@@ -102,6 +108,9 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     yPos: FLOOR_TOP,
     width: frontWallWidth,
     height: doorOpeningHeight,
+    bottomOverhang: wholeFloorHeight,
+    topOverhang: 0.75,
+    insideTopOverhang: 0.75,
     overhangs: "door/none",
     orientation: "south",
   })
@@ -809,101 +818,6 @@ function header(section, stud, plywood, trim, sloped, verticalSlice, insulation)
   })
 
 }
-
-
-function frontWall(section, plywood, trim, stud, door, insulation) {
-
-  var distanceIn = plywood.THICKNESS + stud.DEPTH + trim.THICKNESS*2 + door.WIDTH*2 + DOOR_GAP*2
-
-  var doorOpeningHeight = trim.THICKNESS*2 + door.HEIGHT + DOOR_GAP
-
-  var frontWallWidth = 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH
-
-  var front = section({
-    name: "front-wall-old",
-    zPos: 48+24,
-    xPos: distanceIn,
-    yPos: FLOOR_TOP - doorOpeningHeight
-  })
-
-  for(var i=0; i<2; i++) {
-    insulation({
-      section: front,
-      name: "front-insulation-"+i,
-      xPos: i*12,
-      xSize: 12,
-      yPos: 0,
-      zPos: 0,
-      zSize: -stud.DEPTH,
-      ySize: 83,
-    })
-  }
-
-  plywood({
-    section: front,
-    name: "front-sheathing",
-    xSize: frontWallWidth + plywood.THICKNESS*2 + stud.DEPTH,
-    ySize: doorOpeningHeight + wholeFloorHeight,
-    orientation: "south"
-  })
-
-  plywood({
-    section: front,
-    name: "front-interior",
-    sanded: true,
-    xSize: frontWallWidth,
-    ySize: doorOpeningHeight,
-    zPos: -stud.DEPTH,
-    zSize: -plywood.THICKNESS,
-    orientation: "north"
-  })
-
-
-  stud({
-    section: front,
-    name: "front-stud-1",
-    orientation: "east",
-    zPos: -stud.DEPTH,
-    ySize: doorOpeningHeight
-  })
-
-  stud({
-    section: front,
-    name: "front-stud-2",
-    orientation: "east",
-    xPos: 12,
-    ySize: doorOpeningHeight,
-    zPos: -stud.DEPTH
-  })
-
-  stud({
-    section: front,
-    name: "front-stud-3",
-    orientation: "west",
-    xPos: 96 - distanceIn - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH,
-    zPos: -stud.DEPTH,
-    ySize: doorOpeningHeight
-  })
-
-  stud({
-    section: front,
-    name: "front-top-plate",
-    orientation: "down-across",
-    xSize: frontWallWidth,
-    zPos: -stud.DEPTH,
-  })
-
-  stud({
-    section: front,
-    name: "front-top-plate",
-    orientation: "up-across",
-    xSize: frontWallWidth,
-    yPos: doorOpeningHeight - stud.WIDTH,
-    zPos: -stud.DEPTH
-  })
-
-}
-
 
 
 function merge(obj1,obj2){

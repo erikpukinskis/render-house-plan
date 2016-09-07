@@ -270,7 +270,8 @@ var plan = (function() {
     ".plywood",
     element.style({
       "box-sizing": "border-box",
-      "position": "absolute"
+      "position": "absolute",
+      "z-index": "1",
     }),
     function() {
       var options = joinObjects(arguments)
