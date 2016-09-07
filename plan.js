@@ -278,34 +278,35 @@ var plan = (function() {
       var size = "0.2em"
 
       var o = options.orientation
+      var dashStyle = options.sanded ? " dashed purple" : " dashed red"
 
       if (topView && o=="west" || sideView && o=="north" || frontView && o=="west"
       ) {
 
         this.appendStyles({
           "border-left": size+" solid #863",
-          "border-right": size+" dashed red"
+          "border-right": size+dashStyle
         })
 
       } else if (topView && o=="east" || sideView && o=="south" || frontView && o=="east") {
 
         this.appendStyles({
           "border-right": size+" solid #863",
-          "border-left": size+" dashed red"
+          "border-left": size+dashStyle
         })
 
       } else if (topView && o=="north" || sideView && o=="up" || frontView && o=="up") {
 
           this.appendStyles({
             "border-top": size+" solid #863",
-            "border-bottom": size+" dashed red"
+            "border-bottom": size+dashStyle
           })
 
       } else if (topView && o=="south" || sideView && o=="down" || frontView && o=="down") {
 
           this.appendStyles({
             "border-bottom": size+" solid #863",
-            "border-top": size+" dashed red"
+            "border-top": size+dashStyle
           })
 
       } else {
@@ -803,11 +804,13 @@ var plan = (function() {
   var insulation = element.template(
     ".insulation",
     element.style({
+      "display": "none",
       "background-color": "rgba(255,0,0,0.1)",
       "background-size": "1em",
       "position": "absolute",
       "box-sizing": "border-box",
-      "border": "0.5em dotted rgba(255,255,255,0.8)"
+      "border": "0.5em dotted rgba(255,255,255,0.8)",
+      "z-index": "-100",
     }),
     function() {
       var options = joinObjects(arguments)
@@ -842,7 +845,8 @@ var plan = (function() {
         })
       }
 
-      addStylesFromOptions(options, this)
+      var filtered = pick(options, "xPos", "yPos", "zPos")
+      addStylesFromOptions(filtered, this)
 
       this.origin = options
 
@@ -852,6 +856,14 @@ var plan = (function() {
     }
   )
 
+  function pick(object) {
+    var keys = Array.prototype.slice.call(arguments, 1)
+    var light = {}
+    keys.forEach(function(key) {
+      light[key] = object[key]
+    })
+    return light
+  }
   var sectionBefore = element.style(
     ".section::before",
     {
