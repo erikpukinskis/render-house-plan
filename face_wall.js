@@ -75,6 +75,8 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   // PLYWOOD
 
+  var oppositeOrientation = options.orientation == "north" ? "south" : "north"
+
   plywood({
     section: wall,
     name: options.name+"-interior",
@@ -84,7 +86,7 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     yPos: 0,
     ySize: -options.height - insideTopOverhang,
     zPos: options.orientation == "south" ? -plywood.THICKNESS : stud.DEPTH,
-    orientation: "south"
+    orientation: oppositeOrientation
   })
 
   plywood({
@@ -93,9 +95,9 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     xPos: 0,
     xSize: options.width,
     ySize: -(options.height + bottomOverhang + topOverhang),
-    yPos: wholeFloorHeight,
+    yPos: bottomOverhang,
     zPos: options.orientation == "south" ? stud.DEPTH : -plywood.THICKNESS,
-    orientation: "north"
+    orientation: options.orientation
   })
 
 

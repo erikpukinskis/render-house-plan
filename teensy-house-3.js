@@ -29,8 +29,6 @@ var headerRafterIntersection = {
 
 var doorFramingTop = FLOOR_TOP - plan.parts.door.HEIGHT - 0.75*2 - DOOR_GAP
 
-var headerHeight = doorFramingTop - headerRafterIntersection.yPos
-
 
 var backPlateLeftHeight = RAFTER_HEIGHT - (plan.parts.stud.DEPTH+plan.parts.plywood.THICKNESS*SLOPE)*SLOPE
 
@@ -52,8 +50,6 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     zSize: 6*12,
     join: "left"
   })
-
-  plan.add(header)
 
   plan.add(faceWall, {
     name: "back-wall-left",
@@ -87,9 +83,11 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
 
   var frontWallWidth = (96 - doorOpeningWidth)/2
 
+  var frontWallPosition = 48+24 - plan.parts.stud.DEPTH
+
   plan.add(faceWall, {
     name: "front-wall-left",
-    zPos: 48+24 - plan.parts.stud.DEPTH,
+    zPos: frontWallPosition,
     xPos: 0,
     yPos: FLOOR_TOP,
     width: frontWallWidth,
@@ -103,7 +101,7 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
 
   plan.add(faceWall, {
     name: "front-wall-right",
-    zPos: 48+24 - plan.parts.stud.DEPTH,
+    zPos: frontWallPosition,
     xPos: frontWallWidth + doorOpeningWidth,
     yPos: FLOOR_TOP,
     width: frontWallWidth,
@@ -112,6 +110,37 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     topOverhang: 0.75,
     insideTopOverhang: 0.75,
     overhangs: "door/none",
+    orientation: "south",
+  })
+
+  var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_THICKNESS, SLOPE)
+
+  // sloped({
+  //   section: header,
+  //   part: trim,
+  //   name: "header-cap",
+  //   xPos: RAFTER_WIDTH,
+  //   xSize: 96 - plywood.THICKNESS*2 - RAFTER_WIDTH*2,
+  //   yPos: 0,
+  //   zSize: 1.5,
+  //   ySize: -headerCapFrontHeight,
+  //   slope: SLOPE,
+  //   zPos: -1.5
+  // })
+
+  var headerHeight = doorFramingTop - headerRafterIntersection.yPos
+
+  plan.add(faceWall, {
+    name: "header",
+    zPos: frontWallPosition,
+    xPos: 0,
+    yPos: FLOOR_TOP - doorOpeningHeight - 1.5,
+    width: 96,
+    height: headerHeight,
+    bottomOverhang: 0.75,
+    topOverhang: headerCapFrontHeight,
+    insideTopOverhang: 0,
+    overhangs: "none/none",
     orientation: "south",
   })
 
@@ -512,37 +541,6 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice,options
   })
 
   var xOrigin = -plywood.THICKNESS*2 - stud.DEPTH - trim.THICKNESS
-  var headerRemainder = headerHeight + (plywood.THICKNESS + trim.THICKNESS)*SLOPE + DOOR_GAP + trim.THICKNESS - HEADER_TRIM
-  var tallBatten = headerRemainder + RAFTER_HEIGHT
-  var shortBatten = tallBatten - verticalSlice(TWIN_WALL_THICKNESS, SLOPE)
-
-  headerBatten(1, xOrigin, BATTEN_WIDTH, tallBatten)
-
-  headerBatten(2, xOrigin+24, BATTEN_WIDTH, shortBatten)
-
-  headerBatten(3, xOrigin+48 - (BATTEN_WIDTH - RAFTER_WIDTH)/2, BATTEN_WIDTH, shortBatten)
-
-  headerBatten(4, xOrigin+24+48, BATTEN_WIDTH, shortBatten)
-
-  headerBatten(5, 96 - plywood.THICKNESS*2 - stud.DEPTH + trim.THICKNESS - BATTEN_WIDTH, BATTEN_WIDTH, tallBatten)
-
-  function headerBatten(index, xPos, xSize, ySize) {
-
-    sloped({
-      section: opening,
-      name: "header-batten-"+index,
-      slope: SLOPE,
-      part: trim,
-      background: bg,
-      xSize: xSize,
-      xPos: xPos,
-      yPos: DOOR_GAP + trim.THICKNESS -HEADER_TRIM,
-      ySize: -ySize,
-      zPos: plywood.THICKNESS,
-      zSize: trim.THICKNESS,
-    })
-
-  }
 
   trim({
     section: opening,
@@ -705,119 +703,6 @@ function joiningStud() {
   })
 }
 
-
-
-
-function header(section, stud, plywood, trim, sloped, verticalSlice, insulation) {
-
-  var header = section(headerRafterIntersection)
-
-  var headerLength = 96 - plywood.THICKNESS*4 - stud.DEPTH*2
-
-  for(var i=0; i<6; i++) {
-    insulation({
-      section: header,
-      name: "header-insulation-"+(i+1),
-      xPos: stud.DEPTH + i*15,
-      xSize: 15,
-      yPos: 0,
-      zPos: 0,
-      zSize: -stud.DEPTH,
-      ySize: headerHeight,
-    })
-  }
-
-
-  stud({
-    section: header,
-    name: "header-top-plate",
-    orientation: "down-across",
-    xPos: stud.DEPTH + plywood.THICKNESS,
-    xSize: headerLength,
-    zPos: -stud.DEPTH,
-    yPos: 0
-  })
-
-  stud({
-    section: header,
-    name: "header-bottom-plate",
-    orientation: "up-across",
-    xPos: stud.DEPTH + plywood.THICKNESS,
-    xSize: headerLength,
-    zPos: -stud.DEPTH,
-    yPos: headerHeight - stud.WIDTH
-  })
-
-  plywood({
-    section: header,
-    name: "header-interior",
-    sanded: true,
-    xPos: stud.DEPTH + plywood.THICKNESS,
-    xSize: headerLength,
-    ySize: headerHeight,
-    yPos: 0,
-    zPos: -stud.DEPTH - plywood.THICKNESS,
-    orientation: "north"
-  })
-
-  var topPlateHeight = verticalSlice(RAFTER_HEIGHT - TWIN_WALL_THICKNESS, SLOPE)
-
-  plywood({
-    section: header,
-    name: "header-sheathing",
-    xPos: -plywood.THICKNESS,
-    xSize: 96,
-    ySize: headerHeight + topPlateHeight,
-    yPos: -topPlateHeight,
-    zPos: 0,
-    orientation: "south"
-  })
-
-  sloped({
-    section: header,
-    part: trim,
-    name: "header-cap",
-    xPos: RAFTER_WIDTH,
-    xSize: 96 - plywood.THICKNESS*2 - RAFTER_WIDTH*2,
-    yPos: 0,
-    zSize: 1.5,
-    ySize: -topPlateHeight,
-    slope: SLOPE,
-    zPos: -1.5
-  })
-
-  var toTop = verticalSlice(RAFTER_HEIGHT, SLOPE) + (plywood.THICKNESS + trim.THICKNESS)*SLOPE
-
-  stud({
-    section: header,
-    name: "header-stud-1",
-    xPos: stud.DEPTH + plywood.THICKNESS,
-    ySize: headerHeight,
-    zPos: -stud.DEPTH,
-    orientation: "east"
-  })
-
-  for(var i=1; i<6; i++) {
-    stud({
-      section: header,
-      name: "header-stud-"+(i+1),
-      xPos: plywood.THICKNESS + i*16 - stud.WIDTH,
-      ySize: headerHeight,
-      zPos: -stud.DEPTH,
-      orientation: "east"
-    })
-  }
-
-  stud({
-    section: header,
-    name: "header-stud-"+(i+1),
-    xPos: 96 - plywood.THICKNESS*3 - stud.DEPTH - stud.WIDTH,
-    ySize: headerHeight,
-    zPos: -stud.DEPTH,
-    orientation: "west"
-  })
-
-}
 
 
 function merge(obj1,obj2){
