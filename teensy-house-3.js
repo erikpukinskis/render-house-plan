@@ -30,9 +30,11 @@ var headerRafterIntersection = {
 var doorFramingTop = FLOOR_TOP - plan.parts.door.HEIGHT - 0.75*2 - DOOR_GAP
 
 
-var backPlateLeftHeight = RAFTER_HEIGHT - (plan.parts.stud.DEPTH+plan.parts.plywood.THICKNESS*SLOPE)*SLOPE
+var rafterContact = plan.parts.stud.DEPTH+plan.parts.plywood.THICKNESS*SLOPE
 
-var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
+var backPlateRightHeight = RAFTER_HEIGHT - plan.parts.verticalSlice(TWIN_WALL_THICKNESS, SLOPE)
+
+var backPlateLeftHeight = backPlateRightHeight - rafterContact*SLOPE
 
 
 ;(function() {
@@ -239,6 +241,7 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
 
   var roofLength = Math.sqrt(96*96 - 12*12)
 
+  var backOverhang = 8
   function rafter(xPos, name) {
 
     tilted({
@@ -248,9 +251,9 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
       slope: SLOPE,
       xPos: xPos,
       xSize: RAFTER_WIDTH,
-      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE,
+      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE + backOverhang*SLOPE,
       ySize: RAFTER_HEIGHT,
-      zPos: -8,
+      zPos: -backOverhang,
       zSize: roofLength,
     })
 
@@ -275,9 +278,9 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
       slope: SLOPE,
       xPos: xPos,
       xSize: 7.5,
-      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE -  verticalSlice(trim.THICKNESS, SLOPE),
+      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE -  verticalSlice(trim.THICKNESS, SLOPE) + backOverhang*SLOPE,
       ySize: trim.THICKNESS,
-      zPos: -8,
+      zPos: -backOverhang,
       zSize: roofLength
     })
 
@@ -295,9 +298,9 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
       part: twinWall,
       section: roof,
       slope: SLOPE,
-      yPos: -3.5 - plywood.THICKNESS*SLOPE,
+      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE + backOverhang*SLOPE,
       ySize: TWIN_WALL_THICKNESS,
-      zPos: -8,
+      zPos: -backOverhang,
       zSize: roofLength
     }))
 

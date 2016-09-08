@@ -3,7 +3,7 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
   if (!options.orientation) {
     throw new Error("face wall needs an orientation")
   }
-  
+
   var wall = section(options)
 
   var topOverhang = options.topOverhang || 0
@@ -12,48 +12,45 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   var insideTopOverhang = options.insideTopOverhang || 0
 
-  var backBattenHeight = options.height + topOverhang + bottomOverhang + topOverhang - plywood.THICKNESS*SLOPE
+  var battenHeight = options.height + topOverhang + bottomOverhang
 
-  var shortBattenHeight = backBattenHeight - verticalSlice(TWIN_WALL_THICKNESS, SLOPE)
-
+  if (options.orientation == "south") {
+    battenHeight = battenHeight + plywood.THICKNESS*SLOPE
+  }
 
   var battenZPos = options.orientation == "south" ? stud.DEPTH + plywood.THICKNESS : -plywood.THICKNESS - trim.THICKNESS
 
   var batten = {
+    section: wall,
     part: trim,
     "z-index": 100,
     slope: SLOPE,
     xSize: BATTEN_WIDTH,
     zSize: trim.THICKNESS,
     yPos: bottomOverhang,
+    ySize: -battenHeight,
     zPos: battenZPos,
   }
 
   if (typeof options.leftBattenOverhang != "undefined") {
     sloped(batten, {
-      section: wall,
       name: options.name+"-batten-1",
       xPos: -options.leftBattenOverhang,
-      ySize: -backBattenHeight
     })
   }
 
   if (options.width > 26) {
 
     sloped(batten, {
-      section: wall,
       name: options.name+"-batten-2",
       xPos: 24,
-      ySize: -shortBattenHeight
     })
   }
 
   if (typeof options.rightBattenOverhang != "undefined") {
     sloped(batten, {
-      section: wall,
       name: options.name+"-batten-2",
       xPos: options.width - BATTEN_WIDTH + options.rightBattenOverhang,
-      ySize: -shortBattenHeight
     })
   }
 
