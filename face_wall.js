@@ -1,8 +1,10 @@
 function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulation, options) {
 
+  if (!options.orientation) {
+    throw new Error("face wall needs an orientation")
+  }
+  
   var wall = section(options)
-
-  var studHeight = options.height
 
   var topOverhang = options.topOverhang || 0
 
@@ -13,22 +15,6 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
   var backBattenHeight = options.height + topOverhang + bottomOverhang + topOverhang - plywood.THICKNESS*SLOPE
 
   var shortBattenHeight = backBattenHeight - verticalSlice(TWIN_WALL_THICKNESS, SLOPE)
-
-
-  var overhangs = options.overhangs.split("/")
-
-  if (overhangs[0] == "none" || overhangs[0] == "door") {
-    var leftHang = 0
-  } else {
-    var leftHang = 0.75
-  }
-
-  if (overhangs[1] == "none" || overhangs[1] == "door") {
-    var rightHang = 0
-  } else {
-    var rightHang = 0.75
-  }
-
 
 
   var battenZPos = options.orientation == "south" ? stud.DEPTH + plywood.THICKNESS : -plywood.THICKNESS - trim.THICKNESS
@@ -42,8 +28,6 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     yPos: bottomOverhang,
     zPos: battenZPos,
   }
-
-  var battenOffset = overhangs[0] == "none" ? -plywood.THICKNESS : -BATTEN_WIDTH/2
 
   if (typeof options.leftBattenOverhang != "undefined") {
     sloped(batten, {
@@ -77,14 +61,21 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
 
   var oppositeOrientation = options.orientation == "north" ? "south" : "north"
 
+  var overhang = {
+    left: options.leftOverhang || 0,
+    right: options.rightOverhang || 0,
+    top: options.topOverhang || 0,
+    bottom: options.bottomOverhang || 0,
+  }
+
   plywood({
     section: wall,
     name: options.name+"-interior",
     sanded: true,
-    xPos: 0,
-    xSize: options.width,
+    xPos: 0 - overhang.left,
+    xSize: options.width + overhang.left + overhang.right,
     yPos: 0,
-    ySize: -options.height - insideTopOverhang,
+    ySize: -options.height,
     zPos: options.orientation == "south" ? -plywood.THICKNESS : stud.DEPTH,
     orientation: oppositeOrientation
   })
@@ -92,52 +83,61 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
   plywood({
     section: wall,
     name: options.name+"-sheathing",
-    xPos: 0,
-    xSize: options.width,
-    ySize: -(options.height + bottomOverhang + topOverhang),
-    yPos: bottomOverhang,
+    xPos: overhang.left,
+    xSize: options.width + overhang.left + overhang.right,
+    ySize: -(options.height + overhang.bottom + overhang.top),
+    yPos: overhang.bottom,
     zPos: options.orientation == "south" ? stud.DEPTH : -plywood.THICKNESS,
     orientation: options.orientation
   })
 
+  join = {}
+  ;["left", "right", "top", "bottom"].forEach(function(direction) {
 
-  var plateSize = options.width - leftHang - rightHang
+    var hasJoin = options.joins.match(direction)
+
+    join[direction] = hasJoin ? 0.75 : 0
+  })
+
+  var plateSize = options.width - join.left - join.right
 
   stud({
     section: wall,
     name: options.name+"-bottom-plate",
     orientation: "up-across",
-    xPos: leftHang,
+    xPos: join.left,
     xSize: plateSize,
-    yPos: -stud.WIDTH
+    yPos: -stud.WIDTH - join.bottom
   })
+
+  var studHeight = options.height - join.top - join.bottom
 
   stud({
     section: wall,
     name: options.name+"-top-plate",
     orientation: "down-across",
-    xPos: leftHang,
+    xPos: join.left,
     xSize: plateSize,
-    yPos: -studHeight
+    yPos: -options.height + join.top
   })
 
   var wallStud = {
     orientation: "west",
     ySize: -studHeight,
-    yPos: 0
+    yPos: -join.bottom
   }
 
   stud(wallStud, {
     section: wall,
     name: options.name+"-stud-1",
     orientation: "east",
-    xPos: leftHang,
+    xPos: join.left,
   })
 
-  var maxStudOffset = options.width - rightHang - stud.WIDTH
+  var maxStudOffset = options.width - join.right - stud.WIDTH
   var insulated = 0
 
-  for(var i=1; i<4; i++){
+  for(var i=1; i<8; i++){
     var tryOffset = 16*i - stud.WIDTH/2
 
     if (tryOffset + 3 > maxStudOffset) {
@@ -172,4 +172,18 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     if (bail) { break }
   }
 
+}
+
+function contains(array, value) {
+  if (!Array.isArray(array)) {
+    throw new Error("looking for "+JSON.stringify(value)+" in "+JSON.stringify(array)+", which is supposed to be an array. But it's not.")
+  }
+  var index = -1;
+  var length = array.length;
+  while (++index < length) {
+    if (array[index] == value) {
+      return true;
+    }
+  }
+  return false;
 }

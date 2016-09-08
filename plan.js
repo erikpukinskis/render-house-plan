@@ -281,6 +281,10 @@ var plan = (function() {
       var o = options.orientation
       var dashStyle = options.sanded ? " dashed purple" : " dashed red"
 
+      if (!o) {
+        throw new Error("plywood needs an orientation")
+      }
+      
       if (topView && o=="west" || sideView && o=="north" || frontView && o=="west"
       ) {
 

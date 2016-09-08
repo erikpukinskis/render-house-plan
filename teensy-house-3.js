@@ -56,12 +56,13 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     zPos: 0,
     yPos: FLOOR_TOP,
     width: 48,
-    height: BACK_WALL_INSIDE_HEIGHT + backPlateLeftHeight,
+    height: BACK_WALL_INSIDE_HEIGHT,
     topOverhang: backPlateLeftHeight,
     bottomOverhang: wholeFloorHeight,
-    overhangs: "none/join",
+    joins: "right",
     leftBattenOverhang: plan.parts.plywood.THICKNESS,
     rightBattenOverhang: 0.75,
+    orientation: "north",
   })
 
   plan.add(faceWall, {
@@ -70,11 +71,12 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     zPos: 0,
     yPos: FLOOR_TOP,
     width: 48,
-    height: BACK_WALL_INSIDE_HEIGHT + backPlateLeftHeight,
+    height: BACK_WALL_INSIDE_HEIGHT,
     topOverhang: backPlateLeftHeight,
     bottomOverhang: wholeFloorHeight,
-    overhangs: "join/none",
+    joins: "left",
     rightBattenOverhang: plan.parts.plywood.THICKNESS,
+    orientation: "north",
   })
 
   var doorOpeningHeight = plan.parts.trim.THICKNESS*2 + plan.parts.door.HEIGHT + DOOR_GAP
@@ -91,11 +93,9 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     xPos: 0,
     yPos: FLOOR_TOP,
     width: frontWallWidth,
-    height: doorOpeningHeight,
+    height: doorOpeningHeight + 0.75,
     bottomOverhang: wholeFloorHeight,
-    topOverhang: 0.75,
-    insideTopOverhang: 0.75,
-    overhangs: "none/door",
+    joins: "top",
     orientation: "south",
   })
 
@@ -105,11 +105,9 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
     xPos: frontWallWidth + doorOpeningWidth,
     yPos: FLOOR_TOP,
     width: frontWallWidth,
-    height: doorOpeningHeight,
+    height: doorOpeningHeight + 0.75,
     bottomOverhang: wholeFloorHeight,
-    topOverhang: 0.75,
-    insideTopOverhang: 0.75,
-    overhangs: "door/none",
+    joins: "top",
     orientation: "south",
   })
 
@@ -128,19 +126,18 @@ var backPlateRightHeight = backPlateLeftHeight + 1.5*SLOPE
   //   zPos: -1.5
   // })
 
-  var headerHeight = doorFramingTop - headerRafterIntersection.yPos
+  var headerHeight = doorFramingTop - headerRafterIntersection.yPos - 0.75
 
   plan.add(faceWall, {
     name: "header",
     zPos: frontWallPosition,
     xPos: 0,
-    yPos: FLOOR_TOP - doorOpeningHeight - 1.5,
+    yPos: FLOOR_TOP - doorOpeningHeight - 0.75,
     width: 96,
     height: headerHeight,
-    bottomOverhang: 0.75,
     topOverhang: headerCapFrontHeight,
     insideTopOverhang: 0,
-    overhangs: "none/none",
+    joins: "bottom",
     orientation: "south",
   })
 
@@ -400,16 +397,6 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice,options
   var opening = section(options)
 
   var jambWidth = plywood.THICKNESS*2 + stud.DEPTH + 0.5
-
-  plywood({
-    section: opening,
-    name: "left-of-door-sheathing",
-    xSize: stud.DEPTH + plywood.THICKNESS*2,
-    xPos: -plywood.THICKNESS*2 - stud.DEPTH,
-    ySize: door.HEIGHT + DOOR_GAP + trim.THICKNESS*2 + wholeFloorHeight,
-    yPos: 0,
-    orientation: "south"
-  })
 
   door({
     section: opening,
