@@ -36,6 +36,8 @@ var backPlateRightHeight = RAFTER_HEIGHT - plan.parts.verticalSlice(TWIN_WALL_TH
 
 var backPlateLeftHeight = backPlateRightHeight - rafterContact*SLOPE
 
+var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_THICKNESS, SLOPE) - (plan.parts.plywood.THICKNESS + plan.parts.stud.DEPTH - RAFTER_WIDTH)*SLOPE
+
 
 ;(function() {
   plan.add(floorSection, {
@@ -59,7 +61,7 @@ var backPlateLeftHeight = backPlateRightHeight - rafterContact*SLOPE
     yPos: FLOOR_TOP,
     width: 48,
     height: BACK_WALL_INSIDE_HEIGHT,
-    topOverhang: backPlateLeftHeight,
+    topOverhang: backPlateLeftHeight - plan.parts.plywood.THICKNESS*SLOPE,
     bottomOverhang: wholeFloorHeight,
     joins: "right",
     leftBattenOverhang: plan.parts.plywood.THICKNESS,
@@ -113,20 +115,7 @@ var backPlateLeftHeight = backPlateRightHeight - rafterContact*SLOPE
     orientation: "south",
   })
 
-  var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_THICKNESS, SLOPE)
-
-  // sloped({
-  //   section: header,
-  //   part: trim,
-  //   name: "header-cap",
-  //   xPos: RAFTER_WIDTH,
-  //   xSize: 96 - plywood.THICKNESS*2 - RAFTER_WIDTH*2,
-  //   yPos: 0,
-  //   zSize: 1.5,
-  //   ySize: -headerCapFrontHeight,
-  //   slope: SLOPE,
-  //   zPos: -1.5
-  // })
+  plan.add(joins)
 
   var headerHeight = doorFramingTop - headerRafterIntersection.yPos - 0.75
 
@@ -231,444 +220,8 @@ var backPlateLeftHeight = backPlateRightHeight - rafterContact*SLOPE
 
 })()
 
-function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, shade) {
 
-  var roof = section({
-    name: "roof",
-    zPos: rafterStart.zPos,
-    yPos: rafterStart.yPos
-  })
 
-  var roofLength = Math.sqrt(96*96 - 12*12)
-
-  var backOverhang = 8
-  function rafter(xPos, name) {
-
-    tilted({
-      part: trim,
-      name: name,
-      section: roof,
-      slope: SLOPE,
-      xPos: xPos,
-      xSize: RAFTER_WIDTH,
-      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE + backOverhang*SLOPE,
-      ySize: RAFTER_HEIGHT,
-      zPos: -backOverhang,
-      zSize: roofLength,
-    })
-
-  }
-
-  var centerLine = 48 - plywood.THICKNESS
-
-  rafter(0, "left-rafter")
-
-  rafter(centerLine - 0.75, "center-rafter")
-
-  rafter(96 - plywood.THICKNESS*2 - RAFTER_WIDTH, "right-rafter")
-
-  var roofHeight = RAFTER_HEIGHT - stud.DEPTH*SLOPE
-
-  function roofCap(xPos, name) {
-
-    tilted({
-      part: trim,
-      section: roof,
-      name: name,
-      slope: SLOPE,
-      xPos: xPos,
-      xSize: 7.5,
-      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE -  verticalSlice(trim.THICKNESS, SLOPE) + backOverhang*SLOPE,
-      ySize: trim.THICKNESS,
-      zPos: -backOverhang,
-      zSize: roofLength
-    })
-
-  }
-
-  roofCap(-5, "left-roof-cap")
-
-  roofCap(centerLine - 7.5/2, "center-roof-cap")
-
-  roofCap(96 - plywood.THICKNESS * 2 - 2.5, "right-roof-cap")
-
-  function roofPanel(options) {
-
-    tilted(merge(options, {
-      part: twinWall,
-      section: roof,
-      slope: SLOPE,
-      yPos: -RAFTER_HEIGHT - plywood.THICKNESS*SLOPE + backOverhang*SLOPE,
-      ySize: TWIN_WALL_THICKNESS,
-      zPos: -backOverhang,
-      zSize: roofLength
-    }))
-
-  }
-
-  roofPanel({
-    name: "left-twin-wall",
-    xPos: RAFTER_WIDTH,
-    xSize: 48 - plywood.THICKNESS - RAFTER_WIDTH*1.5
-  })
-
-  roofPanel({
-    name: "right-twin-wall",
-    xPos: centerLine+0.75,
-    xSize: 48 - RAFTER_WIDTH*1.5 - plywood.THICKNESS
-  })
-
-  shadeRail({
-    name: "left-shade-rail",
-    xPos: RAFTER_WIDTH,
-    xSize: 1.5,
-    ySize: -1.5,
-  })
-
-  shadeRail({
-    name: "center-left-shade-rail",
-    xPos: centerLine - RAFTER_WIDTH/2 - 1.5,
-    xSize: 1.5,
-    ySize: -1.5,
-  })
-
-  shadeRail({
-    name: "center-right-shade-rail",
-    xPos: centerLine + RAFTER_WIDTH/2,
-    xSize: 1.5,
-    ySize: -1.5,
-  })
-
-  shadeRail({
-    name: "right-shade-rail",
-    xPos: 96 - plywood.THICKNESS*2 - stud.DEPTH - 0.5,
-    xSize: 1.5,
-    ySize: -1.5,
-  })
-
-  tilted({
-    section: roof,
-    name: "left-ceiling-shade",
-    part: shade,
-    slope: SLOPE,
-    xPos: 2,
-    xSize: 44.5,
-    ySize: -0.5,
-    yPos: -verticalSlice(1.5, SLOPE),
-    zSize: 72 - stud.DEPTH*2 - plywood.THICKNESS*2,
-    zPos: 0,
-  })
-
-
-  tilted({
-    section: roof,
-    name: "right-ceiling-shade",
-    part: shade,
-    slope: SLOPE,
-    xPos: 49,
-    xSize: 44.5,
-    ySize: -0.5,
-    yPos: -verticalSlice(1.5, SLOPE),
-    zSize: 72 - stud.DEPTH*2 - plywood.THICKNESS*2,
-    zPos: 0,
-  })
-
-  function shadeRail(options) {
-
-    var defaults = {
-      part: trim,
-      section: roof,
-      slope: SLOPE,
-      yPos: -plywood.THICKNESS*SLOPE,
-      ySize: -trim.THICKNESS,
-      zPos: -plywood.THICKNESS - stud.DEPTH + RAFTER_WIDTH,
-      zSize: 72 - RAFTER_WIDTH*2
-    }
-
-    options = merge(defaults, options)
-
-    tilted(options)
-
-  }
-
-
-}
-
-
-function doors(section, door, trim, plywood, stud, sloped, verticalSlice,options) {
-
-  var opening = section(options)
-
-  var jambWidth = plywood.THICKNESS*2 + stud.DEPTH + 0.5
-
-  door({
-    section: opening,
-    name: "left-door",
-    xPos: DOOR_GAP + trim.THICKNESS,
-    xSize: door.WIDTH,
-    yPos: DOOR_GAP + trim.THICKNESS,
-    zPos: 0,
-    zSize: -door.THICKNESS,
-    orientation: "east"
-  })
-
-  door({
-    section: opening,
-    name: "right-door",
-    xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH,
-    xSize: door.WIDTH,
-    yPos: DOOR_GAP + trim.THICKNESS,
-    zPos: 0,
-    zSize: -door.THICKNESS,
-    orientation: "west"
-  })
-
-  plywood({
-    section: opening,
-    name: "below-door-sheathing",
-    xPos: 0,
-    xSize: door.WIDTH*2 + DOOR_GAP*2 + trim.THICKNESS*2,
-    yPos: DOOR_GAP + trim.THICKNESS*2 + door.HEIGHT,
-    ySize: wholeFloorHeight,
-    orientation: "south"
-  })
-
-  var jambDepth = plywood.THICKNESS
-
-  trim({
-    section: opening,
-    name: "left-door-jamb",
-    xPos: DOOR_GAP,
-    zSize: -jambWidth,
-    ySize: door.HEIGHT,
-    zPos: jambDepth,
-    yPos: DOOR_GAP + trim.THICKNESS
-  })
-
-  trim({
-    section: opening,
-    name: "right-door-jamb",
-    xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH*2,
-    zSize: -jambWidth,
-    ySize: door.HEIGHT,
-    zPos: jambDepth,
-    yPos: DOOR_GAP + trim.THICKNESS
-  })
-
-  trim({
-    section: opening,
-    name: "top-door-jamb",
-    xPos: DOOR_GAP,
-    xSize: trim.THICKNESS*2 + door.WIDTH*2,
-    zSize: -jambWidth,
-    zPos: jambDepth,
-    yPos: DOOR_GAP
-  })
-
-  trim({
-    section: opening,
-    name: "bottom-door-jamb",
-    xPos: DOOR_GAP,
-    xSize: trim.THICKNESS*2 + door.WIDTH*2,
-    zSize: -jambWidth,
-    yPos: door.HEIGHT + DOOR_GAP + trim.THICKNESS,
-    zPos: jambDepth
-  })
-
-
-  var bg2 = "rgba(255,150,0,0.9)"
-  var bg3 = "rgba(170,255,0,0.9)"
-  var bg = bg2 = bg3 = null //"rgba(255,255,0,0.9)"
-
-  var belowDoorTrimHeight = wholeFloorHeight + trim.THICKNESS
-
-  var fatTrimWidth = trim.THICKNESS*2 + plywood.THICKNESS*2 + stud.DEPTH + DOOR_GAP
-
-  var skinnyTrimWidth = BATTEN_WIDTH
-
-  trim({
-    section: opening,
-    name: "below-door-trim",
-    background: bg2,
-    xPos: DOOR_GAP + trim.THICKNESS,
-    xSize: door.WIDTH*2,
-    ySize: belowDoorTrimHeight,
-    yPos: DOOR_GAP + trim.THICKNESS + 80,
-    zPos: plywood.THICKNESS
-  })
-
-  trim({
-    section: opening,
-    name: "above-door-trim",
-    background: bg,
-    xPos: DOOR_GAP + trim.THICKNESS - fatTrimWidth,
-    xSize: 96 + trim.THICKNESS*2,
-    ySize: -HEADER_TRIM,
-    yPos: DOOR_GAP + trim.THICKNESS,
-    zPos: plywood.THICKNESS
-  })
-
-  trim({
-    section: opening,
-    name: "left-door-trim",
-    background: bg2,
-    xSize: fatTrimWidth,
-    xPos: - trim.THICKNESS - plywood.THICKNESS*2 - stud.DEPTH,
-    yPos: DOOR_GAP + trim.THICKNESS,
-    ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
-    zPos: plywood.THICKNESS
-  })
-
-  trim({
-    section: opening,
-    name: "right-door-trim",
-    background: bg2,
-    xSize: fatTrimWidth,
-    xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH * 2,
-    yPos: DOOR_GAP + trim.THICKNESS,
-    ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
-    zPos: plywood.THICKNESS,
-  })
-
-  var xOrigin = -plywood.THICKNESS*2 - stud.DEPTH - trim.THICKNESS
-
-  trim({
-    section: opening,
-    name: "front-right-corner-trim",
-    background: bg3,
-    yPos: DOOR_GAP + trim.THICKNESS,
-    ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
-    xSize: -skinnyTrimWidth,
-    xPos: 96 - plywood.THICKNESS*2 - stud.DEPTH + trim.THICKNESS,
-    zPos: plywood.THICKNESS,
-  })
-
-}
-
-
-
-function floorSection(section, plywood, stud, insulation, flooring, options) {
-
-  if (!options.zSize) {
-    console.log(options)
-    throw new Error("floor section must have a zSize")
-  }
-
-  var id = options.name
-
-  var floor = section({
-    name: id,
-    xPos: options.xPos,
-    yPos: FLOOR_TOP,
-    zPos: 0
-  })
-
-  var letters = ["A","B","C", "D"]
-
-  for(var i=0; i<3; i++) {
-    insulation({
-      section: floor,
-      name: options.name+"-insulation-"+letters[i],
-      xPos: 1+i*16,
-      xSize: 14,
-      yPos: 1,
-      ySize: 2,
-      zPos: 1,
-      zSize: options.zSize-2,
-    })
-  }
-
-  var trackLength = options.xSize
-  if (options.join == "right" || options.join == "left") {
-    trackLength = trackLength - 0.75
-  }
-
-  var framingOffset = 0
-  if (options.join == "left") {
-    framingOffset = 0.75
-  }
-
-  stud({
-    section: floor,
-    name: id+"-back-track",
-    xPos: framingOffset,
-    xSize: trackLength,
-    yPos: FLOORING_THICKNESS,
-    orientation: "horizontal-south"
-  })
-
-  stud({
-    section: floor,
-    name: id+"-front-track",
-    xPos: framingOffset,
-    xSize: trackLength,
-    yPos: FLOORING_THICKNESS,
-    zPos: options.zSize - stud.WIDTH,
-    orientation: "horizontal-north"
-  })
-
-  var joist = {
-    section: floor,
-    orientation: "horizontal-east",
-    xPos: framingOffset,
-    yPos: FLOORING_THICKNESS,
-    ySize: stud.DEPTH,
-    zSize: 72
-  }
-
-  stud(joist, {
-    name: id+"-joist-A",
-    xPos: framingOffset,
-  })
-
-  stud(joist, {
-    name: id+"-joist-B",
-    xPos: framingOffset + 16,
-  })
-
-  stud(joist, {
-    name: id+"-joist-C",
-    xPos: framingOffset + 16*2,
-  })
-
-  stud(joist, {
-    name: id+"-joist-D",
-    orientation: "horizontal-west",
-    xPos: framingOffset + trackLength - stud.WIDTH,
-  })
-
-  plywood({
-    section: floor,
-    name: id+"-subfloor",
-    xPos: 0,
-    xSize: options.xSize,
-    yPos: 1/4,
-    ySize: SUBFLOOR_THICKNESS,
-    zSize: options.zSize,
-    orientation: "up"
-  })
-
-  flooring({
-    section: floor,
-    name: id+"-flooring",
-    xPos: 0,
-    xSize: options.xSize,
-    yPos: 0,
-    ySize: 1/4,
-    zSize: options.zSize,
-  })
-
-  plywood({
-    section: floor,
-    name: id+"-sheathing",
-    xSize: options.xSize,
-    yPos: FLOORING_THICKNESS + stud.DEPTH,
-    zSize: options.zSize,
-    orientation: "down"
-  })
-
-
-}
 
 
 
@@ -676,6 +229,29 @@ function sideSheathingHeightAt(offset) {
   var height = BACK_WALL_INSIDE_HEIGHT - plan.parts.stud.DEPTH*SLOPE + wholeFloorHeight + plan.parts.verticalSlice(RAFTER_HEIGHT, SLOPE)+ offset*SLOPE
 
   return height
+}
+
+
+function joins(section, sloped, trim) {
+  var joins = section({
+    name: "joins",
+    xPos: 0,
+    yPos: 0,
+    zPos: 0,
+  })
+
+  sloped({
+    section: joins,
+    part: trim,
+    name: "header-cap",
+    xPos: RAFTER_WIDTH,
+    xSize: 96 - RAFTER_WIDTH*2,
+    yPos: FLOOR_TOP - BACK_WALL_INSIDE_HEIGHT,
+    zPos: 0,
+    zSize: 1.5,
+    ySize: -headerCapFrontHeight,
+    slope: SLOPE,
+  })
 }
 
 function joiningStud() {
