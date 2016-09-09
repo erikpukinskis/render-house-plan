@@ -1,38 +1,3 @@
-<body>
-</body>
-
-<script src="../../build/element.js"></script>
-<script src="../../build/function-call.js"></script>
-<script src="../../build/add-html.js"></script>
-<script src="../plan.js"></script>
-<script src="../allocate_materials.js"></script>
-<script src="../side_wall.js"></script>
-<script src="../face_wall.js"></script>
-<script src="../floor_section.js"></script>
-<script src="../roof.js"></script>
-<script src="../doors.js"></script>
-<script src="../teensy-house-3.js"></script>
-<script src="step.js"></script>
-<script src="dimension_text.js"></script>
-<script src="cut_materials.js"></script>
-
-<script>
-
-addHtml(element([
-  element("a", {href: "index.html"}, "build"),
-  element("span", " floor section")
-]).html())
-
-var materials = allocateMaterials(plan)
-
-var leftOptions = {
-  name: "floor-left",
-  xSize: 48 - plan.parts.plywood.THICKNESS,
-  zSize: 6*12,
-  join: "right"
-}
-
-floorInstructions(leftOptions, materials)
 
 function floorInstructions(options, materials) {
 
@@ -169,4 +134,3 @@ function floorInstructions(options, materials) {
   return
 
 }
-</script>

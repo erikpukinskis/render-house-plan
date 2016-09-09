@@ -18,8 +18,9 @@ var body = element.style("body", {
 
 addHtml(element.stylesheet(body).html())
 
-var sectionType = "floor"
+;["left_floor", "right_floor"].forEach(function(name) {
+  addHtml(element(element("a", {href: name+".html"}, name+" section")).html())
+})
 
-addHtml(element("a", {href: sectionType+".html"}, sectionType).html())
 </script>
 
