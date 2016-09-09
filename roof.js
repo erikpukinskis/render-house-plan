@@ -56,11 +56,12 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
 
   }
 
-  roofCap(-5, "left-roof-cap")
+  var overhang = 4.5
+  roofCap(-overhang, "left-roof-cap")
 
   roofCap(centerLine - 7.5/2, "center-roof-cap")
 
-  roofCap(96 - plywood.THICKNESS * 2 - 2.5, "right-roof-cap")
+  roofCap(96 - plywood.THICKNESS * 2 - 7.5 + overhang, "right-roof-cap")
 
 
   function roofPanel(options) {
