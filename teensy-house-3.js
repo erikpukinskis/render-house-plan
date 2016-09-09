@@ -264,6 +264,7 @@ function joins(section, sloped, trim, stud, plywood) {
 
   trim({
     section: joins,
+    name: "front-joining-plate",
     xSize: 96,
     yPos: FLOOR_TOP - doorOpeningHeight,
     ySize: -1.5,

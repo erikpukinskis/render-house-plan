@@ -168,6 +168,7 @@ var allocateMaterials = (function() {
       destination: toDestination(options)
     }
     if (!name) {
+      console.log(scrap)
       throw new Error("every scrap needs a name")
     }
 
@@ -248,7 +249,7 @@ var allocateMaterials = (function() {
       options,
       {
         defaultThickness: trimMaterial.THICKNESS,
-        maxThickness: 1.5,
+        maxThickness: 1.5,  
         maxWidth: 7.5,
       }
     )
@@ -462,7 +463,7 @@ var allocateMaterials = (function() {
   /** TESTS ******/
   var options = {
     defaultThickness: 0.5,
-    maxThickness: 1,
+    maxThickness: 0.9,
     maxWidth: 48,
   }
   var dim = lumberDimensions({
@@ -471,9 +472,9 @@ var allocateMaterials = (function() {
   if (dim.thickness != 0.5 || dim.width != 48 || dim.length != 60) { th() }
 
   dim = lumberDimensions({
-    xSize: 65, ySize: 1, zSize: 38
+    xSize: 65, ySize: 0.9, zSize: 38
   }, options)
-  if (dim.thickness != 1 || dim.width != 38 || dim.length != 65) { th() }
+  if (dim.thickness != 0.9 || dim.width != 38 || dim.length != 65) { th() }
 
   function th() {
     throw new Error("lumberDimensions is not working")
@@ -489,6 +490,11 @@ var allocateMaterials = (function() {
     var zSize = Math.abs(shape.zSize || options.defaultThickness)
 
     var minDimension = Math.min(xSize, ySize, zSize)
+
+    // Hardcoded here for ripping the 1in shade rails 
+    if (minDimension == 1) {
+      minDimension = 1.5
+    }
 
     if (xSize == minDimension) {
       var thickness = xSize
