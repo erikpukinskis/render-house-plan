@@ -8,7 +8,7 @@ var SUBFLOOR_THICKNESS = 0.5
 var TWIN_WALL_THICKNESS = 7/16
 var RAFTER_HEIGHT = 3.5
 var RAFTER_WIDTH = 1.5
-var HEADER_TRIM = 3.5
+var DOOR_TRIM_WIDTH = 3.5
 
 var wholeFloorHeight = FLOORING_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
 
@@ -21,7 +21,6 @@ var betweenRafterIntersections = 72 - rafterStart.zPos
 var elevationBetweenIntersections = betweenRafterIntersections*SLOPE
 
 var headerRafterIntersection = {
-  name: "header",
   xPos: 0,
   zPos: 72,
   yPos: rafterStart.yPos - elevationBetweenIntersections
@@ -100,7 +99,9 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     height: doorOpeningHeight + 0.75,
     bottomOverhang: wholeFloorHeight,
     joins: "top",
+    leftBattenOverhang: plan.parts.plywood.THICKNESS,
     orientation: "south",
+    slopeBattens: false,
   })
 
   plan.add(faceWall, {
@@ -112,7 +113,9 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     height: doorOpeningHeight + 0.75,
     bottomOverhang: wholeFloorHeight,
     joins: "top",
+    rightBattenOverhang: plan.parts.plywood.THICKNESS,
     orientation: "south",
+    slopeBattens: false,
   })
 
   plan.add(joins)
@@ -127,7 +130,9 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     width: 96,
     height: headerHeight,
     topOverhang: headerCapFrontHeight,
-    insideTopOverhang: 0,
+    leftBattenOverhang: plan.parts.plywood.THICKNESS,
+    rightBattenOverhang: plan.parts.plywood.THICKNESS,
+    middleBattenBottomGap: DOOR_TRIM_WIDTH - plan.parts.trim.THICKNESS - DOOR_GAP - 0.75,
     joins: "bottom",
     orientation: "south",
   })

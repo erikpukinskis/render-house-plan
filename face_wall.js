@@ -32,23 +32,33 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     zPos: battenZPos,
   }
 
+  var battenGenerator = options.slopeBattens === false ? trim : sloped
+
+
   if (typeof options.leftBattenOverhang != "undefined") {
-    sloped(batten, {
+    battenGenerator(batten, {
       name: options.name+"-batten-1",
       xPos: -options.leftBattenOverhang,
     })
   }
 
-  if (options.width > 26) {
+  var maxSegments = (options.width - 12)/24
+  var bottomGap = options.middleBattenBottomGap||0
 
-    sloped(batten, {
+  for (var i=1; i<maxSegments; i++) {
+    var xPos = 24*i - BATTEN_WIDTH/2
+    var yPos = bottomOverhang - bottomGap
+    var ySize = -battenHeight + bottomGap
+    battenGenerator(batten, {
       name: options.name+"-batten-2",
-      xPos: 24,
+      xPos: xPos,
+      yPos: yPos,
+      ySize: ySize,
     })
   }
 
   if (typeof options.rightBattenOverhang != "undefined") {
-    sloped(batten, {
+    battenGenerator(batten, {
       name: options.name+"-batten-2",
       xPos: options.width - BATTEN_WIDTH + options.rightBattenOverhang,
     })

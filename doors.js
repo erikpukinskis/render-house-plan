@@ -84,19 +84,13 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice,options
   var bg3 = "rgba(170,255,0,0.9)"
   var bg = bg2 = bg3 = null //"rgba(255,255,0,0.9)"
 
-  var belowDoorTrimHeight = wholeFloorHeight + trim.THICKNESS
-
-  var fatTrimWidth = trim.THICKNESS*2 + plywood.THICKNESS*2 + stud.DEPTH + DOOR_GAP
-
-  var skinnyTrimWidth = BATTEN_WIDTH
-
   trim({
     section: opening,
     name: "below-door-trim",
     background: bg2,
     xPos: DOOR_GAP + trim.THICKNESS,
     xSize: door.WIDTH*2,
-    ySize: belowDoorTrimHeight,
+    ySize: wholeFloorHeight + trim.THICKNESS,
     yPos: DOOR_GAP + trim.THICKNESS + 80,
     zPos: plywood.THICKNESS
   })
@@ -105,9 +99,9 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice,options
     section: opening,
     name: "above-door-trim",
     background: bg,
-    xPos: DOOR_GAP + trim.THICKNESS - fatTrimWidth,
-    xSize: 96 + trim.THICKNESS*2,
-    ySize: -HEADER_TRIM,
+    xPos: DOOR_GAP + trim.THICKNESS -DOOR_TRIM_WIDTH,
+    xSize: DOOR_TRIM_WIDTH*2 + door.WIDTH*2,
+    ySize: -DOOR_TRIM_WIDTH,
     yPos: DOOR_GAP + trim.THICKNESS,
     zPos: plywood.THICKNESS
   })
@@ -116,8 +110,8 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice,options
     section: opening,
     name: "left-door-trim",
     background: bg2,
-    xSize: fatTrimWidth,
-    xPos: - trim.THICKNESS - plywood.THICKNESS*2 - stud.DEPTH,
+    xSize: -DOOR_TRIM_WIDTH,
+    xPos: DOOR_GAP + trim.THICKNESS,
     yPos: DOOR_GAP + trim.THICKNESS,
     ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
     zPos: plywood.THICKNESS
@@ -127,23 +121,10 @@ function doors(section, door, trim, plywood, stud, sloped, verticalSlice,options
     section: opening,
     name: "right-door-trim",
     background: bg2,
-    xSize: fatTrimWidth,
+    xSize: DOOR_TRIM_WIDTH,
     xPos: DOOR_GAP + trim.THICKNESS + door.WIDTH * 2,
     yPos: DOOR_GAP + trim.THICKNESS,
     ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
-    zPos: plywood.THICKNESS,
-  })
-
-  var xOrigin = -plywood.THICKNESS*2 - stud.DEPTH - trim.THICKNESS
-
-  trim({
-    section: opening,
-    name: "front-right-corner-trim",
-    background: bg3,
-    yPos: DOOR_GAP + trim.THICKNESS,
-    ySize: door.HEIGHT + trim.THICKNESS + wholeFloorHeight,
-    xSize: -skinnyTrimWidth,
-    xPos: 96 - plywood.THICKNESS*2 - stud.DEPTH + trim.THICKNESS,
     zPos: plywood.THICKNESS,
   })
 

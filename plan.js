@@ -703,12 +703,15 @@ var plan = (function() {
 
       var newYPos = options.yPos - zTravel*options.slope
 
+      var newYSize = verticalSlice(options.ySize, options.slope)
+
       if (maxZ < zDepth || minZ > zDepth) {
         return
       }
 
       var newOptions = merge(options, {
-        yPos: newYPos
+        yPos: newYPos,
+        ySize: newYSize,
       })
 
       return generator.call(null, newOptions)
@@ -733,7 +736,7 @@ var plan = (function() {
 
     // floorWidth = ceilingWidth*cos(angle)
 
-    options.height = height
+    options.ySize = height
     options.yPos = yPos
 
     var el = generator.call(null, options)
