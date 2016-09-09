@@ -44,7 +44,7 @@ function floorSection(section, plywood, stud, insulation, flooring, options) {
     name: id+"-back-track",
     xPos: framingOffset,
     xSize: trackLength,
-    yPos: FLOORING_THICKNESS,
+    yPos: FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
     orientation: "horizontal-south"
   })
 
@@ -53,7 +53,7 @@ function floorSection(section, plywood, stud, insulation, flooring, options) {
     name: id+"-front-track",
     xPos: framingOffset,
     xSize: trackLength,
-    yPos: FLOORING_THICKNESS,
+    yPos: FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
     zPos: options.zSize - stud.WIDTH,
     orientation: "horizontal-north"
   })
@@ -62,7 +62,7 @@ function floorSection(section, plywood, stud, insulation, flooring, options) {
     section: floor,
     orientation: "horizontal-east",
     xPos: framingOffset,
-    yPos: FLOORING_THICKNESS,
+    yPos: FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
     ySize: stud.DEPTH,
     zSize: 72
   }
@@ -113,7 +113,7 @@ function floorSection(section, plywood, stud, insulation, flooring, options) {
     section: floor,
     name: id+"-sheathing",
     xSize: options.xSize,
-    yPos: FLOORING_THICKNESS + stud.DEPTH,
+    yPos: FLOORING_THICKNESS + SUBFLOOR_THICKNESS + stud.DEPTH,
     zSize: options.zSize,
     orientation: "down"
   })

@@ -44,7 +44,7 @@ function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, vertical
 
   var backInsideToInteriorEnd = options.zPos + options.width - outerTallHang + innerTallHang - stud.DEPTH - plywood.THICKNESS
 
-  var interiorHeight = BACK_WALL_INSIDE_HEIGHT + backInsideToInteriorEnd*SLOPE
+  var interiorHeight = BACK_WALL_INSIDE_HEIGHT + backInsideToInteriorEnd*SLOPE + options.innerTopOverhang||0
 
   verticalSlice(0.75, SLOPE) + (options.zPos + interiorWidth)*SLOPE
 

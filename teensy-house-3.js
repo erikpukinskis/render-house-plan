@@ -3,14 +3,16 @@ var BATTEN_WIDTH = 1.5
 var FLOOR_TOP = 96
 var DOOR_GAP = 1/4 // no gap below?
 var SLOPE = 1/8
-var FLOORING_THICKNESS = 0.75 // inc subfloor
+var FLOORING_THICKNESS = 0.25
 var SUBFLOOR_THICKNESS = 0.5
 var TWIN_WALL_THICKNESS = 7/16
 var RAFTER_HEIGHT = 3.5
 var RAFTER_WIDTH = 1.5
 var DOOR_TRIM_WIDTH = 3.5
 
-var wholeFloorHeight = FLOORING_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
+var FLOOR_LENGTH = 6*12
+
+var wholeFloorHeight = FLOORING_THICKNESS + SUBFLOOR_THICKNESS + plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS
 
 var rafterStart = {
   zPos: plan.parts.stud.DEPTH + plan.parts.plywood.THICKNESS,
@@ -37,12 +39,13 @@ var backPlateLeftHeight = backPlateRightHeight - rafterContact*SLOPE
 
 var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_THICKNESS, SLOPE) - (plan.parts.plywood.THICKNESS + plan.parts.stud.DEPTH - RAFTER_WIDTH)*SLOPE
 
+var doorOpeningHeight = plan.parts.trim.THICKNESS*2 + plan.parts.door.HEIGHT + DOOR_GAP
 
 ;(function() {
   plan.add(floorSection, {
     name: "floor-left",
     xSize: 48,
-    zSize: 6*12,
+    zSize: FLOOR_LENGTH,
     join: "right"
   })
 
@@ -50,7 +53,7 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     name: "floor-right",
     xPos: 48,
     xSize: 48,
-    zSize: 6*12,
+    zSize: FLOOR_LENGTH,
     join: "left"
   })
 
@@ -81,8 +84,6 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     rightBattenOverhang: plan.parts.plywood.THICKNESS,
     orientation: "north",
   })
-
-  var doorOpeningHeight = plan.parts.trim.THICKNESS*2 + plan.parts.door.HEIGHT + DOOR_GAP
 
   var doorOpeningWidth = plan.parts.trim.THICKNESS*2 + plan.parts.door.WIDTH*2 + DOOR_GAP*2
 
@@ -144,41 +145,6 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     xPos: frontWallWidth,
   })
 
-  // trim({
-  //   section: wall,
-  //   name: "back-wall-joining-plate",
-  //   xPos: 0,
-  //   xSize: 96 - plywood.THICKNESS*2,
-  //   zPos: 0,
-  //   zSize: stud.DEPTH,
-  //   yPos: -studHeight,
-  //   ySize: -1.5,
-  // })
-
-  // trim({
-  //   section: wall,
-  //   name: "back-wall-joining-stud",
-  //   xPos: 48 - plywood.THICKNESS - 0.75,
-  //   xSize: 1.5,
-  //   yPos: 0,
-  //   ySize: -studHeight,
-  //   zSize: stud.DEPTH,
-  //   zPos: 0
-  // })
-
-  // sloped({
-  //   part: trim,
-  //   section: backLeft,
-  //   name: "back-cap",
-  //   xPos: RAFTER_WIDTH,
-  //   xSize: 96 - plywood.THICKNESS*2 - RAFTER_WIDTH*2,
-  //   yPos: -BACK_WALL_INSIDE_HEIGHT,
-  //   ySize: -backPlateRightHeight,
-  //   zSize: 1.5,
-  //   slope: SLOPE
-  // })
-
-
   plan.add(roof)
 
   plan.add(sideWall, {
@@ -188,6 +154,7 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     zPos: -plan.parts.plywood.THICKNESS,
     width: 48,
     overhangs: "wall/join",
+    innerTopOverhang: plan.parts.verticalSlice(0.75, SLOPE),
     whichSide: "left",
   })
 
@@ -198,6 +165,7 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     zPos: 48 - plan.parts.plywood.THICKNESS,
     width: 24+plan.parts.plywood.THICKNESS*2,
     overhangs: "join/wall",
+    innerTopOverhang: plan.parts.verticalSlice(0.75, SLOPE),
     whichSide: "left",
   })
 
@@ -210,6 +178,7 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     zPos: -plan.parts.plywood.THICKNESS,
     width: 48,
     overhangs: "wall/join",
+    innerTopOverhang: plan.parts.verticalSlice(0.75, SLOPE),
     whichSide: "right",
   })
 
@@ -220,6 +189,7 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
     zPos: 48 - plan.parts.plywood.THICKNESS,
     width: 24+plan.parts.plywood.THICKNESS*2,
     overhangs: "join/wall",
+    innerTopOverhang: plan.parts.verticalSlice(0.75, SLOPE),
     whichSide: "right",
   })
 
@@ -230,14 +200,7 @@ var headerCapFrontHeight = plan.parts.verticalSlice(RAFTER_HEIGHT - TWIN_WALL_TH
 
 
 
-function sideSheathingHeightAt(offset) {
-  var height = BACK_WALL_INSIDE_HEIGHT - plan.parts.stud.DEPTH*SLOPE + wholeFloorHeight + plan.parts.verticalSlice(RAFTER_HEIGHT, SLOPE)+ offset*SLOPE
-
-  return height
-}
-
-
-function joins(section, sloped, trim) {
+function joins(section, sloped, trim, stud, plywood) {
   var joins = section({
     name: "joins",
     xPos: 0,
@@ -257,21 +220,57 @@ function joins(section, sloped, trim) {
     ySize: -headerCapFrontHeight,
     slope: SLOPE,
   })
-}
 
-function joiningStud() {
-  sloped({
-    section: tall,
-    part: trim,
-    name: whichSide+"-side-joining-stud",
-    slope: SLOPE,
-    xPos: 0,
-    xSize: stud.DEPTH,
-    zPos: 48 - 0.75,
-    zSize: 1.5,
-    yPos: 0,
-    ySize: -studHeightAt(offset)
+  trim({
+    section: joins,
+    name: "floor-joining-joist",
+    xPos: 48 - 0.75,
+    xSize: 1.5,
+    yPos: FLOOR_TOP + FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
+    ySize: stud.DEPTH,
+    zSize: FLOOR_LENGTH,
   })
+
+  trim({
+    section: joins,
+    name: "back-wall-joining-stud",
+    xPos: 48 - 0.75,
+    xSize: 1.5,
+    zSize: stud.DEPTH,
+    yPos: FLOOR_TOP,
+    ySize: -BACK_WALL_INSIDE_HEIGHT,
+  })
+
+  var sideJoiningStud = {
+    section: joins,
+    part: trim,
+    slope: SLOPE,
+    xSize: stud.DEPTH,
+    yPos: FLOOR_TOP,
+    ySize: -BACK_WALL_INSIDE_HEIGHT - (48 + 0.75 - plywood.THICKNESS - stud.DEPTH)*SLOPE,
+    zPos: 48 - plywood.THICKNESS - 0.75,
+    zSize: 1.5,
+  }
+
+  sloped(sideJoiningStud, {
+    name: "left-wall-joining-stud",
+    xPos: 0,
+  })
+
+  sloped(sideJoiningStud, {
+    name: "left-wall-joining-stud",
+    xPos: 96 - stud.DEPTH,
+  })
+
+  trim({
+    section: joins,
+    xSize: 96,
+    yPos: FLOOR_TOP - doorOpeningHeight,
+    ySize: -1.5,
+    zPos: FLOOR_LENGTH - stud.DEPTH,
+    zSize: stud.DEPTH,
+  })
+
 }
 
 
