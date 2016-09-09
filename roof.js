@@ -31,6 +31,8 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
 
   rafter(0, "left-rafter")
 
+  var yPos = -RAFTER_HEIGHT + backOverhang*SLOPE
+
   rafter(centerLine - 0.75, "center-rafter")
 
   rafter(96 - plywood.THICKNESS*2 - RAFTER_WIDTH, "right-rafter")

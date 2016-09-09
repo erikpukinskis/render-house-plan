@@ -271,7 +271,6 @@ var plan = (function() {
     element.style({
       "box-sizing": "border-box",
       "position": "absolute",
-      "z-index": "1",
     }),
     function() {
       var options = joinObjects(arguments)
@@ -697,9 +696,9 @@ var plan = (function() {
       var zIntersect = zDepth - originZ
       var boost = zIntersect * options.slope
 
-      var zPos = options.zPos || 0
+      // section.origin.zPos + options.zPos + zTravel = zDepth
 
-      var zTravel = zDepth - options.section.origin.zPos
+      var zTravel = zDepth - options.section.origin.zPos - options.zPos||0
 
       var newYPos = options.yPos - zTravel*options.slope
 
