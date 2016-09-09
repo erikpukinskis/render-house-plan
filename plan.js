@@ -769,53 +769,6 @@ var plan = (function() {
   }
 
 
-  var chordlength = (96 - 1.5*3)/2
-  // var chordlength = 47.85
-
-  var radius = 500
-
-  var arc = element.template(
-    ".arc",
-    element.style({
-      position: "absolute",
-      width: chordlength+"em",
-      height: "10em",
-      left: "1.5em",
-      top: "-17.3em",
-      overflow: "hidden",
-      "z-index": 10,
-    }),
-    " ",
-    function(options) {
-      options.section.addChild(this)
-
-      // http://mathworld.wolfram.com/CircularSegment.html
-      // s = RƟ
-      // a = 2R*sin(Ɵ/2)
-      // Ɵ = asin(a/2R)*2
-      // s = R*asin(a/2R)*2
-
-      var arcLength = radius * Math.asin(chordlength/(2*radius))*2
-
-      console.log(arcLength)
-
-      var circle = element(
-        element.style({
-          "border": "3px solid blue",
-          "width": (radius*2)+"em",
-          "height": (radius*2)+"em",
-          "border-radius": radius+"em",
-          "box-sizing": "border-box",
-          "position": "absolute",
-          "bottom": "0",
-          "left": (chordlength/2 - radius)+"em",
-        }),
-        " "
-      )
-      this.addChild(circle)
-    }
-  )
-
 
 
 
@@ -994,7 +947,6 @@ var plan = (function() {
     shade: shade,
     sloped: sloped,
     twinWall: twinWall,
-    arc: arc,
     insulation: insulation,
     flooring: flooring,
     tilted: tilted,
@@ -1226,7 +1178,6 @@ var plan = (function() {
 
     addHtml(
       element.stylesheet(
-        arc,
         planTemplate,
         stud,
         plywood,
