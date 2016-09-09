@@ -65,7 +65,7 @@ var doorOpeningHeight = plan.parts.trim.THICKNESS*2 + plan.parts.door.HEIGHT + D
     height: BACK_WALL_INSIDE_HEIGHT,
     topOverhang: backPlateLeftHeight - plan.parts.plywood.THICKNESS*SLOPE,
     bottomOverhang: wholeFloorHeight,
-    joins: "right",
+    joins: "right top-full",
     leftBattenOverhang: plan.parts.plywood.THICKNESS,
     rightBattenOverhang: 0.75,
     orientation: "north",
@@ -80,7 +80,7 @@ var doorOpeningHeight = plan.parts.trim.THICKNESS*2 + plan.parts.door.HEIGHT + D
     height: BACK_WALL_INSIDE_HEIGHT,
     topOverhang: backPlateLeftHeight,
     bottomOverhang: wholeFloorHeight,
-    joins: "left",
+    joins: "left top-full",
     rightBattenOverhang: plan.parts.plywood.THICKNESS,
     orientation: "north",
   })
@@ -238,7 +238,17 @@ function joins(section, sloped, trim, stud, plywood) {
     xSize: 1.5,
     zSize: stud.DEPTH,
     yPos: FLOOR_TOP,
-    ySize: -BACK_WALL_INSIDE_HEIGHT,
+    ySize: -BACK_WALL_INSIDE_HEIGHT + 1.5,
+  })
+
+  trim({
+    section: joins,
+    name: "back-wall-joining-plate",
+    xPos: 0,
+    xSize: 96,
+    zSize: stud.DEPTH,
+    yPos: FLOOR_TOP - BACK_WALL_INSIDE_HEIGHT,
+    ySize: 1.5,
   })
 
   var sideJoiningStud = {

@@ -88,36 +88,43 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
     xSize: 48 - RAFTER_WIDTH*1.5 - plywood.THICKNESS
   })
 
+  var rafterPositions = {
+    "left": RAFTER_WIDTH,
+    "center-left": centerLine - RAFTER_WIDTH/2 - 1.5,
+    "center-right": centerLine + RAFTER_WIDTH/2,
+    "right": 96 - plywood.THICKNESS*2 - stud.DEPTH - 0.5
+  }
+
   var shadeRail = {
     part: trim,
     section: roof,
     slope: SLOPE,
     xSize: 1.5,
     yPos: (plywood.THICKNESS + stud.DEPTH - RAFTER_WIDTH)*SLOPE,
-    ySize: -1.5,
+    ySize: -1,
     zPos: -plywood.THICKNESS - stud.DEPTH + RAFTER_WIDTH,
     zSize: 72 - RAFTER_WIDTH*2 - 5
   }
 
-  tilted(shadeRail, {
-    name: "left-shade-rail",
-    xPos: RAFTER_WIDTH,
+  var roofRail = merge(shadeRail, {
+    yPos: (plywood.THICKNESS + stud.DEPTH - RAFTER_WIDTH)*SLOPE - verticalSlice(RAFTER_HEIGHT - TWIN_WALL_THICKNESS, SLOPE),
+    ySize: 1,
   })
 
-  tilted(shadeRail, {
-    name: "center-left-shade-rail",
-    xPos: centerLine - RAFTER_WIDTH/2 - 1.5,
-  })
+  for(var rafterName in rafterPositions) {
 
-  tilted(shadeRail, {
-    name: "center-right-shade-rail",
-    xPos: centerLine + RAFTER_WIDTH/2,
-  })
+    tilted(shadeRail, {
+      name: rafterName+"-shade-rail",
+      xPos: rafterPositions[rafterName],
+    })
 
-  tilted(shadeRail, {
-    name: "right-shade-rail",
-    xPos: 96 - plywood.THICKNESS*2 - stud.DEPTH - 0.5,
-  })
+    tilted(roofRail, {
+      name: rafterName+"-roof-rail",
+      xPos: rafterPositions[rafterName],
+    })
+
+  }
+
 
   tilted({
     section: roof,

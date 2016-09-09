@@ -98,13 +98,16 @@ function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulatio
     orientation: options.orientation
   })
 
-  join = {}
-  ;["left", "right", "top", "bottom"].forEach(function(direction) {
+  join = {left: 0, right: 0, top: 0, bottom: 0}
 
-    var hasJoin = options.joins.match(direction)
-
-    join[direction] = hasJoin ? 0.75 : 0
-  })
+  options.joins.split(" ").forEach(
+    function(directive) {
+      var parts = directive.split("-")
+      var direction = parts[0]
+      var depth = parts[1] == "full" ? 1.5 : 0.75
+      join[direction] = depth
+    }
+  )
 
   var plateSize = options.width - join.left - join.right
 
