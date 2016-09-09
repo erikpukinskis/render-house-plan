@@ -1,5 +1,5 @@
 
-function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, shade) {
+function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, shade, arc) {
 
   var roof = section({
     name: "roof",
@@ -61,6 +61,7 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
   roofCap(centerLine - 7.5/2, "center-roof-cap")
 
   roofCap(96 - plywood.THICKNESS * 2 - 2.5, "right-roof-cap")
+
 
   function roofPanel(options) {
 
@@ -126,32 +127,26 @@ function roof(section, twinWall, trim, stud, plywood, tilted, verticalSlice, sha
   }
 
 
-  tilted({
+  var shadeRail = {
     section: roof,
-    name: "left-ceiling-shade",
     part: shade,
     slope: SLOPE,
-    xPos: 2,
     xSize: 44.5,
     ySize: -0.5,
-    yPos: -verticalSlice(1.5, SLOPE),
+    yPos: -1,
     zSize: 72 - stud.DEPTH*2 - plywood.THICKNESS*2,
     zPos: 0,
+  }
+
+  tilted(shadeRail, {
+    name: "left-ceiling-shade",
+    xPos: 2,
   })
 
-
-  // tilted({
-  //   section: roof,
-  //   name: "right-ceiling-shade",
-  //   part: shade,
-  //   slope: SLOPE,
-  //   xPos: 49,
-  //   xSize: 44.5,
-  //   ySize: -0.5,
-  //   yPos: -verticalSlice(1.5, SLOPE),
-  //   zSize: 72 - stud.DEPTH*2 - plywood.THICKNESS*2,
-  //   zPos: 0,
-  // })
+  tilted(shadeRail, {
+    name: "right-ceiling-shade",
+    xPos: 49,
+  })
 
 
 }
