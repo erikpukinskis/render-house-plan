@@ -1,4 +1,9 @@
 var allocateMaterials = (function() {
+
+  var scrapsByName = {}
+  var materialSets
+
+
   var BASE_MATERIALS = {
     "0.5in rough plywood": {
       length: 96,
@@ -102,11 +107,11 @@ var allocateMaterials = (function() {
 
     var price = BASE_MATERIALS[description].price
 
+    // PERSIST
+
     set.push({name: name, quantity: quantity, bulk: true})
   }
 
-
-  var materialSets
 
   function getMaterial(description, cut, size) {
 
@@ -142,6 +147,8 @@ var allocateMaterials = (function() {
       number: set.length + 1
     })
 
+    // PERSIST
+
     set.push(material)
 
     return material
@@ -174,11 +181,13 @@ var allocateMaterials = (function() {
 
     // scrap[constraint] = size
 
+    // PERSIST
     material[constraint] = material[constraint] - size - 1/8
     material.cut = cut
     material.parts.push(name)
     material.cutLengths.push(size)
 
+    // PERSIST
     scrapsByName[name] = scrap
 
     return scrap
@@ -195,9 +204,8 @@ var allocateMaterials = (function() {
     return destination
   }
 
-  var scrapsByName = {}
 
-  function plywoodMaterial() {
+  function plywood() {
     var options = joinObjects(arguments)
 
     var dimensions = lumberDimensions(
@@ -240,15 +248,15 @@ var allocateMaterials = (function() {
       cutMaterial(sheet, "rip", dimensions.width, options)
     }
   }
-  plywoodMaterial.THICKNESS = plan.parts.plywood.THICKNESS
+  plywood.THICKNESS = plan.parts.plywood.THICKNESS
 
-  function trimMaterial() {
+  function trim() {
     var options = joinObjects(arguments)
 
     var dimensions = lumberDimensions(
       options,
       {
-        defaultThickness: trimMaterial.THICKNESS,
+        defaultThickness: trim.THICKNESS,
         maxThickness: 1.5,  
         maxWidth: 7.5,
       }
@@ -296,27 +304,27 @@ var allocateMaterials = (function() {
     }
 
   }
-  trimMaterial.THICKNESS = plan.parts.trim.THICKNESS
+  trim.THICKNESS = plan.parts.trim.THICKNESS
 
-  function doorMaterial() {
+  function door() {
     var options = joinObjects(arguments)
 
     var door = getMaterial("door")
     door.parts.push(options.name)
   }
-  doorMaterial.HEIGHT = plan.parts.door.HEIGHT
-  doorMaterial.WIDTH = plan.parts.door.WIDTH
-  doorMaterial.THICKNESS = plan.parts.door.THICKNESS
+  door.HEIGHT = plan.parts.door.HEIGHT
+  door.WIDTH = plan.parts.door.WIDTH
+  door.THICKNESS = plan.parts.door.THICKNESS
 
-  function studMaterial() {
+  function stud() {
     var options = joinObjects(arguments)
 
     var dimensions = lumberDimensions(
       options,
       {
-        defaultThickness: studMaterial.WIDTH,
-        maxThickness: studMaterial.WIDTH,
-        maxWidth: studMaterial.DEPTH,
+        defaultThickness: stud.WIDTH,
+        maxThickness: stud.WIDTH,
+        maxWidth: stud.DEPTH,
       }
     )
 
@@ -332,17 +340,17 @@ var allocateMaterials = (function() {
 
     cutMaterial(steel, "cross", dimensions.length, options)
   }
-  studMaterial.DEPTH = plan.parts.stud.DEPTH
-  studMaterial.WIDTH = plan.parts.stud.WIDTH
+  stud.DEPTH = plan.parts.stud.DEPTH
+  stud.WIDTH = plan.parts.stud.WIDTH
 
 
-  function twinWallMaterial() {
+  function twinWall() {
     var options = joinObjects(arguments)
 
     var dimensions = lumberDimensions(
       options,
       {
-        defaultThickness: twinWallMaterial.THICKNESS,
+        defaultThickness: twinWall.THICKNESS,
         maxThickness: 1,
         maxWidth: 48,
       }
@@ -353,9 +361,9 @@ var allocateMaterials = (function() {
     cutMaterial(poly, "cross", dimensions.length, options)
 
   }
-  twinWallMaterial.THICKNESS = plan.parts.twinWall.THICKNESS
+  twinWall.THICKNESS = plan.parts.twinWall.THICKNESS
 
-  function insulationMaterial() {
+  function insulation() {
     var options = joinObjects(arguments)
 
     var dimensions = lumberDimensions(
@@ -373,7 +381,7 @@ var allocateMaterials = (function() {
 
   }
 
-  function reflectixMaterial() {
+  function reflectix() {
     var options = joinObjects(arguments)
 
     var dimensions = lumberDimensions(
@@ -392,7 +400,7 @@ var allocateMaterials = (function() {
   }
 
 
-  function flooringMaterial() {
+  function flooring() {
     var options = joinObjects(arguments)
 
     var area = options.xSize/12 * options.zSize/12
@@ -402,12 +410,12 @@ var allocateMaterials = (function() {
     getBulk(description, area, options.name)
   }
 
-  function slopedMaterial() {
+  function sloped() {
     var options = joinObjects(arguments)
     options.part(options)
   }
 
-  function tiltedMaterial() {
+  function tilted() {
     var options = joinObjects(arguments)
 
     if (!options.zSize) {
@@ -441,18 +449,18 @@ var allocateMaterials = (function() {
 
   function noop() {}
 
-  var materialParts = {
+  var helpers = {
     section: noop,
-    stud: studMaterial,
-    plywood: plywoodMaterial,
-    insulation: insulationMaterial,
-    flooring: flooringMaterial,
-    door: doorMaterial,
-    trim: trimMaterial,
-    shade: reflectixMaterial,
-    sloped: slopedMaterial,
-    twinWall: twinWallMaterial,
-    tilted: tiltedMaterial,
+    stud: stud,
+    plywood: plywood,
+    insulation: insulation,
+    flooring: flooring,
+    door: door,
+    trim: trim,
+    shade: reflectix,
+    sloped: sloped,
+    twinWall: twinWall,
+    tilted: tilted,
     slopeToRadians: plan.parts.slopeToRadians,
     slopeToDegrees: plan.parts.slopeToDegrees,
     verticalSlice: plan.parts.verticalSlice
@@ -533,6 +541,9 @@ var allocateMaterials = (function() {
   }
 
   function allocateMaterials(plan) {
+
+    // PERSIST
+
     var sets = materialSets = {}
 
     for(var i=0; i<plan.generators.length; i++) {
@@ -541,7 +552,7 @@ var allocateMaterials = (function() {
 
       var params = plan.parameterSets[i]
 
-      var args = materialPartsFor(generator, params).concat(params)
+      var args = helpersFor(generator, params).concat(params)
 
       generator.apply(null, args)
 
@@ -591,12 +602,12 @@ var allocateMaterials = (function() {
     return scrap
   }
 
-  function materialPartsFor(generator) {
+  function helpersFor(generator) {
     var names = argNames(generator)
 
     var args = []
     names.forEach(function(name) {
-      var helper = materialParts[name]
+      var helper = helpers[name]
       if (helper) { args.push(helper) }
     })
 
