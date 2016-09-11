@@ -21,17 +21,19 @@ function orderMaterials(materials) {
 
   var grandSubtotal = 0
 
-  for(var description in materials.groupedByDescription) {
-    var set = materials.groupedByDescription[description]
+  var groups = materials.groupedByDescription()
 
-    if (set[0].bulk) {
-      describeBulk(set)
+  for(var description in groups) {
+    var group = groups[description]
+
+    if (group[0].bulk) {
+      describeBulk(group)
       continue
     }
 
     var els = []
-    for(var i=0; i<set.length; i++) {
-      var item = set[i]
+    for(var i=0; i<group.length; i++) {
+      var item = group[i]
 
       var text = " --- #"+item.number+" --- "
 
@@ -66,16 +68,16 @@ function orderMaterials(materials) {
   }
 
 
-  function describeBulk(set) {
+  function describeBulk(group) {
 
     var material = allocateMaterials.BASE_MATERIALS[description]
     var totalQuantity = 0
     var els = []
     var ct = 1
 
-    for(var i=0; i<set.length; i++) {
-      var quantity = set[i].quantity
-      var name = set[i].name
+    for(var i=0; i<group.length; i++) {
+      var quantity = group[i].quantity
+      var name = group[i].name
 
       totalQuantity = totalQuantity + quantity
 

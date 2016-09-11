@@ -3,9 +3,9 @@ function floorInstructions(options, materials) {
 
   var STUD_WIDTH = plan.parts.stud.WIDTH
 
-  materials.prefix(options.name)
+  materials.setPrefix(options.name)
 
-  var joists = materials(
+  var joists = materials.list(
     "joist-A",
     "joist-B",
     "joist-C",
@@ -14,7 +14,7 @@ function floorInstructions(options, materials) {
 
   step("cut steel track", function() {
 
-    cutMaterials(step, materials(
+    cutMaterials(step, materials.list(
       "front-track",
       "back-track"
     ))
@@ -23,7 +23,7 @@ function floorInstructions(options, materials) {
 
   step("cut joists", function() {
 
-    cutMaterials(step, materials(
+    cutMaterials(step, materials.list(
       "joist-A", "joist-B", "joist-C", "joist-D"
     ))
 
@@ -31,7 +31,7 @@ function floorInstructions(options, materials) {
 
   step("cut sheathing", function() {
 
-    cutMaterials(step, materials("sheathing"))
+    cutMaterials(step, materials.list("sheathing"))
 
     chalkLines("right")
   })
@@ -55,7 +55,7 @@ function floorInstructions(options, materials) {
 
   step("cut subfloor", function() {
 
-    cutMaterials(step, materials("subfloor"))
+    cutMaterials(step, materials.list("subfloor"))
 
     chalkLines("left")
 
@@ -63,7 +63,7 @@ function floorInstructions(options, materials) {
 
   step("lay out framing", function() {
 
-    var trackLength = dimensionText(materials("front-track")[0].size
+    var trackLength = dimensionText(materials.list("front-track")[0].size
     )
 
     step.instruction("Lay out the front and back tracks ("+trackLength+" long) "+dimensionText(options.zSize)+" apart.")
@@ -74,7 +74,7 @@ function floorInstructions(options, materials) {
 
     step.instruction("Set the joists inthe tracks "+joists.map(toLeft)+" from the right")
 
-    // diagram("bottom", materials("front-track", "back-track", "joist-A", "joist-B", "joist-C", "joist-D"))
+    // diagram("bottom", materials.list("front-track", "back-track", "joist-A", "joist-B", "joist-C", "joist-D"))
 
     step.instruction("Crimp each stud to both tracks, with one single crimp on the top side of the stud")
 
@@ -112,7 +112,7 @@ function floorInstructions(options, materials) {
 
     step.instruction("cut and add insulation between the joists")
 
-    cutMaterials(step, materials("insulation-A", "insulation-B", "insulation-C"))
+    cutMaterials(step, materials.list("insulation-A", "insulation-B", "insulation-C"))
 
   })
 

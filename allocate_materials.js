@@ -1,272 +1,237 @@
-var allocateMaterials = (function() {
+var BASE_MATERIALS = {
+  "0.5in rough plywood": {
+    length: 96,
+    width: 48,
+    price: 1795,
+    extra: 0,
+  },
+  "0.375in rough plywood": {
+    length: 96,
+    width: 48,
+    price: 1533,
+    extra: 1,
+  },
+  "0.375in sanded plywood": {
+    length: 96,
+    width: 48,
+    price: 2723,
+    extra: 1,
+  },
+  "8ft 2x4": {
+    length: 96,
+    width: 3.5,
+    price: 321,
+    extra: 1,
+  },
+  "8ft 2x6": {
+    length: 96,
+    width: 5.5,
+    price: 483,
+    extra: 1,
+  },
+  "8ft 1x4": {
+    length: 96,
+    width: 3.5,
+    price: 248,
+    extra: 1,
+  },
+  "8ft 1x6": {
+    length: 96,
+    width: 5.5,
+    price: 752,
+    extra: 1,
+  },
+  "8ft 1x8": { // http://www.homedepot.com/p/202603657
+    length: 96,
+    width: 7.5,
+    price: 678,
+    extra: 1,
+  },
+  "8ft furring strip": {
+    length: 96,
+    width: 1.5,
+    price: 91,
+    extra: 2,
+  },
+  "8ft steel stud": {
+    length: 96,
+    price: 357,
+    extra: 2,
+  },
+  "10ft steel track": {
+    length: 120,
+    price: 433,
+    extra: 1,
+  },
+  "twin wall poly": {
+    length: 96,
+    width: 48,
+    price: 6100,
+    extra: 0,
+  },
+  "door": {
+    price: 10000,
+    extra: 0,
+  },
+  "fiberglass insulation": {
+    length: 32*12,
+    width: 15,
+    price: 1498,
+    extra: 0,
+  },
+  "vinyl flooring": {
+    unit: "sq ft",
+    price: 150,
+  },
+  "reflectix roll": {
+    length: 25*12,
+    width: 48,
+    price: 4400,
+    extra: 0,
+  }
+}
 
-  // SO WE SEEM TO BE PERSISTING TO TWO DATA STRUCTURES:
+var SetOfMaterials = (function() {
 
-  var materialSets
-  var scrapsByName = {}
-
-
-
-  // THE MATERIAL SETS GROW WHEN WE GET FRE MATERIALS. THESE ARE USED MOSTLY FOR BUYING, ALTHOUGH THE IDS ARE IMPORTANT FOR KEEPING TRACK OF WHICH SCRAPS COME FROM WHERE
-
-  // WE ALSO RESET THEM WHEN WE START A NEW ALLOCATION.
-
-  function allocateMaterials(plan) {
-
-    // PERSIST
-
-    var sets = materialSets = {}
-
-    for(var i=0; i<plan.generators.length; i++) {
-
-      var generator = plan.generators[i]
-
-      var params = plan.parameterSets[i]
-
-      var args = helpersFor(generator, params).concat(params)
-
-      generator.apply(null, args)
-
-    }
-
-    materialSets = undefined
-
-    var options = {}
-
-    var materials = getPiece.bind(null, options)
-    materials.groupedByDescription = sets
-    materials.prefix = changePrefix.bind(options)
-
-    return materials
+  function SetOfMaterials() {
+    this.byDescription = {}
+    this.scrapsByName = {}
   }
 
-  function getBulk(description, quantity, name) {
-
-    var set = materialSets[description]
-    if (!set) {
-      set = materialSets[description] = []
+  SetOfMaterials.prototype.groupedByDescription = function() {
+      return this.byDescription
     }
 
-    var price = BASE_MATERIALS[description].price
+  function ofKind(description, set) {
+    var group = set.byDescription[description]
 
-    // PERSIST
+    if (!group) {
+      group = set.byDescription[description] = []
+    }
 
-    set.push({name: name, quantity: quantity, bulk: true})
+    return group
   }
 
-  function getMaterial(description, cut, size) {
+  SetOfMaterials.prototype.reserveBulk =
+    function(description, quantity, name) {
 
-    var set = materialSets[description]
-    if (!set) {
-      set = materialSets[description] = []
-    }
+      var group = ofKind(description, this)
 
-    for(var i=0; i<set.length; i++) {
-      var material = set[i]
-
-      if (material.cut != cut) {
-        continue
+      var material = {
+        name: name,
+        quantity: quantity,
+        bulk: true
       }
 
-      if (cut == "rip" && material.width >= size) {
-        return material
-      } else if (cut == "cross" && material.length >= size) {
-        return material
+      // PERSIST
+      group.push(material)
+
+      return material
+    }
+
+  SetOfMaterials.prototype.reserve =
+    function(description, cut, size) {
+
+      var group = ofKind(description, this)
+
+      for(var i=0; i<group.length; i++) {
+        var material = group[i]
+
+        if (material.cut != cut) {
+          continue
+        }
+
+        if (cut == "rip" && material.width >= size) {
+          return material
+        } else if (cut == "cross" && material.length >= size) {
+          return material
+        }
       }
-    }
 
-    var material = BASE_MATERIALS[description]
+      var base = BASE_MATERIALS[description]
 
-    if (!material) {
-      throw new Error("Add "+description+" to base materials")
-    }
-
-    material = merge(material, {
-      parts: [],
-      cutLengths: [],
-      description: description,
-      number: set.length + 1
-    })
-
-    // PERSIST
-
-    set.push(material)
-
-    return material
-  }
-
-
-
-
-
-  // THEN WE CREATE SCRAPS WHEN WE ACTUALLY CUT THOSE MATERIALS.
-
-  // getPiece IS WHAT WE ACTUALLY EXPORT OUT OF HERE, ALTHOUGH WE STICK groupedByDescription ON THERE AND ALSO PROVIDE A WAY TO SET THE PREFIX ON getPiece
-
-  function nameToScrap(name) {
-    var scrap = scrapsByName[name]
-    if (!scrap) {
-      throw new Error("Scrap "+name+" not found")
-    }
-    return scrap
-  }
-
-  function getPiece(options) {
-    var names = Array.prototype.slice.call(arguments, 1)
-    var pieces = []
-
-    for(var i=0; i<names.length; i++) {
-      var name = names[i]
-      if (options.prefix) {
-        name = options.prefix+"-"+name
+      if (!base) {
+        throw new Error("Add "+description+" to base materials")
       }
-      pieces.push(nameToScrap(name))
+
+      material = merge(base, {
+        parts: [],
+        cutLengths: [],
+        description: description,
+        number: group.length + 1
+      })
+
+      // PERSIST
+
+      group.push(material)
+
+      return material
     }
 
-    return pieces
-  }
+  SetOfMaterials.prototype.list =
+    function() {
+      var names = Array.prototype.slice.call(arguments)
+      var pieces = []
 
-  function cutMaterial(material, cut, size, options) {
-    var name = options.name
+      for(var i=0; i<names.length; i++) {
+        var name = names[i]
+        if (this.prefix) {
+          name = this.prefix+"-"+name
+        }
+        var scrap = this.scrapsByName[name]
+        if (!scrap) {
+          throw new Error("no scraps named "+name)
+        }
+        pieces.push(scrap)
+      }
 
-    if (material.cut && cut != material.cut) {
-      throw new Error("trying to cut material the wrong way")
+      return pieces
     }
 
-    var constraint = cut == "cross" ? "length" : "width"
-
-    if (material[constraint] < size) {
-      throw new Error("not enough material")
+  SetOfMaterials.prototype.setPrefix =function(newPrefix) {
+      this.prefix = newPrefix
     }
 
-    var scrap = {
-      cut: cut,
-      part: name,
-      material: material,
-      size: size,
-      destination: toDestination(options)
+  SetOfMaterials.prototype.cut =
+    function(material, cut, size, options) {
+      var name = options.name
+
+      if (material.cut && cut != material.cut) {
+        throw new Error("trying to cut material the wrong way")
+      }
+
+      var constraint = cut == "cross" ? "length" : "width"
+
+      if (material[constraint] < size) {
+        throw new Error("not enough material")
+      }
+
+      var scrap = {
+        cut: cut,
+        part: name,
+        material: material,
+        size: size,
+        destination: toDestination(options)
+      }
+      if (!name) {
+        console.log(scrap)
+        throw new Error("every scrap needs a name")
+      }
+
+      // scrap[constraint] = size
+
+      // PERSIST
+      material[constraint] = material[constraint] - size - 1/8
+      material.cut = cut
+      material.parts.push(name)
+      material.cutLengths.push(size)
+
+      // PERSIST
+      this.scrapsByName[name] = scrap
+
+      return scrap
+
     }
-    if (!name) {
-      console.log(scrap)
-      throw new Error("every scrap needs a name")
-    }
-
-    // scrap[constraint] = size
-
-    // PERSIST
-    material[constraint] = material[constraint] - size - 1/8
-    material.cut = cut
-    material.parts.push(name)
-    material.cutLengths.push(size)
-
-    // PERSIST
-    scrapsByName[name] = scrap
-
-    return scrap
-
-  }
-
-
-
-
-  // OTHER STUFF?
-
-
-  var BASE_MATERIALS = {
-    "0.5in rough plywood": {
-      length: 96,
-      width: 48,
-      price: 1795,
-      extra: 0,
-    },
-    "0.375in rough plywood": {
-      length: 96,
-      width: 48,
-      price: 1533,
-      extra: 1,
-    },
-    "0.375in sanded plywood": {
-      length: 96,
-      width: 48,
-      price: 2723,
-      extra: 1,
-    },
-    "8ft 2x4": {
-      length: 96,
-      width: 3.5,
-      price: 321,
-      extra: 1,
-    },
-    "8ft 2x6": {
-      length: 96,
-      width: 5.5,
-      price: 483,
-      extra: 1,
-    },
-    "8ft 1x4": {
-      length: 96,
-      width: 3.5,
-      price: 248,
-      extra: 1,
-    },
-    "8ft 1x6": {
-      length: 96,
-      width: 5.5,
-      price: 752,
-      extra: 1,
-    },
-    "8ft 1x8": { // http://www.homedepot.com/p/202603657
-      length: 96,
-      width: 7.5,
-      price: 678,
-      extra: 1,
-    },
-    "8ft furring strip": {
-      length: 96,
-      width: 1.5,
-      price: 91,
-      extra: 2,
-    },
-    "8ft steel stud": {
-      length: 96,
-      price: 357,
-      extra: 2,
-    },
-    "10ft steel track": {
-      length: 120,
-      price: 433,
-      extra: 1,
-    },
-    "twin wall poly": {
-      length: 96,
-      width: 48,
-      price: 6100,
-      extra: 0,
-    },
-    "door": {
-      price: 10000,
-      extra: 0,
-    },
-    "fiberglass insulation": {
-      length: 32*12,
-      width: 15,
-      price: 1498,
-      extra: 0,
-    },
-    "vinyl flooring": {
-      unit: "sq ft",
-      price: 150,
-    },
-    "reflectix roll": {
-      length: 25*12,
-      width: 48,
-      price: 4400,
-      extra: 0,
-    }
-  }
-
-
-
 
   function toDestination(options) {
     var destination = {}
@@ -278,9 +243,42 @@ var allocateMaterials = (function() {
     return destination
   }
 
+  return SetOfMaterials
+})()
 
-  function plywood() {
-    var options = joinObjects(arguments)
+
+var allocateMaterials = (function() {
+
+
+  function allocateMaterials(plan) {
+
+    // PERSIST
+
+    var set = new SetOfMaterials()
+
+    for(var i=0; i<plan.generators.length; i++) {
+
+      var generator = plan.generators[i]
+
+      var params = plan.parameterSets[i]
+
+      var args = helpersFor(generator, set).concat(params)
+
+      generator.apply(null, args)
+
+    }
+
+    var options = {}
+
+    return set
+  }
+
+
+
+
+
+  function plywood(materials) {
+    var options = joinObjects(arguments, 1)
 
     var dimensions = lumberDimensions(
       options,
@@ -292,6 +290,7 @@ var allocateMaterials = (function() {
     )
 
     if (dimensions.length <= 48) {
+      console.log(options)
       throw new Error("We don't need a full length of plywood for this piece")
     }
 
@@ -312,25 +311,24 @@ var allocateMaterials = (function() {
     var description = dimensions.thickness+"in "+finish+" plywood"
 
     if (dimensions.width > 45) {
-      var sheet = getMaterial(description, "cross", dimensions.length)
+      var sheet = materials.reserve(description, "cross", dimensions.length)
 
-      cutMaterial(sheet, "cross", dimensions.length, options)
+      materials.cut(sheet, "cross", dimensions.length, options)
 
     } else {
-      var sheet = getMaterial(description, "rip", dimensions.width)
+      var sheet = materials.reserve(description, "rip", dimensions.width)
 
-      cutMaterial(sheet, "rip", dimensions.width, options)
+      materials.cut(sheet, "rip", dimensions.width, options)
     }
   }
-  plywood.THICKNESS = plan.parts.plywood.THICKNESS
 
-  function trim() {
-    var options = joinObjects(arguments)
+  function trim(materials) {
+    var options = joinObjects(arguments, 1)
 
     var dimensions = lumberDimensions(
       options,
       {
-        defaultThickness: trim.THICKNESS,
+        defaultThickness: plan.parts.trim.THICKNESS,
         maxThickness: 1.5,  
         maxWidth: 7.5,
       }
@@ -365,40 +363,36 @@ var allocateMaterials = (function() {
     }
 
     if (crossCut) {
-      var board = getMaterial(description, "cross", dimensions.length)
+      var board = materials.reserve(description, "cross", dimensions.length)
 
-      cutMaterial(board, "cross", dimensions.length, options)
+      materials.cut(board, "cross", dimensions.length, options)
 
     } else {
 
-      var board = getMaterial(description, "rip", dimensions.width)
+      var board = materials.reserve(description, "rip", dimensions.width)
 
-      cutMaterial(board, "rip", dimensions.width, options)
+      materials.cut(board, "rip", dimensions.width, options)
 
     }
 
   }
-  trim.THICKNESS = plan.parts.trim.THICKNESS
 
-  function door() {
-    var options = joinObjects(arguments)
+  function door(materials) {
+    var options = joinObjects(arguments, 1)
 
-    var door = getMaterial("door")
+    var door = materials.reserve("door")
     door.parts.push(options.name)
   }
-  door.HEIGHT = plan.parts.door.HEIGHT
-  door.WIDTH = plan.parts.door.WIDTH
-  door.THICKNESS = plan.parts.door.THICKNESS
 
-  function stud() {
-    var options = joinObjects(arguments)
+  function stud(materials) {
+    var options = joinObjects(arguments, 1)
 
     var dimensions = lumberDimensions(
       options,
       {
-        defaultThickness: stud.WIDTH,
-        maxThickness: stud.WIDTH,
-        maxWidth: stud.DEPTH,
+        defaultThickness: plan.parts.stud.WIDTH,
+        maxThickness: plan.parts.stud.WIDTH,
+        maxWidth: plan.parts.stud.DEPTH,
       }
     )
 
@@ -410,35 +404,31 @@ var allocateMaterials = (function() {
 
     var description = isTrack ? "10ft steel track" : "8ft steel stud"
 
-    var steel = getMaterial(description, "cross", dimensions.length)
+    var steel = materials.reserve(description, "cross", dimensions.length)
 
-    cutMaterial(steel, "cross", dimensions.length, options)
+    materials.cut(steel, "cross", dimensions.length, options)
   }
-  stud.DEPTH = plan.parts.stud.DEPTH
-  stud.WIDTH = plan.parts.stud.WIDTH
 
-
-  function twinWall() {
-    var options = joinObjects(arguments)
+  function twinWall(materials) {
+    var options = joinObjects(arguments, 1)
 
     var dimensions = lumberDimensions(
       options,
       {
-        defaultThickness: twinWall.THICKNESS,
+        defaultThickness: plan.parts.twinWall.THICKNESS,
         maxThickness: 1,
         maxWidth: 48,
       }
     )
 
-    var poly = getMaterial("twin wall poly", "cross", dimensions.length)
+    var poly = materials.reserve("twin wall poly", "cross", dimensions.length)
 
-    cutMaterial(poly, "cross", dimensions.length, options)
+    materials.cut(poly, "cross", dimensions.length, options)
 
   }
-  twinWall.THICKNESS = plan.parts.twinWall.THICKNESS
 
-  function insulation() {
-    var options = joinObjects(arguments)
+  function insulation(materials) {
+    var options = joinObjects(arguments, 1)
 
     var dimensions = lumberDimensions(
       options,
@@ -449,14 +439,14 @@ var allocateMaterials = (function() {
       }
     )
 
-    var fiberglass = getMaterial("fiberglass insulation", "cross", dimensions.length)
+    var fiberglass = materials.reserve("fiberglass insulation", "cross", dimensions.length)
 
-    cutMaterial(fiberglass, "cross", dimensions.length, options)
+    materials.cut(fiberglass, "cross", dimensions.length, options)
 
   }
 
-  function reflectix() {
-    var options = joinObjects(arguments)
+  function reflectix(materials) {
+    var options = joinObjects(arguments, 1)
 
     var dimensions = lumberDimensions(
       options,
@@ -467,30 +457,30 @@ var allocateMaterials = (function() {
       }
     )
 
-    var shade = getMaterial("reflectix roll", "cross", dimensions.length)
+    var shade = materials.reserve("reflectix roll", "cross", dimensions.length)
 
-    cutMaterial(shade, "cross", dimensions.length, options)
+    materials.cut(shade, "cross", dimensions.length, options)
 
   }
 
 
-  function flooring() {
-    var options = joinObjects(arguments)
+  function flooring(materials) {
+    var options = joinObjects(arguments, 1)
 
     var area = options.xSize/12 * options.zSize/12
 
     var description = "vinyl flooring"
 
-    getBulk(description, area, options.name)
+    materials.reserveBulk(description, area, options.name)
   }
 
-  function sloped() {
-    var options = joinObjects(arguments)
+  function sloped(materials) {
+    var options = joinObjects(arguments, 1)
     options.part(options)
   }
 
-  function tilted() {
-    var options = joinObjects(arguments)
+  function tilted(materials) {
+    var options = joinObjects(arguments, 1)
 
     if (!options.zSize) {
       console.log("offending part:", options)
@@ -509,10 +499,10 @@ var allocateMaterials = (function() {
 
   }
 
-  function joinObjects(iterable) {
+  function joinObjects(iterable, start) {
     var joined = {}
 
-    for(var i=0; i<iterable.length; i++) {
+    for(var i = start||0; i<iterable.length; i++) {
       for(var key in iterable[i]) {
         joined[key] = iterable[i][key]
       }
@@ -535,9 +525,6 @@ var allocateMaterials = (function() {
     sloped: sloped,
     twinWall: twinWall,
     tilted: tilted,
-    slopeToRadians: plan.parts.slopeToRadians,
-    slopeToDegrees: plan.parts.slopeToDegrees,
-    verticalSlice: plan.parts.verticalSlice
   }
 
 
@@ -607,6 +594,9 @@ var allocateMaterials = (function() {
       }            
     }
 
+    if (typeof thickness == "undefined") {
+      debugger
+    }
     return {
       length: length,
       width: width,
@@ -615,26 +605,27 @@ var allocateMaterials = (function() {
   }
 
 
-
-  function changePrefix(newPrefix) {
-    this.prefix = newPrefix
-  }
-
-  getMaterial.prefix = function(newPrefix) {
-    prefix = newPrefix
-  }
-  
-
-
-
-
-  function helpersFor(generator) {
+  function helpersFor(generator, materials) {
     var names = argNames(generator)
-
     var args = []
+
     names.forEach(function(name) {
       var helper = helpers[name]
-      if (helper) { args.push(helper) }
+
+      if (!helper) {
+        if (plan.parts[name]) {
+          args.push(plan.parts[name])
+        }
+        return
+      }
+
+      helper = helper.bind(null, materials)
+
+      ;["DEPTH", "WIDTH", "HEIGHT", "THICKNESS"].forEach(function(dimension) {
+        helper[dimension] = plan.parts[name][dimension]
+      })
+
+      args.push(helper)
     })
 
     return args
