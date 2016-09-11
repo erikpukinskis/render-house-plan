@@ -30,20 +30,18 @@ function orderMaterials(materials) {
     }
 
     var els = []
-    var ct = 1
     for(var i=0; i<set.length; i++) {
       var item = set[i]
 
+      var text = " --- #"+item.number+" --- "
+
       if (description == "door") {
-        els.push(element(" ("+ct+") "+item.parts[0]))
+        text = text + item.parts[0]
       } else {
-        var cutPlan = element(
-          " ("+ct+") "+cutPlanText(item)
-        )
-        els.push(cutPlan)
+        text = text + cutPlanText(item)
       }
 
-      ct++
+      els.push(element(text))
     }
 
     var material = allocateMaterials.BASE_MATERIALS[description]
@@ -55,7 +53,7 @@ function orderMaterials(materials) {
 
     var header = description+": "+els.length+" CT "
     if (material.extra) {
-      header += "+"+material.extra+" "
+      header += "+"+material.extra+" extra "
     }
     header += "@$"+toDollarString(price)+" = $"+toDollarString(subtotal)
 

@@ -1,7 +1,175 @@
 var allocateMaterials = (function() {
 
-  var scrapsByName = {}
+  // SO WE SEEM TO BE PERSISTING TO TWO DATA STRUCTURES:
+
   var materialSets
+  var scrapsByName = {}
+
+
+
+  // THE MATERIAL SETS GROW WHEN WE GET FRE MATERIALS. THESE ARE USED MOSTLY FOR BUYING, ALTHOUGH THE IDS ARE IMPORTANT FOR KEEPING TRACK OF WHICH SCRAPS COME FROM WHERE
+
+  // WE ALSO RESET THEM WHEN WE START A NEW ALLOCATION.
+
+  function allocateMaterials(plan) {
+
+    // PERSIST
+
+    var sets = materialSets = {}
+
+    for(var i=0; i<plan.generators.length; i++) {
+
+      var generator = plan.generators[i]
+
+      var params = plan.parameterSets[i]
+
+      var args = helpersFor(generator, params).concat(params)
+
+      generator.apply(null, args)
+
+    }
+
+    materialSets = undefined
+
+    var options = {}
+
+    var materials = getPiece.bind(null, options)
+    materials.groupedByDescription = sets
+    materials.prefix = changePrefix.bind(options)
+
+    return materials
+  }
+
+  function getBulk(description, quantity, name) {
+
+    var set = materialSets[description]
+    if (!set) {
+      set = materialSets[description] = []
+    }
+
+    var price = BASE_MATERIALS[description].price
+
+    // PERSIST
+
+    set.push({name: name, quantity: quantity, bulk: true})
+  }
+
+  function getMaterial(description, cut, size) {
+
+    var set = materialSets[description]
+    if (!set) {
+      set = materialSets[description] = []
+    }
+
+    for(var i=0; i<set.length; i++) {
+      var material = set[i]
+
+      if (material.cut != cut) {
+        continue
+      }
+
+      if (cut == "rip" && material.width >= size) {
+        return material
+      } else if (cut == "cross" && material.length >= size) {
+        return material
+      }
+    }
+
+    var material = BASE_MATERIALS[description]
+
+    if (!material) {
+      throw new Error("Add "+description+" to base materials")
+    }
+
+    material = merge(material, {
+      parts: [],
+      cutLengths: [],
+      description: description,
+      number: set.length + 1
+    })
+
+    // PERSIST
+
+    set.push(material)
+
+    return material
+  }
+
+
+
+
+
+  // THEN WE CREATE SCRAPS WHEN WE ACTUALLY CUT THOSE MATERIALS.
+
+  // getPiece IS WHAT WE ACTUALLY EXPORT OUT OF HERE, ALTHOUGH WE STICK groupedByDescription ON THERE AND ALSO PROVIDE A WAY TO SET THE PREFIX ON getPiece
+
+  function nameToScrap(name) {
+    var scrap = scrapsByName[name]
+    if (!scrap) {
+      throw new Error("Scrap "+name+" not found")
+    }
+    return scrap
+  }
+
+  function getPiece(options) {
+    var names = Array.prototype.slice.call(arguments, 1)
+    var pieces = []
+
+    for(var i=0; i<names.length; i++) {
+      var name = names[i]
+      if (options.prefix) {
+        name = options.prefix+"-"+name
+      }
+      pieces.push(nameToScrap(name))
+    }
+
+    return pieces
+  }
+
+  function cutMaterial(material, cut, size, options) {
+    var name = options.name
+
+    if (material.cut && cut != material.cut) {
+      throw new Error("trying to cut material the wrong way")
+    }
+
+    var constraint = cut == "cross" ? "length" : "width"
+
+    if (material[constraint] < size) {
+      throw new Error("not enough material")
+    }
+
+    var scrap = {
+      cut: cut,
+      part: name,
+      material: material,
+      size: size,
+      destination: toDestination(options)
+    }
+    if (!name) {
+      console.log(scrap)
+      throw new Error("every scrap needs a name")
+    }
+
+    // scrap[constraint] = size
+
+    // PERSIST
+    material[constraint] = material[constraint] - size - 1/8
+    material.cut = cut
+    material.parts.push(name)
+    material.cutLengths.push(size)
+
+    // PERSIST
+    scrapsByName[name] = scrap
+
+    return scrap
+
+  }
+
+
+
+
+  // OTHER STUFF?
 
 
   var BASE_MATERIALS = {
@@ -97,102 +265,8 @@ var allocateMaterials = (function() {
     }
   }
 
-  function getBulk(description, quantity, name) {
 
 
-    var set = materialSets[description]
-    if (!set) {
-      set = materialSets[description] = []
-    }
-
-    var price = BASE_MATERIALS[description].price
-
-    // PERSIST
-
-    set.push({name: name, quantity: quantity, bulk: true})
-  }
-
-
-  function getMaterial(description, cut, size) {
-
-    var set = materialSets[description]
-    if (!set) {
-      set = materialSets[description] = []
-    }
-
-    for(var i=0; i<set.length; i++) {
-      var material = set[i]
-
-      if (material.cut != cut) {
-        continue
-      }
-
-      if (cut == "rip" && material.width >= size) {
-        return material
-      } else if (cut == "cross" && material.length >= size) {
-        return material
-      }
-    }
-
-    var material = BASE_MATERIALS[description]
-
-    if (!material) {
-      throw new Error("Add "+description+" to base materials")
-    }
-
-    material = merge(material, {
-      parts: [],
-      cutLengths: [],
-      description: description,
-      number: set.length + 1
-    })
-
-    // PERSIST
-
-    set.push(material)
-
-    return material
-  }
-
-  function cutMaterial(material, cut, size, options) {
-    var name = options.name
-
-    if (material.cut && cut != material.cut) {
-      throw new Error("trying to cut material the wrong way")
-    }
-
-    var constraint = cut == "cross" ? "length" : "width"
-
-    if (material[constraint] < size) {
-      throw new Error("not enough material")
-    }
-
-    var scrap = {
-      cut: cut,
-      part: name,
-      material: material,
-      size: size,
-      destination: toDestination(options)
-    }
-    if (!name) {
-      console.log(scrap)
-      throw new Error("every scrap needs a name")
-    }
-
-    // scrap[constraint] = size
-
-    // PERSIST
-    material[constraint] = material[constraint] - size - 1/8
-    material.cut = cut
-    material.parts.push(name)
-    material.cutLengths.push(size)
-
-    // PERSIST
-    scrapsByName[name] = scrap
-
-    return scrap
-
-  }
 
   function toDestination(options) {
     var destination = {}
@@ -540,34 +614,7 @@ var allocateMaterials = (function() {
     }
   }
 
-  function allocateMaterials(plan) {
 
-    // PERSIST
-
-    var sets = materialSets = {}
-
-    for(var i=0; i<plan.generators.length; i++) {
-
-      var generator = plan.generators[i]
-
-      var params = plan.parameterSets[i]
-
-      var args = helpersFor(generator, params).concat(params)
-
-      generator.apply(null, args)
-
-    }
-
-    materialSets = undefined
-
-    var options = {}
-
-    var materials = getPiece.bind(null, options)
-    materials.groupedByDescription = sets
-    materials.prefix = changePrefix.bind(options)
-
-    return materials
-  }
 
   function changePrefix(newPrefix) {
     this.prefix = newPrefix
@@ -579,28 +626,7 @@ var allocateMaterials = (function() {
   
 
 
-  function getPiece(options) {
-    var names = Array.prototype.slice.call(arguments, 1)
-    var pieces = []
 
-    for(var i=0; i<names.length; i++) {
-      var name = names[i]
-      if (options.prefix) {
-        name = options.prefix+"-"+name
-      }
-      pieces.push(nameToScrap(name))
-    }
-
-    return pieces
-  }
-
-  function nameToScrap(name) {
-    var scrap = scrapsByName[name]
-    if (!scrap) {
-      throw new Error("Scrap "+name+" not found")
-    }
-    return scrap
-  }
 
   function helpersFor(generator) {
     var names = argNames(generator)
