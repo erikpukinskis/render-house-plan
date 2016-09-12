@@ -33,7 +33,7 @@ module.exports = library.export(
       },
     }
 
-    var helpers = {
+    var helpers = HousePlan.helpers = {
       verticalSlice: verticalSlice,
       slopeToDegrees: slopeToDegrees,
       slopeToRadians: slopeToRadians,
@@ -59,6 +59,7 @@ module.exports = library.export(
               handler = helpers[name]
             }
             if (handler) {
+              addConstants(handler, name)
               args.push(handler)
             }
           })
@@ -72,6 +73,15 @@ module.exports = library.export(
 
       }
 
+    function addConstants(handler, name) {
+      ;["DEPTH", "WIDTH", "HEIGHT", "THICKNESS"].forEach(function(dimension) {
+        var basePart = HousePlan.parts[name]
+        if (!handler[dimension] && basePart) {
+          handler[dimension] = basePart[dimension]
+        }
+      })
+    }
+    
     function argNames(func) {
       var pattern = /^function[ a-zA-Z]*\(([a-zA-Z, ]*)/
       var argString = func.toString().match(pattern)[1]

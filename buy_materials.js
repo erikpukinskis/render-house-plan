@@ -3,22 +3,22 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "buy-house-parts",
-  ["./teensy-house-3", "./allocate_materials", "./floor_section", "nrtv-element", "nrtv-browser-bridge"],
-  function(teensyHouse3, allocateMaterials, floorSection, element, BrowserBridge) {
+  ["./allocate_materials", "./floor_section", "nrtv-element", "nrtv-browser-bridge"],
+  function(allocateMaterials, floorSection, element, BrowserBridge) {
 
 
+    return function(myPlan) {
+      var materials = allocateMaterials(myPlan)
+      var bridge = new BrowserBridge()
+      var body = element()
 
-    var myPlan = teensyHouse3()
-    var materials = allocateMaterials(myPlan)
-    var bridge = new BrowserBridge()
-    var body = element()
+      buyMaterials(materials, bridge, body)
 
-    buyMaterials(materials, bridge)
-
-    return bridge.sendPage(body)
+      return bridge.sendPage(body)
+    }
 
 
-    function buyMaterials(materials, bridge) {
+    function buyMaterials(materials, bridge, body) {
 
       var grandSubtotal = 0
 

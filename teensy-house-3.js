@@ -73,6 +73,7 @@ module.exports = library.export(
         leftBattenOverhang: HousePlan.parts.plywood.THICKNESS,
         rightBattenOverhang: 0.75,
         orientation: "north",
+        slope: SLOPE,
       })
 
       plan.add(faceWall, {
@@ -87,6 +88,7 @@ module.exports = library.export(
         joins: "left",
         rightBattenOverhang: HousePlan.parts.plywood.THICKNESS,
         orientation: "north",
+        slope: SLOPE,
       })
 
 
@@ -141,6 +143,7 @@ module.exports = library.export(
         middleBattenBottomGap: doors.TRIM_WIDTH - HousePlan.parts.trim.THICKNESS - doors.GAP - 0.75,
         joins: "bottom",
         orientation: "south",
+        slope: SLOPE,
       })
 
       plan.add(doors, {
@@ -279,11 +282,6 @@ module.exports = library.export(
       })
 
     }
-
-
-
-
-
 
     return teensyHouse
 

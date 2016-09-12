@@ -33,6 +33,7 @@ module.exports = library.export(
         yPos: bottomOverhang,
         ySize: -battenHeight,
         zPos: battenZPos,
+        slope: options.slope,
       }
 
       var battenGenerator = options.slopeBattens === false ? trim : sloped

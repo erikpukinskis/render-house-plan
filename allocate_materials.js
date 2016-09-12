@@ -24,13 +24,6 @@ module.exports = library.export(
 
       helper = helper.bind(null, materials)
 
-      ;["DEPTH", "WIDTH", "HEIGHT", "THICKNESS"].forEach(function(dimension) {
-        var basePart = HousePlan.parts[name]
-        if (!helper[dimension] && basePart) {
-          helper[dimension] = basePart[dimension]
-        }
-      })
-
       return helper
     }
 

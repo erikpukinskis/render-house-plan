@@ -1,38 +1,234 @@
-var library = require("nrtv-library")()
+var library = require("nrtv-library")(require)
 
 
 module.exports = library.export(
   "house-plan-viewer",
-  function() {
+  ["./house_plan", "nrtv-element"],
+  function(HousePlan, element) {
 
-    function verticalSlice(thickness, slope) {
-      if (!slope) {
-        throw new Error("verticalSlice takes a thickness and a slope. You didn't provide a slope")
-      }
-      var angle = slopeToRadians(slope)
-      return thickness/Math.cos(angle)
-    }
-
-    function slopeToDegrees(slope) {
-      var degrees = 180*slopeToRadians(slope)/Math.PI
-      return degrees
-    }
-
-    function slopeToRadians(slope) {
-      return Math.atan(slope)
-    }
+    var verticalSlice = HousePlan.helpers.verticalSlice
+    var slopeToDegrees = HousePlan.helpers.slopeToDegrees
+    var slopeToRadians = HousePlan.helpers.slopeToRadians
 
     var PLAN_ORIGIN = {
       left: 36,
       top: 20
     }
 
-    var resetZDepth = false
 
-    if (resetZDepth || !localStorage.zDepth) {
-      var zDepth = 72
-    } else {
-      var zDepth = parseFloat(localStorage.zDepth)
+    function Viewer() {
+    }
+    Viewer.render = function(plan) {
+      var el = element(".plan")
+      var viewOptions = {
+        view: "front",
+        zDepth: 72,
+      }
+      plan.generate(getPartGenerator.bind(null, el, viewOptions))
+
+      el.addChild(
+        element.stylesheet(
+          planTemplate,
+          stud,
+          plywood,
+          section,
+          sectionBefore,
+          sectionAfter,
+          trim,
+          shade,
+          topDoorContainer,
+          basicDoor,
+          doorKnob,
+          doorBox,
+          doorSwing,
+          slopeWrapper,
+          twinWall,
+          insulation,
+          flooring,
+          overlay,
+          viewButton,
+          zoomButton,
+          resetZoom,
+          sectionToggle,
+          sectionToggleOn,
+          depthSlider,
+          depthSliderBar,
+          explodeButton
+        )
+      )
+
+      return el
+    }
+
+    function getPartGenerator(planElement, viewOptions, name) {
+
+      if (name == "section") {
+
+        return section.bind(null, planElement, viewOptions)
+
+      } else {
+
+        var generator = drawableParts[name]
+
+        if (!generator) { return }
+
+        return generator.bind(null, viewOptions)
+      }
+    }
+
+
+    Viewer.defineHandlersOn = function(bridge) {
+
+      var ViewerClient = bridge.defineSingleton(
+        "ViewerClient",
+        function() {
+          function ViewerClient() {
+            var resetZDepth = false
+
+            if (resetZDepth || !localStorage.zDepth) {
+              this.zDepth = 72
+            } else {
+              this.zDepth = parseFloat(localStorage.zDepth)
+            }
+
+            if (localStorage.zoomFactor) {
+              this.zoomFactor = parseFloat(localStorage.zoomFactor)
+            } else {
+              this.zoomFactor = 0.39
+            }
+
+            if (localStorage.showSection) {
+              var showSection = JSON.parse(localStorage.showSection)
+            } else {
+              var showSection = {}
+            }
+
+            var toggles
+            var togglesAdded = {}
+                      var startXPixels
+            var startZDepth
+
+
+            this.zoom(this.zoomFactor)
+          }
+
+          function setZDepth(d) {
+            if (d != zDepth) {
+              localStorage.zDepth = d
+            }
+
+            zDepth = d
+
+            var left = zDepthToLeft(d)
+
+            document.querySelector(".depth-slider").style.left = left+"em"
+          }
+
+          function dragZ(event) {
+            if (event.screenX == 0) { return }
+            var dx = event.screenX - startXPixels
+            var newZDepth = startZDepth + dx / (16*zoomFactor)
+            setZDepth(newZDepth)
+          }
+
+          function zDragStart(event) {
+            startXPixels = event.screenX
+            startZDepth = zDepth
+          }
+
+          function zoom(setZDepth, planSelector, by) {
+            if (by == "default") {
+              zoomFactor = 0.39
+            } else {
+              zoomFactor = zoomFactor*by
+            }
+            localStorage.zoomFactor = zoomFactor
+            document.querySelector(planSelector).style["font-size"] = zoomFactor+"em"
+            setZDepth(zDepth)
+          }
+
+
+          function setView(newView, draw) {
+            if (!newView) { return }
+
+            view = newView
+            localStorage.view = newView
+            throw new Error("view?")
+            sideView = frontView = topView = false
+            if (view == "side") {
+              sideView = true
+            } else if (view == "front") {
+              frontView = true
+            } else if (view == "top") {
+              topView = true
+            } else {
+              throw new Error(view+" is not a valid view")
+            }
+
+            if (draw !== false) { redraw() }
+          }
+
+          function ensureToggle(name) {
+            if (!name) { return }
+
+            if (!togglesAdded[name]) {
+              togglesAdded[name] = true
+
+              var show = showSection[name] !== false
+              showSection[name] = show
+
+              var link = element("a.section-toggle.button", name, {
+                href: "javascript: plan.toggleSection(\""+name+"\")"
+              })
+              if (show) {
+                link.classes.push("on")
+              }
+              link.classes.push("toggle-"+name)
+              addHtml.inside(toggles, link.html())
+            }
+          }
+
+          function toggleSection(name) {
+            if (drawing) { return }
+
+            var on = !showSection[name]
+
+            showSection[name] = on
+            localStorage.showSection = JSON.stringify(showSection)
+            
+            var toggle = document.querySelector(".toggle-"+name)
+
+            if (on) {
+              toggle.classList.add("on")
+            } else {
+              toggle.classList.remove("on")
+            }
+
+            emptyNode(container)
+
+            if (drawing) { return }
+            setTimeout(redraw, 0)
+            drawing = true
+          }
+
+          function emptyNode(node) {
+            while (node.firstChild) {
+              node.removeChild(node.firstChild)
+            }
+          }
+
+
+
+          function zDepthToLeft(depth) {
+            return (zDepth + PLAN_ORIGIN.left)*zoomFactor - 0.5
+          }
+
+
+          return ViewerClient
+        }
+      )
+
+
     }
 
     function joinObjects(iterable) {
@@ -56,8 +252,8 @@ module.exports = library.export(
         "border-radius": "0.2em",
         "position": "absolute"
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         addPart(this, options)
 
@@ -91,8 +287,9 @@ module.exports = library.export(
           northSouth = parts[0] == "north" || parts[0] == "south"
           eastWest = !northSouth
         }
+        var v = viewOptions.view
 
-        if (topView && o=="north" || sideView && o=="up-across" && options.xSize|| frontView && o=="up"
+        if (v == "top" && o=="north" || v == "side" && o=="up-across" && options.xSize || v == "front" && o=="up"
         ) {
 
           // U-shape
@@ -102,7 +299,7 @@ module.exports = library.export(
             "height": stud.WIDTH+"em"
           })
 
-        } else if (topView && o=="south" || sideView && o=="down-across" || frontView && o=="down"
+        } else if (v == "top" && o=="south" || v =="side" && o=="down-across" || v == "front" && o=="down"
         ) {
 
           // n-shape
@@ -112,7 +309,7 @@ module.exports = library.export(
             "height": stud.WIDTH+"em"
           })
 
-        } else if (topView && o=="east" || sideView && o=="horizontal-south" || frontView && o=="horizontal-east"
+        } else if (v == "top" && o=="east" || v == "side" && o=="horizontal-south" || v == "front" && o=="horizontal-east"
         ) {
 
           // C-shape
@@ -122,7 +319,7 @@ module.exports = library.export(
             "height": stud.DEPTH+"em"
           })
 
-        } else if (topView && o=="west" || sideView && o=="horizontal-north" || frontView && o=="horizontal-west"
+        } else if (v == "top" && o=="west" || v == "side" && o=="horizontal-north" || v == "front" && o=="horizontal-west"
         ) {
 
           // ɔ-shape
@@ -132,7 +329,7 @@ module.exports = library.export(
             "height": stud.DEPTH+"em"
           })
 
-        } else if (topView && flat && options.xSize || sideView && horizontal && eastWest || frontView && horizontal && northSouth) { 
+        } else if (v == "top" && flat && options.xSize || v == "side" && horizontal && eastWest || v == "front" && horizontal && northSouth) { 
 
           // tall horizontal
           this.appendStyles({
@@ -140,7 +337,7 @@ module.exports = library.export(
             "height": stud.DEPTH+"em"
           })
 
-        } else if (topView && horizontal && northSouth || sideView && flat && !across || frontView && flat && across) {
+        } else if (v == "top" && horizontal && northSouth || v == "side" && flat && !across || v == "front" && flat && across) {
 
           // short horizontal
           this.appendStyles({
@@ -148,7 +345,7 @@ module.exports = library.export(
             "height": stud.WIDTH+"em"
           })
 
-        } else if (topView && flat && !across || sideView && vertical && eastWest || frontView && vertical && northSouth) {
+        } else if (v == "top" && flat && !across || v == "side" && vertical && eastWest || v == "front" && vertical && northSouth) {
 
           // wide vertical
           this.appendStyles({
@@ -156,7 +353,7 @@ module.exports = library.export(
             "width": stud.DEPTH+"em"
           })
 
-        } else if (topView && horizontal && eastWest || sideView && vertical && northSouth || frontView && vertical && eastWest) {
+        } else if (v == "top" && horizontal && eastWest || v == "side" && vertical && northSouth || v == "front" && vertical && eastWest) {
 
           // narrow vertical
           this.appendStyles({
@@ -166,11 +363,12 @@ module.exports = library.export(
 
         }
 
-        addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
+
       }
     )
 
-    function addStylesFromOptions(options, el) {
+    function addStylesFromOptions(options, el, viewOptions) {
 
       if (!el) {
         throw new Error("You wanted to add some styles from an options hash but you didn't pass an element: "+JSON.stringify(options))
@@ -196,12 +394,21 @@ module.exports = library.export(
 
       ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(
         function(attribute) {
+
+          if (options.name == "left-wall-A-sheathing" && attribute == "xSize") { debugger }
+
           var value = options[attribute]
           if (Number.isNaN(value)) {
             console.log("offending options:", options)
             throw new Error("option "+attribute+" is not a number")
           }
           var screenAttr
+
+          var view = viewOptions.view
+
+          if (!view) {
+            throw new Error("what view is this?")
+          }
 
           if (typeof value != "undefined") {
 
@@ -264,8 +471,14 @@ module.exports = library.export(
               value = Math.abs(value)
             }
 
-            el[screenAttr || attribute] = value
+            var attributeToSet = screenAttr || attribute
+
+            if (options.name == "left-wall-B-bottom-plate" && attributeToSet == "height") {
+              debugger
+            }
+
             styles[screenAttr || attribute] = value+"em"
+            el[attributeToSet] = value
             isSome = true
 
           }
@@ -294,8 +507,8 @@ module.exports = library.export(
         "box-sizing": "border-box",
         "position": "absolute",
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         var size = "0.2em"
 
@@ -305,8 +518,10 @@ module.exports = library.export(
         if (!o) {
           throw new Error("plywood needs an orientation")
         }
+
+        var v = options.view
         
-        if (topView && o=="west" || sideView && o=="north" || frontView && o=="west"
+        if (v == "top" && o=="west" || v == "side" && o=="north" || v == "front" && o=="west"
         ) {
 
           this.appendStyles({
@@ -314,21 +529,21 @@ module.exports = library.export(
             "border-right": size+dashStyle
           })
 
-        } else if (topView && o=="east" || sideView && o=="south" || frontView && o=="east") {
+        } else if (v == "top" && o=="east" || v == "side" && o=="south" || v == "front" && o=="east") {
 
           this.appendStyles({
             "border-right": size+" solid #863",
             "border-left": size+dashStyle
           })
 
-        } else if (topView && o=="north" || sideView && o=="up" || frontView && o=="up") {
+        } else if (v == "top" && o=="north" || v == "side" && o=="up" || v == "front" && o=="up") {
 
             this.appendStyles({
               "border-top": size+" solid #863",
               "border-bottom": size+dashStyle
             })
 
-        } else if (topView && o=="south" || sideView && o=="down" || frontView && o=="down") {
+        } else if (v == "top" && o=="south" || v == "side" && o=="down" || v == "front" && o=="down") {
 
             this.appendStyles({
               "border-bottom": size+" solid #863",
@@ -346,7 +561,7 @@ module.exports = library.export(
 
         addPart(this, options)
 
-        addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
       }
     )
     plywood.THICKNESS = 3/8
@@ -365,28 +580,28 @@ module.exports = library.export(
         "border": "0.2em solid #ec4",
         "position": "absolute"
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         this.borderBottom = "0.2em solid #ec4"
 
         var height = options.height
-
-        if(topView && options.zSize) {
+        var v = viewOptions.view
+        if(v == "top" && options.zSize) {
           height = options.zSize
-        } else if (sideView && options.ySize) {
+        } else if (v == "side" && options.ySize) {
           height = options.ySize
-        } else if (frontView && options.ySize) {
+        } else if (v == "front" && options.ySize) {
           height = options.ySize
         }
 
         var width = options.width
 
-        if (topView && options.xSize) {
+        if (v == "top" && options.xSize) {
           width = options.xSize
-        } else if (sideView && options.zSize) {
+        } else if (v == "side" && options.zSize) {
           width = options.zSize
-        } else if (frontView && options.xSize) {
+        } else if (v == "front" && options.xSize) {
           width = options.xSize
         }
 
@@ -406,7 +621,7 @@ module.exports = library.export(
           this.appendStyles({border: options.border})
         }
 
-        drawPlan.addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
       }
     )
     trim.THICKNESS = 0.75
@@ -420,12 +635,12 @@ module.exports = library.export(
         "border": "0.2em dotted #bcc",
         "position": "absolute"
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         addPart(this, options)
 
-        drawPlan.addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
       }
     )
 
@@ -435,8 +650,8 @@ module.exports = library.export(
       element.style({
         "position": "absolute"
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         var swing = doorSwing()
         var box = doorBox(swing)
@@ -458,7 +673,7 @@ module.exports = library.export(
 
         addPart(this, options)
 
-        drawPlan.addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
       }
     )
     door.WIDTH = DOOR_WIDTH
@@ -497,14 +712,16 @@ module.exports = library.export(
           "box-sizing": "border-box",
           "border": "0.4em solid black"
         }),
-        function(options) {
+        function(viewOptions) {
+          var options = joinObjects(arguments, 1)
+
           if (!options.ySize) {
             options.ySize = door.HEIGHT
           }
 
           addPart(this, options)
 
-          addStylesFromOptions(options, this)
+          addStylesFromOptions(options, this, viewOptions)
         }
       )
 
@@ -526,39 +743,26 @@ module.exports = library.export(
     )
 
 
-    function door(options) {
-      if (topView) {
+    function door(viewOptions) {
+      var options = joinObjects(arguments, 1)
+
+      if (viewOptions.view == "top") {
         topDoorContainer(options)
       } else {
         basicDoor(options)
       }
     }
 
-    function zDepthToLeft(depth) {
-      return (zDepth + PLAN_ORIGIN.left)*zoomFactor - 0.5
-    }
 
-    function setZDepth(d) {
-      if (d != zDepth) {
-        localStorage.zDepth = d
-      }
-
-      zDepth = d
-
-      var left = zDepthToLeft(d)
-
-      document.querySelector(".depth-slider").style.left = left+"em"
-    }
-
-    function sloped() {
-      var options = joinObjects(arguments)
-
+    function sloped(viewOptions) {
+      var options = joinObjects(arguments, 1)
+      var view = viewOptions.view
       var generator = options.part
       delete options.part
 
-      if (topView) {
+      if (view == "top") {
         return generator.call(null, options)
-      } else if (frontView) {
+      } else if (view == "front") {
         var sectionZ = options.section && options.section.origin.zPos
         if (typeof sectionZ == "undefined") {
           console.log("options", options)
@@ -568,6 +772,8 @@ module.exports = library.export(
         var originZ = sectionZ + (options.zPos || 0)
 
         var depth = Math.abs(options.zSize)
+
+        var zDepth = options.zDepth
 
         if (options.zSize < 0) {
           var minZ = originZ - depth
@@ -610,7 +816,8 @@ module.exports = library.export(
 
 
       if (!options.slope) {
-        throw new Error("You need to pass a slope option when you create a sloped piece. You passed options "+JSON.stringify(options))
+        debugger
+        throw new Error("You need to pass a slope option when you create a sloped piece.")
       }
 
       var wrapperOptions = {
@@ -642,9 +849,10 @@ module.exports = library.export(
 
       }
 
-      var innerEl = generator.call(null, innerOptions)
 
-      var wrapped = slopeWrapper(innerEl, wrapperOptions)
+      var innerEl = generator.call(null, viewOptions, innerOptions)
+
+      var wrapped = slopeWrapper(innerEl, wrapperOptions, viewOptions)
 
       addPart(wrapped, options)
 
@@ -666,15 +874,15 @@ module.exports = library.export(
         "overflow": "hidden",
         "box-sizing": "border-box"
       }),
-      function(el, options) {
+      function(el, options, viewOptions) {
 
         var angle = slopeToDegrees(options.slope)
-
-        var dh = el.width*options.slope
 
         if (!el.width) {
           throw new Error("Can't slope an element without a width "+JSON.stringify(el))
         }
+
+        var dh = el.width*options.slope
 
         el.appendStyles({
           "transform": "skewY(-"+angle+"deg)",
@@ -689,21 +897,22 @@ module.exports = library.export(
 
         this.addChild(el)
 
-        drawPlan.addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
       }
     )
 
 
 
-    function tilted() {
+    function tilted(viewOptions) {
       var options = joinObjects(arguments)
 
       var generator = options.part
       delete options.part
 
-      if (topView) {
+      var view = viewOptions.view
+      if (view == "top") {
         return generator.call(null, options)
-      } else if (frontView) {
+      } else if (view == "front") {
         var originZ = options.zPos
         var depth = Math.abs(options.zSize)
 
@@ -715,6 +924,7 @@ module.exports = library.export(
           var maxZ = originZ + depth
         }
 
+        var zDepth = options.zDepth
         var zIntersect = zDepth - originZ
         var boost = zIntersect * options.slope
 
@@ -735,7 +945,7 @@ module.exports = library.export(
           ySize: newYSize,
         })
 
-        return generator.call(null, newOptions)
+        return generator.call(null, viewOptions, newOptions)
       }
 
       if (typeof options.ySize == "undefined") {
@@ -802,12 +1012,12 @@ module.exports = library.export(
         "box-sizing": "border-box",
         "border": "0.2em solid rgba(0,0,255,0.4)"
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         addPart(this, options)
 
-        drawPlan.addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
       }
     )
 
@@ -819,12 +1029,12 @@ module.exports = library.export(
         "box-sizing": "border-box",
         "border": "0.2em solid #fa4"
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         addPart(this, options)
 
-        drawPlan.addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
       }
     )
 
@@ -841,12 +1051,12 @@ module.exports = library.export(
         "border": "0.5em dotted rgba(255,255,255,0.8)",
         "z-index": "-100",
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         addPart(this, options)
 
-        drawPlan.addStylesFromOptions(options, this)
+        addStylesFromOptions(options, this, viewOptions)
       }
     )
 
@@ -862,8 +1072,8 @@ module.exports = library.export(
         "transition": "transform 100ms",
         "transition-timing-function": "linear",
       }),
-      function() {
-        var options = joinObjects(arguments)
+      function(planElement, viewOptions) {
+        var options = joinObjects(arguments, 1)
 
         if (options.name) {
           this.attributes["data-name"] = this.name = options.name
@@ -875,24 +1085,32 @@ module.exports = library.export(
         }
 
         var filtered = pick(options, "xPos", "yPos", "zPos")
-        addStylesFromOptions(filtered, this)
+        addStylesFromOptions(filtered, this, viewOptions)
 
         this.origin = options
 
-        if (sections) {
-          sections.push(this)
+        if (planElement) {
+          planElement.addChild(this)
         }
       }
     )
 
-    function pick(object) {
-      var keys = Array.prototype.slice.call(arguments, 1)
-      var light = {}
-      keys.forEach(function(key) {
-        light[key] = object[key]
-      })
-      return light
+    var drawableParts = {
+      section: section,
+      stud: stud,
+      plywood: plywood,
+      section: section,
+      door: door,
+      trim: trim,
+      shade: shade,
+      twinWall: twinWall,
+      insulation: insulation,
+      flooring: flooring,
+      tilted: tilted,
+      sloped: sloped,
     }
+
+
     var sectionBefore = element.style(
       ".section::before",
       {
@@ -922,41 +1140,6 @@ module.exports = library.export(
 
 
 
-
-    // All of the parts and helpers:
-
-    var drawableParts = {
-      section: section,
-      stud: stud,
-      plywood: plywood,
-      section: section,
-      door: door,
-      trim: trim,
-      shade: shade,
-      sloped: sloped,
-      twinWall: twinWall,
-      insulation: insulation,
-      flooring: flooring,
-      tilted: tilted,
-      slopeToRadians: slopeToRadians,
-      slopeToDegrees: slopeToDegrees,
-      verticalSlice: verticalSlice
-    }
-
-
-
-
-
-
-
-    var sections
-
-    if (localStorage.zoomFactor) {
-      var zoomFactor = parseFloat(localStorage.zoomFactor)
-    } else {
-      var zoomFactor = 0.39
-    }
-
     var planTemplate = element.template(
       ".plan",
       element.style({
@@ -966,8 +1149,8 @@ module.exports = library.export(
         "top": PLAN_ORIGIN.top+"em",
         "min-width": "120em",
         "min-height": "120em",
-        "font-size": zoomFactor+"em",
-        "margin": "0"
+        "margin": "0",
+        "font-size": "0.39em",
       })
     )
 
@@ -1126,21 +1309,6 @@ module.exports = library.export(
     )
 
 
-    var startXPixels
-    var startZDepth
-
-    function dragZ(event) {
-      if (event.screenX == 0) { return }
-      var dx = event.screenX - startXPixels
-      var newZDepth = startZDepth + dx / (16*zoomFactor)
-      setZDepth(newZDepth)
-    }
-
-    function zDragStart(event) {
-      startXPixels = event.screenX
-      startZDepth = zDepth
-    }
-
     var depthSliderBar = element.style(
       ".depth-slider::after",
       {
@@ -1157,45 +1325,6 @@ module.exports = library.export(
 
     var container
     var addedEditor
-    var addedStyles
-
-    function ensureStyles() {
-      if (addedStyles == true) {
-        return
-      }
-
-      addHtml(
-        element.stylesheet(
-          planTemplate,
-          stud,
-          plywood,
-          section,
-          sectionBefore,
-          sectionAfter,
-          trim,
-          shade,
-          topDoorContainer,
-          basicDoor,
-          doorKnob,
-          doorBox,
-          doorSwing,
-          slopeWrapper,
-          twinWall,
-          insulation,
-          flooring,
-          overlay,
-          viewButton,
-          zoomButton,
-          resetZoom,
-          sectionToggle,
-          sectionToggleOn,
-          depthSlider,
-          depthSliderBar,
-          explodeButton
-        ).html()
-      )
-      addedStyles = true
-    }
 
     function ensureEditor(callback) {
       if (addedEditor) {
@@ -1311,17 +1440,13 @@ module.exports = library.export(
     }
 
 
-    var drawPlan = {
-      parameterSets: [],
-      generators: [],
-    }
-
     function redraw() {
       emptyNode(container)
       sections = []
       renderers.map(call)
       sections.forEach(addToPage)
       drawing = false
+      throw new Error("view?")
       document.querySelector(".depth-slider").style.display = sideView ? "block" : "none"
     }
 
@@ -1334,125 +1459,36 @@ module.exports = library.export(
       addHtml.inside(container, section.html())
     }
 
-    drawPlan.clear = function() {
+    function clear() {
       renderers = []
       emptyNode(container)
     }
 
-    if (localStorage.showSection) {
-      var showSection = JSON.parse(localStorage.showSection)
-    } else {
-      var showSection = {}
-    }
-
-    var toggles
-    var togglesAdded = {}
-
-    function ensureToggle(name) {
-      if (!name) { return }
-
-      if (!togglesAdded[name]) {
-        togglesAdded[name] = true
-
-        var show = showSection[name] !== false
-        showSection[name] = show
-
-        var link = element("a.section-toggle.button", name, {
-          href: "javascript: plan.toggleSection(\""+name+"\")"
-        })
-        if (show) {
-          link.classes.push("on")
-        }
-        link.classes.push("toggle-"+name)
-        addHtml.inside(toggles, link.html())
-      }
-    }
-
     var drawing = false
 
-    function toggleSection(name) {
-      if (drawing) { return }
+    function pick(object) {
+      var keys = Array.prototype.slice.call(arguments, 1)
+      var light = {}
+      keys.forEach(function(key) {
+        light[key] = object[key]
+      })
+      return light
+    }
 
-      var on = !showSection[name]
-
-      showSection[name] = on
-      localStorage.showSection = JSON.stringify(showSection)
-      
-      var toggle = document.querySelector(".toggle-"+name)
-
-      if (on) {
-        toggle.classList.add("on")
-      } else {
-        toggle.classList.remove("on")
+    function contains(array, value) {
+      if (!Array.isArray(array)) {
+        throw new Error("looking for "+JSON.stringify(value)+" in "+JSON.stringify(array)+", which is supposed to be an array. But it's not.")
       }
-
-      emptyNode(container)
-
-      if (drawing) { return }
-      setTimeout(redraw, 0)
-      drawing = true
-    }
-
-    function emptyNode(node) {
-      while (node.firstChild) {
-        node.removeChild(node.firstChild)
+      var index = -1;
+      var length = array.length;
+      while (++index < length) {
+        if (array[index] == value) {
+          return true;
+        }
       }
+      return false;
     }
 
-    function getPartRenderer(name) {
-      return drawableParts[name]
-    }
-
-    var sideView
-    var frontView
-    var topView
-    var view
-
-    function setView(newView, draw) {
-      if (!newView) { return }
-
-      view = newView
-      localStorage.view = newView
-      sideView = frontView = topView = false
-      if (view == "side") {
-        sideView = true
-      } else if (view == "front") {
-        frontView = true
-      } else if (view == "top") {
-        topView = true
-      } else {
-        throw new Error(view+" is not a valid view")
-      }
-
-      if (draw !== false) { redraw() }
-    }
-
-    function zoom(by) {
-      if (by == "default") {
-        zoomFactor = 0.39
-      } else {
-        zoomFactor = zoomFactor*by
-      }
-      localStorage.zoomFactor = zoomFactor
-      document.querySelector(".plan").style["font-size"] = zoomFactor+"em"
-      setZDepth(zDepth)
-    }
-
-
-
-    drawPlan.draw = draw
-    drawPlan.drawSection = drawSection
-    drawPlan.drawScraps = drawScraps
-    drawPlan.addStylesFromOptions = addStylesFromOptions
-    drawPlan.parts = drawableParts
-    drawPlan.toggleSection = toggleSection
-    drawPlan.setView = setView
-    drawPlan.setZDepth = setZDepth
-    drawPlan.zoom = zoom
-    drawPlan.dragZ = dragZ
-    drawPlan.zDragStart = zDragStart
-    drawPlan.explode = explode
-
-    return drawPlan
+    return Viewer
   }
 )
