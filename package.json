@@ -1,0 +1,15 @@
+{
+  "name": "teensy-house",
+  "version": "0.0.0",
+  "description": "Build a very small house",
+  "dependencies": {
+    "nrtv-library": "*",
+    "nrtv-element": "*",
+    "nrtv-server": "*",
+    "nrtv-browser-bridge": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erikpukinskis/house-plans.git"
+  }
+}
