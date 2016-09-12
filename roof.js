@@ -17,81 +17,84 @@ module.exports = library.export(
       var roofLength = Math.sqrt(96*96 - 12*12)
 
       var backOverhang = 8
-      function rafter(xPos, name) {
 
-        tilted({
-          part: trim,
-          name: name,
-          section: roof,
-          slope: options.slope,
-          xPos: xPos,
-          xSize: RAFTER_WIDTH,
-          yPos: -RAFTER_HEIGHT + backOverhang*options.slope,
-          ySize: RAFTER_HEIGHT,
-          zPos: -backOverhang,
-          zSize: roofLength,
-        })
-
+      var rafter = {
+        part: trim,
+        section: roof,
+        slope: options.slope,
+        xSize: RAFTER_WIDTH,
+        yPos: -RAFTER_HEIGHT + backOverhang*options.slope,
+        ySize: RAFTER_HEIGHT,
+        zPos: -backOverhang,
+        zSize: roofLength,
       }
 
       var centerLine = 48 - plywood.THICKNESS
 
-      rafter(0, "left-rafter")
+      tilted(rafter, {
+        xPos: 0,
+        name: "left-rafter"
+      })
 
       var yPos = -RAFTER_HEIGHT + backOverhang*options.slope
 
-      rafter(centerLine - 0.75, "center-rafter")
+      tilted(rafter, {
+        xPos: centerLine - 0.75,
+        name: "center-rafter"
+      })
 
-      rafter(96 - plywood.THICKNESS*2 - RAFTER_WIDTH, "right-rafter")
+      tilted(rafter, {
+        xPos: 96 - plywood.THICKNESS*2 - RAFTER_WIDTH,
+        name: "right-rafter"
+      })
 
       var roofHeight = RAFTER_HEIGHT - stud.DEPTH*options.slope
 
-      function roofCap(xPos, name) {
-
-        tilted({
-          part: trim,
-          section: roof,
-          name: name,
-          slope: options.slope,
-          xPos: xPos,
-          xSize: 7.5,
-          yPos: -verticalSlice(RAFTER_HEIGHT + trim.THICKNESS, options.slope) + backOverhang*options.slope,
-          ySize: trim.THICKNESS,
-          zPos: -backOverhang,
-          zSize: roofLength
-        })
-
+      var roofCap = {
+        part: trim,
+        section: roof,
+        slope: options.slope,
+        xSize: 7.5,
+        yPos: -verticalSlice(RAFTER_HEIGHT + trim.THICKNESS, options.slope) + backOverhang*options.slope,
+        ySize: trim.THICKNESS,
+        zPos: -backOverhang,
+        zSize: roofLength
       }
 
       var overhang = 4.5
-      roofCap(-overhang, "left-roof-cap")
 
-      roofCap(centerLine - 7.5/2, "center-roof-cap")
+      tilted(roofCap, {
+        xPos: -overhang,
+        name: "left-roof-cap"
+      })
 
-      roofCap(96 - plywood.THICKNESS * 2 - 7.5 + overhang, "right-roof-cap")
+      tilted(roofCap, {
+        xPos: centerLine - 7.5/2,
+        name: "center-roof-cap",
+      })
 
+      tilted(roofCap, {
+        xPos: 96 - plywood.THICKNESS * 2 - 7.5 + overhang,
+        name: "right-roof-cap",
+      })
 
-      function roofPanel(options) {
-
-        tilted(merge(options, {
-          part: twinWall,
-          section: roof,
-          slope: options.slope,
-          yPos: -RAFTER_HEIGHT - plywood.THICKNESS*options.slope + backOverhang*options.slope,
-          ySize: HousePlan.parts.twinWall.THICKNESS,
-          zPos: -backOverhang,
-          zSize: roofLength
-        }))
-
+      var roofPanel = {
+        part: twinWall,
+        section: roof,
+        slope: options.slope,
+        yPos: -RAFTER_HEIGHT - plywood.THICKNESS*options.slope + backOverhang*options.slope,
+        ySize: HousePlan.parts.twinWall.THICKNESS,
+        zPos: -backOverhang,
+        zSize: roofLength
       }
 
-      roofPanel({
+      tilted(roofPanel, {
         name: "left-twin-wall",
         xPos: RAFTER_WIDTH,
         xSize: 48 - plywood.THICKNESS - RAFTER_WIDTH*1.5
       })
 
-      roofPanel({
+      tilted(roofPanel, {
         name: "right-twin-wall",
         xPos: centerLine+0.75,
         xSize: 48 - RAFTER_WIDTH*1.5 - plywood.THICKNESS
