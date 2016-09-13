@@ -3,8 +3,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "allocate-materials",
-  ["./some_materials", "./set_of_materials", "./house_plan"],
-  function(BASE_MATERIALS, SetOfMaterials, HousePlan) {
+  ["./set_of_materials", "./house_plan"],
+  function(SetOfMaterials, HousePlan) {
 
     function allocateMaterials(plan) {
       var set = new SetOfMaterials()
@@ -374,8 +374,6 @@ module.exports = library.export(
         return []
       }
     }
-
-    allocateMaterials.BASE_MATERIALS = BASE_MATERIALS
 
     return allocateMaterials
   }

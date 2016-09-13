@@ -396,8 +396,6 @@ module.exports = library.export(
       ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(
         function(attribute) {
 
-          if (options.name == "left-wall-A-sheathing" && attribute == "xSize") { debugger }
-
           var value = options[attribute]
           if (Number.isNaN(value)) {
             console.log("offending options:", options)
@@ -473,10 +471,6 @@ module.exports = library.export(
             }
 
             var attributeToSet = screenAttr || attribute
-
-            if (options.name == "left-wall-B-bottom-plate" && attributeToSet == "height") {
-              debugger
-            }
 
             styles[screenAttr || attribute] = value+"em"
             el[attributeToSet] = value

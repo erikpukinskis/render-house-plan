@@ -3,8 +3,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "buy-house-parts",
-  ["./allocate_materials", "./floor_section", "nrtv-element", "nrtv-browser-bridge"],
-  function(allocateMaterials, floorSection, element, BrowserBridge) {
+  ["./allocate_materials", "./some_materials", "./floor_section", "nrtv-element", "nrtv-browser-bridge"],
+  function(allocateMaterials, BASE_MATERIALS, floorSection, element, BrowserBridge) {
 
 
     return function(myPlan) {
@@ -47,7 +47,7 @@ module.exports = library.export(
           els.push(element(text))
         }
 
-        var material = allocateMaterials.BASE_MATERIALS[description]
+        var material = BASE_MATERIALS[description]
         var count = els.length + (material.extra || 0)
         var price = material.price
 
@@ -71,7 +71,7 @@ module.exports = library.export(
 
       function describeBulk(group) {
 
-        var material = allocateMaterials.BASE_MATERIALS[description]
+        var material = BASE_MATERIALS[description]
         var totalQuantity = 0
         var els = []
         var ct = 1

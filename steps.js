@@ -32,27 +32,28 @@ module.exports = function() {
   }
 
   function runGenerator(generator, handlers) {
-      var names = argNames(generator)
-      var outputs = []
-      var args = names.map(toHandler)
+    var names = argNames(generator)
+    var outputs = []
+    var args = names.map(toHandler)
 
-      generator.apply(null, args)
-
-      function toHandler(name) {
-        var handler = handlers[name]
-        if (!handler) {
-          console.log("generator:", generator)
-          throw new Error("A step generator used a "+name+" command, but you didn't provide a handler for it. Try steps.play({"+name+": function(some, args) { return \"some result\" })")
-        }
-
-        return captureOutput.bind(handler)
+    generator.apply(null, args)
+    
+    function toHandler(name) {
+      var handler = handlers[name]
+      if (!handler) {
+        console.log("generator:", generator)
+        throw new Error("A step generator used a "+name+" command, but you didn't provide a handler for it. Try steps.play({"+name+": function(some, args) { return \"some result\" })")
       }
 
-      function captureOutput() {
-        var output = this.apply(null, arguments)
-        outputs.push(output)
-      }
+      return captureOutput.bind(handler)
+    }
 
+    function captureOutput() {
+      var output = this.apply(null, arguments)
+      outputs.push(output)
+    }
+
+    return outputs
   }
 
   function argNames(func) {
