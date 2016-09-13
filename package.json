@@ -6,7 +6,8 @@
     "nrtv-library": "*",
     "nrtv-element": "*",
     "nrtv-server": "*",
-    "nrtv-browser-bridge": "*"
+    "nrtv-browser-bridge": "*",
+    "function-call": "*"
   },
   "repository": {
     "type": "git",

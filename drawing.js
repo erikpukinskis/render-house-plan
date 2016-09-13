@@ -5,12 +5,13 @@ module.exports = library.export(
   ["nrtv-browser-bridge", "./viewer"],
   function(BrowserBridge, Viewer) {
 
-    function sendDrawing(plan) {
+    function sendDrawing(plan, view) {
       var bridge = new BrowserBridge()
 
       Viewer.defineHandlersOn(bridge)
+      var viewer = new Viewer(view)
 
-      return bridge.sendPage(Viewer.render(plan))
+      return bridge.sendPage(viewer.render(plan))
     }
 
     return sendDrawing

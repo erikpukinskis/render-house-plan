@@ -7,6 +7,7 @@ module.exports = library.export(
     function HousePlan() {
       this.generators = []
       this.parameterSets = []
+      this.indexesByName = {}
     }
 
     HousePlan.parts = {
@@ -94,15 +95,30 @@ module.exports = library.export(
     }
 
     HousePlan.prototype.add =
-      function add(generator) {
+      function add(generator, options) {
         var parameters = []
-
+  
+        // oi this is very hacky, conventional
+        if (typeof options == "object" && typeof options.name == "string") {
+          this.indexesByName[options.name] = this.generators.length
+        }
+  
         for(var i=1; i<arguments.length; i++) {
-          parameters.push(arguments[i])
+          var arg = arguments[i]
+          if (arg.name) {
+            name = arg.name
+          }
+          parameters.push(arg)
         }
 
         this.generators.push(generator)
         this.parameterSets.push(parameters)
+      }
+
+    HousePlan.prototype.getOptions =
+      function(name) {
+        var i = this.indexesByName[name]
+        return this.parameterSets[i][0]
       }
 
     function verticalSlice(thickness, slope) {

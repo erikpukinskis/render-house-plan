@@ -16,12 +16,13 @@ module.exports = library.export(
     }
 
 
-    function Viewer() {
+    function Viewer(view) {
+      this.view = view
     }
-    Viewer.render = function(plan) {
+    Viewer.prototype.render = function(plan) {
       var el = element(".plan")
       var viewOptions = {
-        view: "front",
+        view: this.view,
         zDepth: 72,
       }
       plan.generate(getPartGenerator.bind(null, el, viewOptions))
@@ -32,8 +33,8 @@ module.exports = library.export(
           stud,
           plywood,
           section,
-          sectionBefore,
-          sectionAfter,
+          // sectionBefore,
+          // sectionAfter,
           trim,
           shade,
           topDoorContainer,

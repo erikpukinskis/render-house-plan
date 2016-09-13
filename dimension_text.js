@@ -1,4 +1,4 @@
-function dimensionText(number) {
+module.exports = function dimensionText(number) {
   var integer = Math.floor(number)
   var remainder = number - integer
   var sixteenths = Math.round(remainder*16)
