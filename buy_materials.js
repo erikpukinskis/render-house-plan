@@ -3,12 +3,11 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "buy-house-parts",
-  ["./allocate_materials", "./some_materials", "./floor_section", "nrtv-element", "nrtv-browser-bridge"],
+  ["./allocate_materials", "./some_materials", "./floor_section", "web-element", "browser-bridge"],
   function(allocateMaterials, BASE_MATERIALS, floorSection, element, BrowserBridge) {
 
 
-    return function(myPlan) {
-      var materials = allocateMaterials(myPlan)
+    return function(materials) {
       var bridge = new BrowserBridge()
       var body = element()
 

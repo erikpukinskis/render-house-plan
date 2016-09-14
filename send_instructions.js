@@ -2,8 +2,62 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["./build", "./allocate_materials", "./build_floor", "browser-bridge", "web-element", "./dimension_text", "make-request"],
-  function(build, allocateMaterials, buildFloor, BrowserBridge, element, dimensionText, makeRequest) {
+  ["./build", "./build_floor", "browser-bridge", "web-element", "./dimension_text", "make-request"],
+  function(build, buildFloor, BrowserBridge, element, dimensionText, makeRequest) {
+
+    function sendInstructions(plan, materials, server, sectionName) {
+
+      var options = plan.getOptions(sectionName)
+
+      var steps = buildFloor(options, materials)
+
+      var bridge = new BrowserBridge()
+
+      bridge.addToHead(build.stylesheet.html())
+      bridge.addToHead(element.stylesheet(stepTitle, em, checkBox, taskTemplate).html())
+
+      var page = element()
+
+      var toggle = toggleTask(server, bridge)
+
+      steps.play({
+        step: function(description, results) {
+          var stepEl = element(
+            ".step",
+            stepTitle(description)
+          )
+
+          if (results) {
+            results.map(function(el) {
+              stepEl.addChild(el)
+            })
+          }
+          page.addChild(stepEl)
+        },
+        task: task,
+        cut: function(scraps) {
+          return element(".cut_instructions", scraps.map(scrapToTask))
+        }
+      })
+
+      function scrapToTask(scrap) {
+        var material = scrap.material
+
+        var text = scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong> from "+material.description+" #"+material.number
+  
+        var id = "cut-"+scrap.name+"-from-"+toSlug(material.description)+"-no"+material.number
+
+        return task(id, text)
+      }
+
+      function task(id, text) {
+        id = "building-house-X-"+id+"-for-"+sectionName
+
+        return taskTemplate(toggle, text, id)
+      }
+
+      return bridge.sendPage(page)
+    }
 
     var stepTitle = element.template(
       ".step-title",
@@ -47,19 +101,23 @@ module.exports = library.export(
         "margin-bottom": "0.5em",
         "cursor": "pointer",
       }),
-      function(toggleTask, text) {
-        if (!text) {
-          throw new Error("na")
-        }
+      function(toggleTask, text, id) {
+        // if (!text) {
+        //   throw new Error("task needs text")
+        // }
         this.addChild(checkBox())
-        this.addChild(text)
-        this.onclick(toggleTask.withArgs(42).evalable())
+        this.addChild(text||"hay")
+        this.onclick(toggleTask.withArgs(id).evalable())
       }
     )
 
+    function toSlug(string) {
+      return string.toLowerCase().replace(/[^0-9a-z]+/g, "-")
+    }
+
     function toggleTask(server, bridge) {
       if (!server.__toggleTaskRoute) {
-        server.addRoute("post", "/tasks/:id/completed",
+        server.addRoute("post", "/tasks/:id/complete",
           handleRequest)
       }
 
@@ -71,67 +129,19 @@ module.exports = library.export(
       function sendRequest(makeRequest, identifier) {
         makeRequest({
           method: "post",
-          path: "/tasks/"+identifier+"/completed",
+          path: "/tasks/"+identifier+"/complete"
         }, function(resp) {
           console.log("got resp", resp)
         })
       }
 
       function handleRequest(request, response) {
+
+        console.log("task.complete", request.params.id)
         response.json({status: "ok"})
       }
 
       return binding
-    }
-
-    function sendInstructions(plan, server, sectionName) {
-
-      var materials = allocateMaterials(plan)
-
-      var options = plan.getOptions(sectionName)
-
-      var steps = buildFloor(options, materials)
-
-      var bridge = new BrowserBridge()
-
-      bridge.addToHead(build.stylesheet.html())
-      bridge.addToHead(element.stylesheet(stepTitle, em, checkBox, taskTemplate).html())
-
-      var page = element()
-
-      var toggle = toggleTask(server, bridge)
-
-      var task = taskTemplate.bind(null, toggle)
-
-      steps.play({
-        step: function(description, results) {
-          var stepEl = element(
-            ".step",
-            stepTitle(description)
-          )
-
-          if (results) {
-            results.map(function(el) {
-              stepEl.addChild(el)
-            })
-          }
-          page.addChild(stepEl)
-        },
-        task: function(text) {
-          return task(text)
-        },
-        cut: function(scraps) {
-          return element(".cut_instructions", scraps.map(toCutInstruction))
-        }
-      })
-
-      function toCutInstruction(scrap) {
-        var text = scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong> from "+scrap.material.description+" #"+scrap.material.number
-
-        return task(text)
-      }
-
-      return bridge.sendPage(page)
     }
 
     return sendInstructions

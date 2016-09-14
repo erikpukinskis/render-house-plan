@@ -1398,14 +1398,14 @@ module.exports = library.export(
       var scrapBox = element()
 
       scraps.map(function(scrap) {
-        if (!scrap.part) {
+        if (!scrap.name) {
           console.log("scrap:", scrap)
           throw new Error("scrap doesn't have a part?")
         }
-        var scrapEl = elTrap[scrap.part]
+        var scrapEl = elTrap[scrap.name]
         if (!scrapEl) {
           console.log("scrap:", scrap)
-          throw new Error("never rendered a part called "+scrap.part)
+          throw new Error("never rendered a part called "+scrap.name)
         }
         scrapBox.addChild(scrapEl)
       })

@@ -17,9 +17,9 @@ module.exports = library.export(
     var urls = {
       "left_floor": "/build-left-floor-section"
     }
-    function index(plan) {
-      var bridge = new BrowserBridge()
 
+    function index() {
+      var bridge = new BrowserBridge()
 
       var page = element()
 
@@ -36,6 +36,7 @@ module.exports = library.export(
 
       return bridge.sendPage(page)
     }
+
 
 
     return {

@@ -5,10 +5,26 @@ module.exports = library.export(
   ["./steps", "./house_plan", "nrtv-browser-bridge", "./dimension_text"],
   function(Steps, HousePlan, BrowserBridge, dimensionText) {
 
+    function chalkLines(direction, joists, task) {
+
+      task("chalk-horizontal-lines", "Add chalk lines <strong>3/4\"</strong> in from the front and back edge (the shorter sides)")
+
+      var distances = joists.map(toLeft).join(", ")
+
+      function toLeft(joist) {
+        return "<strong>"+dimensionText(joist.destination.xPos + 0.75)+"</strong>"
+      }
+
+      task("chalk-vertical-lines", "Add chalk lines at "+distances+" from the "+direction+" (long side)")
+
+    }
+
+
     function buildFloor(options, materials) {
 
       var STUD_WIDTH = HousePlan.parts.stud.WIDTH
       materials.setPrefix(options.name)
+
       var steps = new Steps()
 
       var joists = materials.list(
@@ -39,28 +55,14 @@ module.exports = library.export(
 
         cut(materials.list("sheathing"))
 
-        chalkLines("right", task)
+        chalkLines("right", joists, task)
       })
-
-      function chalkLines(direction, task) {
-
-        task("Add chalk lines 3/4\" in from the front and back edge (the shorter sides)")
-
-        var distances = joists.map(toLeft).join(", ")
-
-        function toLeft(joist) {
-          return "<strong>"+dimensionText(joist.destination.xPos + 0.75)+"</strong>"
-        }
-
-        task("Add chalk lines at "+distances+" from the "+direction+" (long side)")
-
-      }
 
       steps.add("cut subfloor", function(cut, task) {
 
         cut(materials.list("subfloor"))
 
-        chalkLines("left", task)
+        chalkLines("left", joists, task)
 
       })
 
@@ -69,19 +71,19 @@ module.exports = library.export(
         var trackLength = dimensionText(materials.list("front-track")[0].size
         )
 
-        task("Lay out the front and back tracks ("+trackLength+" long) "+dimensionText(options.zSize)+" apart.")
+        task("space-tracks", "Lay out the front and back tracks (should be "+trackLength+" long) <strong>"+dimensionText(options.zSize)+"</strong> apart.")
 
         function toLeft(joist) {
           return "<strong>"+dimensionText(joist.destination.xPos)+"</strong>"
         }
 
-        task("Set the joists inthe tracks "+joists.map(toLeft)+" from the right")
+        task("set-joists", "Set the joists in the tracks "+joists.map(toLeft)+" from the right")
 
         // diagram("bottom", materials.list("front-track", "back-track", "joist-A", "joist-B", "joist-C", "joist-D"))
 
-        task("Crimp each stud to both tracks, with one single crimp on the top side of the stud")
+        task("crimp", "Crimp each stud to both tracks, with one single crimp on the top side of the stud")
 
-        task("Add shims underneath each of the four corners until the tracks and the outer studs are level")
+        task("shim", "Add shims underneath each of the four corners until the tracks and the outer studs are level")
 
       })
 
@@ -93,9 +95,9 @@ module.exports = library.export(
           right: "left"
         }[options.join]
 
-        task("Lay the sheathing plywood on top of the framing, so that "+itLinesUp(inverseJoin))
+        task("lay-sheathing", "Lay the sheathing plywood on top of the framing, so that "+itLinesUp(inverseJoin))
 
-        task("Screw down the sheathing, one screw every 8 inches on the chalk lines")
+        task("screw-sheathing", "Screw down the sheathing, one screw every 8 inches on the chalk lines")
 
       })
 
@@ -109,11 +111,13 @@ module.exports = library.export(
         }
       }
 
-      steps.add("flip the section over")
+      steps.add("flip it", function(task) {
+        task("flip", "flip the section over")
+      })
 
       steps.add("add insulation", function(task, cut) {
 
-        task("cut and add insulation between the joists")
+        task("insulate", "cut and add insulation between the joists")
 
         cut(materials.list("insulation-A", "insulation-B", "insulation-C"))
 
@@ -121,19 +125,17 @@ module.exports = library.export(
 
       steps.add("attach subfloor", function(task) {
 
-        task("Lay the subfloor plywood on top of the framing, so that "+itLinesUp(options.join))
+        task("lay-subfloor", "Lay the subfloor plywood on top of the framing, so that "+itLinesUp(options.join))
 
-        task("Screw down the subfloor, one screw ever 8 inches on the chalk lines")
+        task("screw-subfloor", "Screw down the subfloor, one screw ever 8 inches on the chalk lines")
 
       })
 
       steps.add("flooring", function(task) {
 
-        task("Glue down flooring to cover the entire subflooor")
+        task("install-flooring", "Glue down flooring to cover the entire subflooor")
 
       })
-
-      steps.add("you did it!")
 
       return steps
     }

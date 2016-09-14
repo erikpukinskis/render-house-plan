@@ -119,7 +119,7 @@ module.exports = library.export(
 
         var scrap = {
           cut: cut,
-          part: name,
+          name: name,
           material: material,
           size: size,
           destination: toDestination(options)
