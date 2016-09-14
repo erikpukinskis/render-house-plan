@@ -1,30 +1,31 @@
 var library = require("nrtv-library")(require)
 
 library.using(
-  ["nrtv-server", "./teensy-house-3", "./buy_materials", "./drawing", "./build"],
-  function(server, teensyHouse, buy, draw, build) {
+  ["nrtv-server", "./teensy-house-3", "./buy_materials", "./drawing", "./build", "./send_instructions"],
+  function(server, teensyHouse, buy, draw, build, sendInstructions) {
     server.start(8181)
 
-    var teensy = teensyHouse()
+    var house = teensyHouse()
 
     server.addRoute(
       "get", "/buy",
-      buy(teensy)
+      buy(house)
     )
 
     server.addRoute(
       "get", "/drawing",
-      draw(teensy, "top")
+      draw(house, "top")
     )
 
     server.addRoute(
       "get", "/build",
-      build.index(teensy)
+      build.index(house)
     )
 
     server.addRoute(
       "get", "/build-left-floor-section",
-      build.floor(teensy)
+      sendInstructions(house, server, "floor-left")
     )
+
   }
 )

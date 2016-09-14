@@ -4,10 +4,11 @@
   "description": "Build a very small house",
   "dependencies": {
     "nrtv-library": "*",
-    "nrtv-element": "*",
+    "web-element": "*",
     "nrtv-server": "*",
-    "nrtv-browser-bridge": "*",
-    "function-call": "*"
+    "browser-bridge": "*",
+    "function-call": "*",
+    "make-request": "*"
   },
   "repository": {
     "type": "git",

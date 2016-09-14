@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["nrtv-browser-bridge", "nrtv-element", "./dimension_text"],
-  function(BrowserBridge, element, dimensionText) {
+  ["./build", "./allocate_materials", "./build_floor", "browser-bridge", "web-element", "./dimension_text", "make-request"],
+  function(build, allocateMaterials, buildFloor, BrowserBridge, element, dimensionText, makeRequest) {
 
     var stepTitle = element.template(
       ".step-title",
@@ -53,21 +53,55 @@ module.exports = library.export(
         }
         this.addChild(checkBox())
         this.addChild(text)
-        this.onclick(toggleTask)
+        this.onclick(toggleTask.withArgs(42).evalable())
       }
     )
 
-    function sendInstructions(steps, bridge) {
+    function toggleTask(server, bridge) {
+      if (!server.__toggleTaskRoute) {
+        server.addRoute("post", "/tasks/:id/completed",
+          handleRequest)
+      }
 
-      var body = element(
-        element.stylesheet(stepTitle, em, checkBox, taskTemplate)
+      var binding = bridge.defineFunction(
+        [makeRequest.defineOn(bridge)],
+        sendRequest
       )
 
-      var toggleTask = bridge.defineFunction(function() {
-        console.log("bam!")
-      })
+      function sendRequest(makeRequest, identifier) {
+        makeRequest({
+          method: "post",
+          path: "/tasks/"+identifier+"/completed",
+        }, function(resp) {
+          console.log("got resp", resp)
+        })
+      }
 
-      var task = taskTemplate.bind(null, toggleTask)
+      function handleRequest(request, response) {
+        response.json({status: "ok"})
+      }
+
+      return binding
+    }
+
+    function sendInstructions(plan, server, sectionName) {
+
+      var materials = allocateMaterials(plan)
+
+      var options = plan.getOptions(sectionName)
+
+      var steps = buildFloor(options, materials)
+
+      var bridge = new BrowserBridge()
+
+      bridge.addToHead(build.stylesheet.html())
+      bridge.addToHead(element.stylesheet(stepTitle, em, checkBox, taskTemplate).html())
+
+      var page = element()
+
+      var toggle = toggleTask(server, bridge)
+
+      var task = taskTemplate.bind(null, toggle)
 
       steps.play({
         step: function(description, results) {
@@ -81,7 +115,7 @@ module.exports = library.export(
               stepEl.addChild(el)
             })
           }
-          body.addChild(stepEl)
+          page.addChild(stepEl)
         },
         task: function(text) {
           return task(text)
@@ -97,7 +131,7 @@ module.exports = library.export(
         return task(text)
       }
 
-      return bridge.sendPage(body)
+      return bridge.sendPage(page)
     }
 
     return sendInstructions

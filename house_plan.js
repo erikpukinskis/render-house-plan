@@ -118,6 +118,10 @@ module.exports = library.export(
     HousePlan.prototype.getOptions =
       function(name) {
         var i = this.indexesByName[name]
+        if (typeof i == "undefined") {
+          throw new Error("House plan doesn't seem to have defined a section called "+name)
+        }
+        
         return this.parameterSets[i][0]
       }
 

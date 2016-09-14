@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "build",
-  ["nrtv-browser-bridge", "nrtv-element", "./allocate_materials", "./build_floor", "./send_instructions"],
-  function(BrowserBridge, element, allocateMaterials, buildFloor, sendInstructions) {
+  ["nrtv-browser-bridge", "nrtv-element"],
+  function(BrowserBridge, element) {
 
     var body = element.style("body", {
       "font-family": "sans-serif",
@@ -37,22 +37,9 @@ module.exports = library.export(
       return bridge.sendPage(page)
     }
 
-    function floor(plan) {
-      var materials = allocateMaterials(plan)
-
-      var options = plan.getOptions("floor-left")
-
-      var steps = buildFloor(options, materials)
-
-      var bridge = new BrowserBridge()
-      bridge.defineStyles(body)
-
-      return sendInstructions(steps, bridge)
-    }
-
 
     return {
       index: index,
-      floor: floor
+      stylesheet: element.stylesheet(body)
     }
 })
