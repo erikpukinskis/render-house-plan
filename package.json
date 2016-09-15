@@ -8,7 +8,11 @@
     "nrtv-server": "*",
     "browser-bridge": "*",
     "function-call": "*",
-    "make-request": "*"
+    "make-request": "*",
+    "knox": "*"
+  },
+  "scripts": {
+    "start": "env $(cat credentials | xargs) node server"
   },
   "repository": {
     "type": "git",

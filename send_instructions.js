@@ -2,8 +2,16 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["./build", "./build_floor", "browser-bridge", "web-element", "./dimension_text", "make-request"],
-  function(build, buildFloor, BrowserBridge, element, dimensionText, makeRequest) {
+  ["./build", "./build_floor", "browser-bridge", "web-element", "./dimension_text", "./module_universe", "./doable"],
+  function(build, buildFloor, BrowserBridge, element, dimensionText, ModuleUniverse, doable) {
+
+    var universe = new ModuleUniverse(
+      "houses",
+      ["doable"],
+      function(doable) {
+        // begin
+      }
+    )
 
     function sendInstructions(plan, materials, server, sectionName) {
 
@@ -18,7 +26,7 @@ module.exports = library.export(
 
       var page = element()
 
-      var toggle = toggleTask(server, bridge)
+      var toggle = doable.complete.defineOn(server, bridge, universe)
 
       steps.play({
         step: function(description, results) {
@@ -113,35 +121,6 @@ module.exports = library.export(
 
     function toSlug(string) {
       return string.toLowerCase().replace(/[^0-9a-z]+/g, "-")
-    }
-
-    function toggleTask(server, bridge) {
-      if (!server.__toggleTaskRoute) {
-        server.addRoute("post", "/tasks/:id/complete",
-          handleRequest)
-      }
-
-      var binding = bridge.defineFunction(
-        [makeRequest.defineOn(bridge)],
-        sendRequest
-      )
-
-      function sendRequest(makeRequest, identifier) {
-        makeRequest({
-          method: "post",
-          path: "/tasks/"+identifier+"/complete"
-        }, function(resp) {
-          console.log("got resp", resp)
-        })
-      }
-
-      function handleRequest(request, response) {
-
-        console.log("task.complete", request.params.id)
-        response.json({status: "ok"})
-      }
-
-      return binding
     }
 
     return sendInstructions
