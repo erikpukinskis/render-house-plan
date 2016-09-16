@@ -14,8 +14,8 @@ library.using(
     )
 
     server.addRoute(
-      "get", "/drawing",
-      draw(house, "top")
+      "get", "/drawing/:view",
+      draw(house)
     )
 
     server.addRoute(

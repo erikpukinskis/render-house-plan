@@ -24,6 +24,24 @@ module.exports = library.export(
 
       var page = element()
 
+      page.addChild(element(
+        element("a", "Top view", {href: "/drawing/top"})
+      ))
+
+      page.addChild(element(
+        element("a", "Side view", {href: "/drawing/side"})
+      ))
+
+      page.addChild(element(
+        element("a", "Front view", {href: "/drawing/front"})
+      ))
+
+      page.addChild(element(
+        element("a", "Materials", {href: "/buy"})
+      ))
+
+      page.addChild(element.raw("<br/>"))
+
       for(var name in builders) {
         var link = element(
           "a",
@@ -56,6 +74,7 @@ module.exports = library.export(
 
     return {
       index: index,
+      sections: Object.keys(builders),
       section: buildSection
     }
 })
