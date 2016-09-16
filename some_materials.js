@@ -77,6 +77,7 @@ module.exports = {
   },
   "fiberglass insulation": {
     length: 32*12,
+    unit: "32ft roll",
     width: 15,
     price: 1498,
     extra: 0,

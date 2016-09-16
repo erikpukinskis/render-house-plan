@@ -119,7 +119,7 @@ module.exports = library.export(
       function(name) {
         var i = this.indexesByName[name]
         if (typeof i == "undefined") {
-          throw new Error("House plan doesn't seem to have defined a section called "+name)
+          throw new Error("House plan doesn't seem to have defined a section called "+name+". Only "+Object.keys(this.indexesByName).join(", "))
         }
         
         return this.parameterSets[i][0]

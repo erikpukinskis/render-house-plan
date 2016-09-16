@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["./build", "./build_floor", "browser-bridge", "web-element", "./dimension_text", "./module_universe", "./doable"],
-  function(build, buildFloor, BrowserBridge, element, dimensionText, ModuleUniverse, doable) {
+  ["./build", "browser-bridge", "web-element", "./dimension_text", "./module_universe", "./doable"],
+  function(build, BrowserBridge, element, dimensionText, ModuleUniverse, doable) {
 
     var universe = new ModuleUniverse(
       "houses",
@@ -17,11 +17,9 @@ module.exports = library.export(
       console.log("OK! "+doable.count+" done")
     })
 
-    function sendInstructions(plan, materials, server, sectionName) {
+    function sendInstructions(steps, materials, server, sectionName) {
 
-      var options = plan.getOptions(sectionName)
 
-      var steps = buildFloor(options, materials)
 
       var bridge = new BrowserBridge()
 

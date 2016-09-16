@@ -74,6 +74,9 @@ module.exports = library.export(
         grandSubtotal += subtotal
 
         var header = description+": "+els.length+" CT "
+        if (material.unit) {
+          header += material.unit+" "
+        }
         if (material.extra) {
           header += "+"+material.extra+" extra "
         }
