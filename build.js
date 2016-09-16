@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "build",
-  ["nrtv-browser-bridge", "nrtv-element"],
-  function(BrowserBridge, element) {
+  ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./send_instructions"],
+  function(BrowserBridge, element, buildFloor, sendInstructions) {
 
     var body = element.style("body", {
       "font-family": "sans-serif",
@@ -14,8 +14,8 @@ module.exports = library.export(
       "-webkit-font-smoothing": "antialiased",
     })
 
-    var urls = {
-      "left_floor": "/build-left-floor-section"
+    var builders = {
+      "floor-left": buildFloor
     }
 
     function index() {
@@ -23,11 +23,11 @@ module.exports = library.export(
 
       var page = element()
 
-      for(var name in urls) {
+      for(var name in builders) {
         var link = element(
           "a",
           name+" section",
-          {href: urls[name]}
+          {href: "/build-section/"+name}
         )
         page.addChild(element(link))
       }
@@ -37,10 +37,24 @@ module.exports = library.export(
       return bridge.sendPage(page)
     }
 
+    function buildSection(house, materials, server) {
+      return function(request, response) {
+        var name = request.params.name
+        var options = house.getOptions(name)
+        var steps = buildFloor(options, materials)
+
+        // should be buildBridge.fork()
+        var bridge = new BrowserBridge()
+        bridge.addToHead(element.stylesheet(body).html())
+
+        sendInstructions(steps, materials, bridge, server, name)(request, response)
+      }
+    }
+
 
 
     return {
       index: index,
-      stylesheet: element.stylesheet(body)
+      section: buildSection
     }
 })

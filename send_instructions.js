@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["./build", "browser-bridge", "web-element", "./dimension_text", "./module_universe", "./doable"],
-  function(build, BrowserBridge, element, dimensionText, ModuleUniverse, doable) {
+  ["browser-bridge", "web-element", "./dimension_text", "./module_universe", "./doable"],
+  function(BrowserBridge, element, dimensionText, ModuleUniverse, doable) {
 
     var universe = new ModuleUniverse(
       "houses",
@@ -14,15 +14,11 @@ module.exports = library.export(
     )
 
     universe.replayRemote(function() {
-      console.log("OK! "+doable.count+" done")
+      console.log("OK! "+doable.count+" tasks done")
     })
 
-    function sendInstructions(steps, materials, server, sectionName) {
-
-
-
-      var bridge = new BrowserBridge()
-
+    function sendInstructions(steps, materials, bridge, server, sectionName) {
+      
       var saveCompletion = doable.complete.defineOn(server, bridge, universe)
 
       var completeTask = bridge.defineFunction(
@@ -41,7 +37,6 @@ module.exports = library.export(
         }
       )
 
-      bridge.addToHead(build.stylesheet.html())
       bridge.addToHead(element.stylesheet(stepTitle, em, checkBox, checkMark, checkMarkChecked, taskTemplate, taskCompleted).html())
 
       var page
