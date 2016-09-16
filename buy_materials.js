@@ -6,10 +6,30 @@ module.exports = library.export(
   ["./allocate_materials", "./some_materials", "./floor_section", "web-element", "browser-bridge"],
   function(allocateMaterials, BASE_MATERIALS, floorSection, element, BrowserBridge) {
 
+    var bodyStyle = element.style("body", {
+      "font-family": "sans-serif",
+      "line-height": "1.5em",
+      "font-size": "1.15em",
+      "color": "#192F41",
+      "background": "#FEF7E7",
+      "-webkit-font-smoothing": "antialiased",
+    })
+
+    var heading = element.style("h2", {
+      "background": "#E1EDEB",
+      "padding": "8px 12px",
+      "border": "1px solid #192F41",
+      "font-size": "1em",
+      "font-weight": "normal",
+      "text-transform": "capitalize",
+    })
+
 
     return function(materials) {
       var bridge = new BrowserBridge()
       var body = element()
+
+      bridge.addToHead(element.stylesheet(bodyStyle, heading).html())
 
       buyMaterials(materials, bridge, body)
 
@@ -60,9 +80,8 @@ module.exports = library.export(
         header += "@$"+toDollarString(price)+" = $"+toDollarString(subtotal)
 
 
-        body.addChild(element(element.raw("<br/>")))
         body.addChild(
-          element(header)
+          element("h2", header)
         )
         body.addChild(element(els))
       }
