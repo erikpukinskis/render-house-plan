@@ -13,6 +13,10 @@ module.exports = library.export(
       }
     )
 
+    universe.replayRemote(function() {
+      console.log("OK! "+doable.count+" done")
+    })
+
     function sendInstructions(plan, materials, server, sectionName) {
 
       var options = plan.getOptions(sectionName)
@@ -21,14 +25,30 @@ module.exports = library.export(
 
       var bridge = new BrowserBridge()
 
+      var saveCompletion = doable.complete.defineOn(server, bridge, universe)
+
+      var completeTask = bridge.defineFunction(
+        [saveCompletion],
+        function(save, id) {
+
+          var el = document.querySelector(".task-"+id)
+
+          var isCompleted = el.classList.contains("task-completed")
+
+          if (isCompleted) { return }
+
+          el.classList.add("task-completed")
+
+          save(id)
+        }
+      )
+
       bridge.addToHead(build.stylesheet.html())
-      bridge.addToHead(element.stylesheet(stepTitle, em, checkBox, taskTemplate).html())
+      bridge.addToHead(element.stylesheet(stepTitle, em, checkBox, checkMark, checkMarkChecked, taskTemplate, taskCompleted).html())
 
-      var page = element()
+      var page
 
-      var toggle = doable.complete.defineOn(server, bridge, universe)
-
-      steps.play({
+      var handlers = {
         step: function(description, results) {
           var stepEl = element(
             ".step",
@@ -46,7 +66,7 @@ module.exports = library.export(
         cut: function(scraps) {
           return element(".cut_instructions", scraps.map(scrapToTask))
         }
-      })
+      }
 
       function scrapToTask(scrap) {
         var material = scrap.material
@@ -61,10 +81,23 @@ module.exports = library.export(
       function task(id, text) {
         id = "building-house-X-"+id+"-for-"+sectionName
 
-        return taskTemplate(toggle, text, id)
+        return taskTemplate(
+          text,
+          id,
+          completeTask,
+          bridge
+        )
       }
 
-      return bridge.sendPage(page)
+      return function(request, response) {
+        if (!universe.isReady()) {
+          throw new Error("server not ready yet")
+        }
+
+        page = element()
+        steps.play(handlers)
+        bridge.sendPage(page)(request, response)
+      }
     }
 
     var stepTitle = element.template(
@@ -85,6 +118,18 @@ module.exports = library.export(
       "line-height": "1em",
     })
 
+    var checkMark = element.template(
+      ".check-mark",
+      element.style({
+        "display": "none"
+      }),
+      "✗"
+    )
+
+    var checkMarkChecked = element.style(".task-completed .check-mark", {
+      "display": "block"
+    })
+
     var checkBox = element.template(
       "button.toggle-button",
       element.style({
@@ -100,6 +145,14 @@ module.exports = library.export(
         "line-height": "1em",
         "display": "inline-block",
         "cursor": "pointer",
+      }),
+      checkMark()
+    )
+
+    var taskCompleted = element.template(
+      ".task-completed",
+      element.style({
+        "text-decoration": "line-through"
       })
     )
 
@@ -109,13 +162,16 @@ module.exports = library.export(
         "margin-bottom": "0.5em",
         "cursor": "pointer",
       }),
-      function(toggleTask, text, id) {
-        // if (!text) {
-        //   throw new Error("task needs text")
-        // }
-        this.addChild(checkBox())
-        this.addChild(text||"hay")
-        this.onclick(toggleTask.withArgs(id).evalable())
+      function(text, id, complete, bridge) {
+        var isCompleted = doable.isCompleted(id)
+        if (isCompleted) {
+          this.classes.push("task-completed")
+        }
+        this.addChild(checkBox(isCompleted))
+        this.addChild(text)
+
+        this.classes.push("task-"+id)
+        this.onclick(complete.withArgs(id).evalable())
       }
     )
 

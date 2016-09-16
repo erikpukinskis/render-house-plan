@@ -12,7 +12,8 @@
     "knox": "*"
   },
   "scripts": {
-    "start": "env $(cat credentials | xargs) node server"
+    "start": "env $(cat CREDENTIALS | xargs) node server",
+    "debug": "env $(cat CREDENTIALS | xargs) node debug server"
   },
   "repository": {
     "type": "git",
