@@ -3,7 +3,7 @@ var library = require("nrtv-library")(require)
 library.using(
   ["nrtv-server", "./teensy-house-3", "./allocate_materials", "./buy_materials", "./drawing", "./build"],
   function(server, teensyHouse, allocateMaterials, buy, draw, build) {
-    server.start(8181)
+    server.start(process.env.PORT||8181)
 
     var house = teensyHouse()
     var materials = allocateMaterials(house)
