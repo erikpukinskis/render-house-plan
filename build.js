@@ -5,7 +5,7 @@ module.exports = library.export(
   ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./send_instructions"],
   function(BrowserBridge, element, buildFloor, sendInstructions) {
 
-    var body = element.style("body", {
+    var body = element.style("body, a", {
       "font-family": "sans-serif",
       "line-height": "1.5em",
       "font-size": "1.15em",
@@ -15,7 +15,8 @@ module.exports = library.export(
     })
 
     var builders = {
-      "floor-left": buildFloor
+      "floor-left": buildFloor,
+      "floor-right": buildFloor,
     }
 
     function index() {
@@ -26,7 +27,7 @@ module.exports = library.export(
       for(var name in builders) {
         var link = element(
           "a",
-          name+" section",
+          name,
           {href: "/build-section/"+name}
         )
         page.addChild(element(link))
