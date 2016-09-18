@@ -23,7 +23,7 @@ module.exports = library.export(
       var el = element(".plan")
       var viewOptions = {
         view: this.view,
-        zDepth: 72,
+        zDepth: 65,
       }
       plan.generate(getPartGenerator.bind(null, el, viewOptions))
 
@@ -1084,7 +1084,7 @@ module.exports = library.export(
 
         this.origin = options
 
-        if (planElement) {
+        if (planElement) { //  && this.name == "floor-left"
           planElement.addChild(this)
         }
       }

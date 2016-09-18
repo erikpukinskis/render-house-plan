@@ -2,23 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "build-floor",
-  ["./steps", "./house_plan", "nrtv-browser-bridge", "./dimension_text"],
-  function(Steps, HousePlan, BrowserBridge, dimensionText) {
-
-    function chalkLines(direction, joists, task) {
-
-      task("chalk-horizontal-lines", "Add chalk lines <strong>3/4\"</strong> in from the front and back edge (the shorter sides)")
-
-      var distances = joists.map(toLeft).join(", ")
-
-      function toLeft(joist) {
-        return "<strong>"+dimensionText(joist.destination.xPos + 0.75)+"</strong>"
-      }
-
-      task("chalk-vertical-lines", "Add chalk lines at "+distances+" from the "+direction+" (long side)")
-
-    }
-
+  ["./steps", "./house_plan", "./dimension_text"],
+  function(Steps, HousePlan, dimensionText) {
 
     function buildFloor(options, materials) {
 
@@ -51,18 +36,18 @@ module.exports = library.export(
 
       })
 
-      steps.add("cut sheathing", function(cut, task) {
+      steps.add("cut sheathing", function(cut, chalkLines) {
 
         cut(materials.list("sheathing"))
 
-        chalkLines("right", joists, task)
+        chalkLines("right", joists)
       })
 
-      steps.add("cut subfloor", function(cut, task) {
+      steps.add("cut subfloor", function(cut, chalkLines) {
 
         cut(materials.list("subfloor"))
 
-        chalkLines("left", joists, task)
+        chalkLines("left", joists)
 
       })
 

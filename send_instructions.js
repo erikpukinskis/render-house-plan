@@ -18,7 +18,7 @@ module.exports = library.export(
     })
 
     function sendInstructions(steps, materials, bridge, server, sectionName) {
-      
+
       var saveCompletion = doable.complete.defineOn(server, bridge, universe)
 
       var completeTask = bridge.defineFunction(
@@ -58,7 +58,21 @@ module.exports = library.export(
         task: task,
         cut: function(scraps) {
           return element(".cut_instructions", scraps.map(scrapToTask))
-        }
+        },
+        chalkLines: function(direction, joists) {
+
+          var horizontal = task("chalk-horizontal-lines", "Add chalk lines <strong>3/4\"</strong> in from the front and back edge (the shorter sides)")
+
+          var distances = joists.map(toLeft).join(", ")
+
+          function toLeft(joist) {
+            return "<strong>"+dimensionText(joist.destination.xPos + 0.75)+"</strong>"
+          }
+
+          var vertical = task("chalk-vertical-lines", "Add chalk lines at "+distances+" from the "+direction+" (long side)")
+
+          return [horizontal, vertical]
+        },
       }
 
       function scrapToTask(scrap) {

@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "build",
-  ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./send_instructions"],
-  function(BrowserBridge, element, buildFloor, sendInstructions) {
+  ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./build_face_wall", "./send_instructions"],
+  function(BrowserBridge, element, buildFloor, buildFaceWall, sendInstructions) {
 
     var body = element.style("body, a", {
       "font-family": "sans-serif",
@@ -17,8 +17,9 @@ module.exports = library.export(
     var builders = {
       "floor-left": buildFloor,
       "floor-right": buildFloor,
+      "back-wall-left": buildFaceWall,
     }
-    
+
 
     function index() {
       var bridge = new BrowserBridge()
@@ -61,7 +62,8 @@ module.exports = library.export(
       return function(request, response) {
         var name = request.params.name
         var options = house.getOptions(name)
-        var steps = buildFloor(options, materials)
+        var builder = builders[name]
+        var steps = builder(options, materials)
 
         // should be buildBridge.fork()
         var bridge = new BrowserBridge()
