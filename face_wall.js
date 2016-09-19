@@ -125,13 +125,13 @@ module.exports = library.export(
         join[direction] = hasJoin ? 1 : 0
       })
 
-      var plateSize = options.width - join.left - join.right
+      var plateSize = options.width
 
       stud({
         section: wall,
         name: options.name+"-bottom-track",
         orientation: "up-across",
-        xPos: join.left,
+        xPos: 0,
         xSize: plateSize,
         yPos: -stud.WIDTH - join.bottom
       })
@@ -142,7 +142,7 @@ module.exports = library.export(
         section: wall,
         name: options.name+"-top-track",
         orientation: "down-across",
-        xPos: join.left,
+        xPos: 0,
         xSize: plateSize,
         yPos: -options.height + join.top
       })

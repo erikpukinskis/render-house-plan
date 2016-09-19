@@ -39,19 +39,16 @@ module.exports = library.export(
       }
 
       var trackLength = options.xSize
-      if (options.join == "right" || options.join == "left") {
-        trackLength = trackLength - 0.75
-      }
 
       var framingOffset = 0
       if (options.join == "left") {
-        framingOffset = 0.75
+        framingOffset = 1.0
       }
 
       stud({
         section: floor,
         name: id+"-back-track",
-        xPos: framingOffset,
+        xPos: 0,
         xSize: trackLength,
         yPos: FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
         orientation: "horizontal-south"
@@ -63,7 +60,7 @@ module.exports = library.export(
       stud({
         section: floor,
         name: id+"-front-track",
-        xPos: framingOffset,
+        xPos: 0,
         xSize: trackLength,
         yPos: FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
         zPos: options.zSize - stud.WIDTH,
@@ -86,19 +83,31 @@ module.exports = library.export(
 
       stud(joist, {
         name: id+"-joist-B",
-        xPos: framingOffset + 16,
+        xPos: 16 - stud.WIDTH/2,
       })
 
       stud(joist, {
         name: id+"-joist-C",
-        xPos: framingOffset + 16*2,
+        xPos: 16*2 - stud.WIDTH/2,
       })
 
-      stud(joist, {
-        name: id+"-joist-D",
-        orientation: "horizontal-west",
-        xPos: framingOffset + trackLength - stud.WIDTH,
-      })
+      if (options.join == "right") {
+        trim({
+          section: floor,
+          name: "floor-joining-joist",
+          xPos: 48 - 0.75,
+          xSize: 1.5,
+          yPos: FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
+          ySize: stud.DEPTH,
+          zSize: options.zSize,
+        })
+      } else {
+        stud(joist, {
+          name: id+"-joist-D",
+          orientation: "horizontal-west",
+          xPos: 48 - stud.WIDTH,
+        })
+      }
 
       plywood({
         section: floor,
@@ -130,17 +139,6 @@ module.exports = library.export(
         orientation: "down"
       })
 
-      if (options.join == "right") {
-        trim({
-          section: floor,
-          name: "floor-joining-joist",
-          xPos: 48 - 0.75,
-          xSize: 1.5,
-          yPos: FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
-          ySize: stud.DEPTH,
-          zSize: options.zSize,
-        })
-      }
     }
 
     function pick(object) {

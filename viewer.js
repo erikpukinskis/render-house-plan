@@ -16,9 +16,9 @@ module.exports = library.export(
     }
 
 
-    function Viewer(view, focus) {
+    function Viewer(view, sectionName) {
       this.view = view
-      focus = focus
+      focus = sectionName
     }
     Viewer.prototype.render = function(plan) {
       var el = element(".plan")
