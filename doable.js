@@ -18,7 +18,6 @@ module.exports = library.export(
     doable.complete = function(id) {
       doable.count++
       completed[id] = true
-      console.log("completed", id)
     }
 
     doable.isCompleted = function(id) {

@@ -3,8 +3,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "teensy-house-3",
-  ["./house_plan", "./face_wall", "./doors", "./floor_section", "./roof", "./side_wall"],
-  function(HousePlan, faceWall, doors, floorSection, roof, sideWall) {
+  ["./house_plan", "./face_wall", "./doors", "./floor_section", "./roof", "./side_wall", "./dimension_text"],
+  function(HousePlan, faceWall, doors, floorSection, roof, sideWall, dimensionText) {
 
     var BACK_WALL_INSIDE_HEIGHT = 80
     var FLOOR_TOP = 96
@@ -33,7 +33,7 @@ module.exports = library.export(
 
     var backPlateLeftHeight = backPlateRightHeight - rafterContact*SLOPE
 
-    var headerCapFrontHeight = HousePlan.verticalSlice(roof.RAFTER_HEIGHT - HousePlan.parts.twinWall.THICKNESS, SLOPE) - (HousePlan.parts.plywood.THICKNESS + HousePlan.parts.stud.DEPTH - roof.RAFTER_WIDTH)*SLOPE
+    var backWallCapFrontHeight = HousePlan.verticalSlice(roof.RAFTER_HEIGHT - HousePlan.parts.twinWall.THICKNESS, SLOPE) - (HousePlan.parts.plywood.THICKNESS + HousePlan.parts.stud.DEPTH - roof.RAFTER_WIDTH)*SLOPE
 
 
 
@@ -137,7 +137,7 @@ module.exports = library.export(
         yPos: FLOOR_TOP - doors.OPENING_HEIGHT - 0.75,
         width: 96,
         height: headerHeight,
-        topOverhang: headerCapFrontHeight,
+        topOverhang: backWallCapFrontHeight,
         leftBattenOverhang: HousePlan.parts.plywood.THICKNESS,
         rightBattenOverhang: HousePlan.parts.plywood.THICKNESS,
         middleBattenBottomGap: doors.TRIM_WIDTH - HousePlan.parts.trim.THICKNESS - doors.GAP - 0.75,
@@ -164,7 +164,7 @@ module.exports = library.export(
         name: "left-wall-A",
         xPos: 0,
         yPos: FLOOR_TOP,
-        zPos: -HousePlan.parts.plywood.THICKNESS,
+        zPos: 0,
         width: 48,
         backWallHeight: BACK_WALL_INSIDE_HEIGHT,
         overhangs: "wall/join",
@@ -230,15 +230,27 @@ module.exports = library.export(
       sloped({
         section: joins,
         part: trim,
-        name: "header-cap",
+        name: "back-wall-cap",
         xPos: roof.RAFTER_WIDTH,
         xSize: 96 - roof.RAFTER_WIDTH*2,
         yPos: FLOOR_TOP - BACK_WALL_INSIDE_HEIGHT,
         zPos: 0,
         zSize: 1.5,
-        ySize: -headerCapFrontHeight,
+        ySize: -backWallCapFrontHeight,
         slope: SLOPE,
       })
+
+      // back cap overhang
+      // back sheathing height
+      // back stud height
+      // back interior ply height
+      // floor overhang
+
+      var backCapOverhang = backWallCapFrontHeight - (1.5+plywood.THICKNESS)*SLOPE
+
+      // console.log("backCapOverhang:", dimensionText(backCapOverhang))
+
+      console.log("sheathingBottomOverhang:", dimensionText(floorSection.HEIGHT))
 
       trim({
         section: joins,

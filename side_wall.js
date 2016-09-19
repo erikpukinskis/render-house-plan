@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "side-wall",
-  ["./house_plan", "./roof", "./floor_section"],
-  function(HousePlan, roof, floorSection) {
+  ["./house_plan", "./roof", "./floor_section", "./dimension_text"],
+  function(HousePlan, roof, floorSection, dimensionText) {
 
     function sideWall(section, stud, plywood, sloped, trim, sloped, tilted, verticalSlice, insulation, options) {
 
@@ -15,7 +15,7 @@ module.exports = library.export(
       var whichSide = options.whichSide
       var flip = whichSide == "right"
 
-      var wallHang = HousePlan.parts.stud.DEPTH + HousePlan.parts.plywood.THICKNESS*2
+      var wallHang = HousePlan.parts.stud.DEPTH + HousePlan.parts.plywood.THICKNESS
       var joinHang = 0.75
 
       var overhangs = options.overhangs.split("/")
@@ -36,7 +36,7 @@ module.exports = library.export(
         var innerTallHang = joinHang
       }
 
-      var backWallWidth = stud.DEPTH + plywood.THICKNESS*2
+      var backWallWidth = stud.DEPTH + plywood.THICKNESS
 
       var backCornerHeight = options.backWallHeight - backWallWidth*options.slope + verticalSlice(roof.RAFTER_HEIGHT, options.slope) + floorSection.HEIGHT
 
@@ -54,6 +54,8 @@ module.exports = library.export(
 
       verticalSlice(0.75, options.slope) + (options.zPos + interiorWidth)*options.slope
 
+      describePly("sheathing height", options.width, sheathingHeight)
+
       sloped({
         section: wall,
         name: name+"-sheathing",
@@ -66,6 +68,8 @@ module.exports = library.export(
         orientation: flip ? "east" : "west",
         yPos: floorSection.HEIGHT
       })
+
+      describePly("interior height", interiorWidth, interiorHeight)
 
       sloped({
         section: wall,
@@ -93,13 +97,34 @@ module.exports = library.export(
       }
 
       var offset = outerShortHang
+      var firstStudHeight = studHeightAtZero + offset*options.slope
+      describeStud(1, firstStudHeight)
       sloped(sideStud, {
         section: wall,
         name: name+"-stud-1",
         orientation: "south",
         zPos: offset,
-        ySize: -studHeightAtZero - offset*options.slope,
+        ySize: -firstStudHeight,
       })
+
+
+      function describeStud(name, height) {
+        if (options.name != "left-wall-A") {return}
+        var shorterHeight = height - options.slope*stud.WIDTH
+        console.log("stud "+name+": "+dimensionText(shorterHeight)+" to "+dimensionText(height))
+      }
+
+      function describePly(name, width, height) {
+        if (options.name != "left-wall-A") {return}
+        var shorterHeight = height - options.slope*width
+        console.log(name+": "+dimensionText(shorterHeight)+" to "+dimensionText(height))
+      }
+
+      function describe(name, dimension) {
+        if (options.name != "left-wall-A") {return}
+        console.log(name+": "+dimensionText(dimension))
+      }
+
 
       var maxOffset = options.width - outerTallHang - stud.WIDTH
 
@@ -107,18 +132,21 @@ module.exports = library.export(
 
       for(var i=1; i<4; i++) {
 
-        var tryOffset = offset = 16*i - stud.WIDTH/2
+        var tryOffset = offset = 16*i - stud.WIDTH/2 - stud.WIDTH - plywood.THICKNESS
         var bail = false
         if (tryOffset + stud.WIDTH + 1 > maxOffset) {
           offset = maxOffset
           bail = true
         }
 
+        var studHeight = studHeightAtZero + offset*options.slope
+        describeStud(i+1, studHeight)
+
         sloped(sideStud, {
           section: wall,
           name: name+"-stud-"+(i+1),
           zPos: offset,
-          ySize: -studHeightAtZero - offset*options.slope,
+          ySize: -studHeight,
         })
 
         var insulationWidth = offset - distance
@@ -140,8 +168,9 @@ module.exports = library.export(
       }
 
       var plateOffset = outerShortHang
-      var plateLength = options.width - stud.DEPTH - plywood.THICKNESS*2 - 0.75
+      var plateLength = options.width - stud.DEPTH - plywood.THICKNESS
 
+      describe("side wall bottom plate", plateLength)
       stud({
         section: wall,
         name: name+"-bottom-plate",
@@ -152,6 +181,8 @@ module.exports = library.export(
       })
 
       var plateStart = options.zPos + outerShortHang
+
+      describe("side wall sheathing corner overhang", outerShortHang)
 
       var studHeightAtZero = options.backWallHeight - (stud.DEPTH + plywood.THICKNESS)*options.slope
 
@@ -168,6 +199,10 @@ module.exports = library.export(
         zPos: plateOffset,
         zSize: plateLength,
       })
+
+      var rise = plateLength*options.slope
+      var topLength = Math.sqrt(rise*rise+plateLength*plateLength)
+      describe("side wall top plate", topLength)
 
       var battenHeightAtZero = studHeightAtZero + floorSection.HEIGHT + verticalSlice(roof.RAFTER_HEIGHT, options.slope) + HousePlan.parts.batten.WIDTH*options.slope + options.zPos*options.slope
 

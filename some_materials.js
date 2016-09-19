@@ -1,7 +1,7 @@
 
 
 module.exports = {
-  "0.5in rough plywood": {
+  "0.625in rough plywood": {
     length: 96,
     width: 48,
     price: 1795,

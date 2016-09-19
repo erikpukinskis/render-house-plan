@@ -30,7 +30,7 @@ module.exports = library.export(
         WIDTH: 1.5,
       },
       twinWall: {
-        THICKNESS: 7/16
+        THICKNESS: 0.314961 // 8mm
       },
     }
 

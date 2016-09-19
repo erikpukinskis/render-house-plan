@@ -1084,8 +1084,11 @@ module.exports = library.export(
 
         this.origin = options
 
-        if (planElement) { //  && this.name == "floor-left"
+        var focus
+        if (planElement && (!focus || this.name == focus)) {
           planElement.addChild(this)
+        } else {
+          console.log(options.name)
         }
       }
     )

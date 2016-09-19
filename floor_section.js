@@ -5,8 +5,8 @@ module.exports = library.export(
   ["./house_plan"],
   function(HousePlan) {
 
-    var FLOORING_THICKNESS = floorSection.FLOORING_THICKNESS = 0.25
-    var SUBFLOOR_THICKNESS = 0.5
+    var FLOORING_THICKNESS = floorSection.FLOORING_THICKNESS = 0
+    var SUBFLOOR_THICKNESS = 5/8
 
     floorSection.HEIGHT = FLOORING_THICKNESS + SUBFLOOR_THICKNESS + HousePlan.parts.stud.DEPTH + HousePlan.parts.plywood.THICKNESS
 

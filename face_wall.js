@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "face-wall",
-  ["./house_plan"],
-  function(HousePlan) {
+  ["./house_plan", "./dimension_text"],
+  function(HousePlan, dimensionText) {
 
 
     function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulation, options) {
@@ -91,16 +91,31 @@ module.exports = library.export(
         orientation: oppositeOrientation
       })
 
+      var sheathingHeight = options.height + overhang.bottom + overhang.top
+
       plywood({
         section: wall,
         name: options.name+"-sheathing",
         xPos: overhang.left,
         xSize: options.width + overhang.left + overhang.right,
-        ySize: -(options.height + overhang.bottom + overhang.top),
+        ySize: -sheathingHeight,
         yPos: overhang.bottom,
         zPos: options.orientation == "south" ? stud.DEPTH : -plywood.THICKNESS,
         orientation: options.orientation
       })
+
+      var sheathingTopOverhang = overhang.top + 1.5
+
+
+      if (options.name == "back-wall-left") {
+        console.log("base top overhang:", dimensionText(overhang.top))
+
+        console.log("base bottom overhang:", dimensionText(overhang.bottom))
+
+        console.log("sheathingHeight:", dimensionText(sheathingHeight))
+        console.log("sheathingTopOverhang:", dimensionText(sheathingTopOverhang))
+        console.log("interiorPlyHeight:", dimensionText(options.height))
+      }
 
       join = {}
       ;["left", "right", "top", "bottom"].forEach(function(direction) {
