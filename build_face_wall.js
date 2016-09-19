@@ -2,9 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "build-face-wall",
-  ["./steps", "./house_plan", "./dimension_text"],
-  function(Steps, HousePlan, dimensionText) {
-
+  ["./steps", "./house_plan", "./dimension_text", "./some_materials"],
+  function(Steps, HousePlan, dimensionText, BASE_MATERIALS) {
 
     function buildFaceWall(options, materials) {
 
@@ -28,14 +27,36 @@ module.exports = library.export(
         }
       )
 
-      steps.add("cut the studs",
+      var studs = materials.list("stud-*")
+      steps.add("cut studs",
         function(cut) {
-          cut(materials.list("stud-*"))
+          cut(studs)
         }
       )
 
-// cut the studs to HEIGHT
-// cut the track to 48
+      steps.add("cut track",
+        function(cut, task) {
+
+          cut(materials.list("*-track"))
+
+          var marks = studMarks(studs, options)
+
+          task("mark-track", "Lay the two pieces of track together, rails together. Mark the tops at "+marks+" putting an ✗ to the right of each mark")
+
+          task("transfer-track-marks", "Transfer the marks to other sides of each piece of track")
+        }
+      )
+
+      steps.add("lay out framing",
+        function(task) {
+          task("lay-out-framing", "Space the two pieces of track <strong>"+dimensionText(studs[0].size)+"</strong> apart. Set the studs inside the tracks on the X side of each mark.")
+          task("crimp", "While pressing each stud securely up into the track, crimp the two together at each intersection.")
+          task("flip-framing", "Gently flip the frame over")
+          task("crimp-other-side", "Crimp the other side")
+        }
+      )
+
+
 // right side:
 //   assemble frame wall. left stud an extra 3/4" in, but 16" centers otherwise. 
 // left side:
@@ -55,6 +76,31 @@ module.exports = library.export(
 
 
       return steps
+    }
+
+    function studMarks(studs, options) {
+      var originX = options.xPos||0
+      var marks = ""
+
+      for(var i=0; i<studs.length; i++) {
+        var stud = studs[i]
+
+        var isFirst = i == 0
+        var isLast = !isFirst && i == studs.length-1
+
+        if (isLast) {
+          marks += ", and "
+        } else if (!isFirst) {
+          marks += ", "
+        }
+
+        var fromLeft = stud.destination.xPos - originX
+
+        marks += "<strong>"+dimensionText(fromLeft)+"</strong> from left"
+        
+      }
+
+      return marks
     }
 
     return buildFaceWall
