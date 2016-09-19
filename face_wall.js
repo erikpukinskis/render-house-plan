@@ -174,11 +174,25 @@ module.exports = library.export(
           var bail = false
         }
 
-        stud(wallStud, {
-          section: wall,
-          name: options.name+"-stud-"+(i+1),
-          xPos: offset,
-        })
+        if (bail && join.right) {
+          trim({
+            section: wall,
+            name: options.name+"-joining-stud",
+            xPos: options.width - 0.75,
+            xSize: 1.5,
+            zSize: stud.DEPTH,
+            yPos: -join.bottom,
+            ySize: -studHeight,
+          })
+        } else {
+
+          stud(wallStud, {
+            section: wall,
+            name: options.name+"-stud-"+(i+1),
+            xPos: offset,
+          })
+
+        }
 
         var insulationWidth = offset - insulated
 

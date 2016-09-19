@@ -1084,7 +1084,7 @@ module.exports = library.export(
 
         this.origin = options
 
-        var focus
+        var focus = "back-wall-right"
         if (planElement && (!focus || this.name == focus)) {
           planElement.addChild(this)
         } else {

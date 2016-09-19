@@ -252,16 +252,6 @@ module.exports = library.export(
 
       console.log("sheathingBottomOverhang:", dimensionText(floorSection.HEIGHT))
 
-      trim({
-        section: joins,
-        name: "back-wall-joining-stud",
-        xPos: 48 - 0.75,
-        xSize: 1.5,
-        zSize: stud.DEPTH,
-        yPos: FLOOR_TOP,
-        ySize: -BACK_WALL_INSIDE_HEIGHT,
-      })
-
       var sideJoiningStud = {
         section: joins,
         part: trim,
