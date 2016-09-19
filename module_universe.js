@@ -6,11 +6,13 @@ module.exports = library.export(
   function(knox) {
 
 
-    var s3 = knox.createClient({
-      key: process.env.AWS_ACCESS_KEY_ID,
-      secret: process.env.AWS_SECRET_ACCESS_KEY,
-      bucket: "ezjs"
-    })
+    if (process.env.AWS_ACCESS_KEY_ID) {
+      var s3 = knox.createClient({
+        key: process.env.AWS_ACCESS_KEY_ID,
+        secret: process.env.AWS_SECRET_ACCESS_KEY,
+        bucket: "ezjs"
+      })
+    }
 
     function ModuleUniverse(name,
       moduleNames, initialize) {
@@ -25,6 +27,10 @@ module.exports = library.export(
     ModuleUniverse.prototype.isReady = function() { return !this.waiting }
 
     ModuleUniverse.prototype.getRemoteSource = function(callback) {
+      if (!s3) {
+        console.log("WARNING: No AWS credentials, no persistence. We are dust in the wind.")
+        return
+      }
       this.waiting = true
 
       var universe = this

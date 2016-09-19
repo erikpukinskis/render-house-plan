@@ -13,20 +13,27 @@ module.exports = library.export(
 
       var steps = new Steps()
 
-      var sheathing = materials("sheathing")[0]
-
-      return steps
-
-      steps.add("cut sheathing", function(task) {
-          task("rip-sheathing", "cut 2 sheets of "+sheathing.description+" to <strong>"+dimensionText(sheathing.length)+"</strong>")
+      steps.add("cut sheathing", function(cut) {
+          var sheathing = materials.get("sheathing")
+          cut(sheathing)
+          // add screw lines
+          // cut notches in the plywood
         }
       )
 
+      steps.add("cut interior", function(cut) {
+          var interior = materials.get("interior")
+          cut(interior)
+          // add screw lines
+        }
+      )
 
-// cut 2 sheets to the outside HEIGHT
+      steps.add("cut the studs",
+        function(cut) {
+          cut(materials.list("stud-*"))
+        }
+      )
 
-// cut notches in the plywood
-// cut 2 sheet to the inside HEIGHT
 // cut the studs to HEIGHT
 // cut the track to 48
 // right side:

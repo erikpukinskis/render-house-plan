@@ -57,6 +57,10 @@ module.exports = library.export(
         },
         task: task,
         cut: function(scraps) {
+          if (!Array.isArray(scraps)) {
+            scraps = [scraps]
+          }
+          console.log(scraps)
           return element(".cut_instructions", scraps.map(scrapToTask))
         },
         chalkLines: function(direction, joists) {

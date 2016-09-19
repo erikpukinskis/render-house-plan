@@ -7,6 +7,8 @@ module.exports = library.export(
     function SetOfMaterials() {
       this.byDescription = {}
       this.scrapsByName = {}
+      this.scrapsByQuery = {}
+      this.get = get.bind(this)
     }
 
     SetOfMaterials.prototype.groupedByDescription = function() {
@@ -79,24 +81,58 @@ module.exports = library.export(
         return material
       }
 
+    function getWildcard(set, query) {
+      if (set.prefix) {
+        query = set.prefix+"-"+query
+      }
+      pattern = "^"+query.replace("*", ".+")+"$"
+      var scraps = set.scrapsByQuery[query]
+      if (scraps) { return scraps }
+
+      var scraps = []
+      for (var name in set.scrapsByName) {
+        var isMatch = !!name.match(pattern)
+        if (isMatch) {
+          scraps.push(set.scrapsByName[name])
+        }
+      }
+      set.scrapsByQuery[query] = scraps
+      return scraps
+    }
+
+    // This gets bound as setOfMaterials.get in the constructor:
+    function get(name) {
+      if (this.prefix) {
+        name = this.prefix+"-"+name
+      }
+
+      var scrap = this.scrapsByName[name]
+      if (!scrap) {
+        throw new Error("no scraps named "+name)
+      }
+      return scrap
+    }
+
     SetOfMaterials.prototype.list =
       function() {
         var names = Array.prototype.slice.call(arguments)
-        var pieces = []
+
+        var list = []
 
         for(var i=0; i<names.length; i++) {
           var name = names[i]
-          if (this.prefix) {
-            name = this.prefix+"-"+name
+          var hasWildcard = !!name.match(/\*/)
+
+          if (hasWildcard) {
+            var matches = getWildcard(this, name)
+            list = list.concat(matches)
+          } else {
+            var scrap = this.get(name)
+            list.push(scrap)
           }
-          var scrap = this.scrapsByName[name]
-          if (!scrap) {
-            throw new Error("no scraps named "+name)
-          }
-          pieces.push(scrap)
         }
 
-        return pieces
+        return list
       }
 
     SetOfMaterials.prototype.setPrefix =function(newPrefix) {

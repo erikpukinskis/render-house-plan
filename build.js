@@ -63,6 +63,7 @@ module.exports = library.export(
         var name = request.params.name
         var options = house.getOptions(name)
         var builder = builders[name]
+
         var steps = builder(options, materials)
 
         // should be buildBridge.fork()
