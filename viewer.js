@@ -16,8 +16,9 @@ module.exports = library.export(
     }
 
 
-    function Viewer(view) {
+    function Viewer(view, focus) {
       this.view = view
+      focus = focus
     }
     Viewer.prototype.render = function(plan) {
       var el = element(".plan")
@@ -1084,7 +1085,6 @@ module.exports = library.export(
 
         this.origin = options
 
-        var focus = "back-wall-right"
         if (planElement && (!focus || this.name == focus)) {
           planElement.addChild(this)
         } else {
@@ -1092,6 +1092,8 @@ module.exports = library.export(
         }
       }
     )
+
+    var focus
 
     var drawableParts = {
       section: section,
