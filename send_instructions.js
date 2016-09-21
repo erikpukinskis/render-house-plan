@@ -89,6 +89,10 @@ module.exports = library.export(
       }
 
       function task(id, text) {
+        if (!text) {
+          throw new Error("task() takes two strings: an identifier and an instruction")
+        }
+        
         id = "building-house-X-"+id+"-for-"+sectionName
 
         return taskTemplate(
