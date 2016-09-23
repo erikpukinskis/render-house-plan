@@ -18,8 +18,6 @@ module.exports = library.export(
 
       var bottomOverhang = options.bottomOverhang || 0
 
-      var insideTopOverhang = options.insideTopOverhang || 0
-
       var battenHeight = options.height + topOverhang + bottomOverhang
 
       var battenZPos = options.orientation == "south" ? stud.DEPTH + plywood.THICKNESS : -plywood.THICKNESS - trim.THICKNESS
@@ -117,13 +115,8 @@ module.exports = library.export(
         console.log("interiorPlyHeight:", dimensionText(options.height))
       }
 
-      join = {}
-      ;["left", "right", "top", "bottom"].forEach(function(direction) {
-
-        var hasJoin = options.joins.match(direction)
-
-        join[direction] = hasJoin ? 1 : 0
-      })
+      join = getJoinGaps(options)
+      console.log(join)
 
       var plateSize = options.width
 
@@ -214,6 +207,26 @@ module.exports = library.export(
 
     }
 
+    function getJoinGaps(options) {
+      var joins = {}
+
+      ;["left", "right", "top", "bottom"].forEach(function(direction) {
+
+        var hasJoin = options.joins.match(direction)
+        var isFullDepth = options.joins.match(direction+"-full")
+
+        if (isFullDepth) {
+          joins[direction] = 1.5
+        } else if (hasJoin) {
+          joins[direction] = 0.75
+        } else {
+          joins[direction] = 0
+        }
+      })
+
+      return joins
+    }
+
     function contains(array, value) {
       if (!Array.isArray(array)) {
         throw new Error("looking for "+JSON.stringify(value)+" in "+JSON.stringify(array)+", which is supposed to be an array. But it's not.")
@@ -227,6 +240,8 @@ module.exports = library.export(
       }
       return false;
     }
+
+    faceWall.getJoinGaps = getJoinGaps
 
     return faceWall
   }
