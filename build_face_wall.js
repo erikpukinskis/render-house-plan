@@ -13,7 +13,7 @@ module.exports = library.export(
       var steps = new Steps()
       var studs = materials.list("stud-*")
 
-      steps.add("cut sheathing", function(cut, task) {
+      steps.add("cut sheathing", function(cut, task, studMarks) {
           var sheathing = materials.get("sheathing")
           cut(sheathing)
 
@@ -39,7 +39,7 @@ module.exports = library.export(
       )
 
       steps.add("cut track",
-        function(cut, task) {
+        function(cut, task, studMarks) {
 
           cut(materials.list("*-track"))
 
@@ -145,31 +145,6 @@ module.exports = library.export(
     function dimensionRound(number) {
       var rounded = Math.round(number*2)/2
       return dimensionText(rounded)
-    }
-
-    function studMarks(studs, options, direction) {
-      var originX = options.xPos||0
-      var marks = ""
-
-      for(var i=0; i<studs.length; i++) {
-        var stud = studs[i]
-
-        var isFirst = i == 0
-        var isLast = !isFirst && i == studs.length-1
-
-        if (isLast) {
-          marks += ", and "
-        } else if (!isFirst) {
-          marks += ", "
-        }
-
-        var fromLeft = stud.destination.xPos - originX
-
-        marks += "<strong>"+dimensionText(fromLeft)+"</strong> from "+direction
-        
-      }
-
-      return marks
     }
 
     return buildFaceWall

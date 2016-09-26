@@ -51,6 +51,7 @@ module.exports = function() {
     function captureOutput() {
       var output = this.apply(null, arguments)
       outputs.push(output)
+      return output
     }
 
     return outputs

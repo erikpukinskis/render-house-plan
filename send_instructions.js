@@ -50,6 +50,7 @@ module.exports = library.export(
 
           if (results) {
             results.map(function(el) {
+              if (!el.html) { return }
               stepEl.addChild(el)
             })
           }
@@ -62,19 +63,18 @@ module.exports = library.export(
           }
           return element(".cut_instructions", scraps.map(scrapToTask))
         },
-        chalkLines: function(direction, joists) {
+        studMarks: function(studs, options, direction) {
+          var originX = options.xPos||0
 
-          var horizontal = task("chalk-horizontal-lines", "Add chalk lines <strong>3/4\"</strong> in from the front and back edge (the shorter sides)")
+          var marks = enumerate(studs.map(toAlignment))
 
-          var distances = joists.map(toLeft).join(", ")
+          function toAlignment(stud) {
+            var fromLeft = stud.destination.xPos - originX
 
-          function toLeft(joist) {
-            return "<strong>"+dimensionText(joist.destination.xPos + 0.75)+"</strong>"
+            return "<strong>"+dimensionText(fromLeft)+"</strong> from "+direction
           }
 
-          var vertical = task("chalk-vertical-lines", "Add chalk lines at "+distances+" from the "+direction+" (long side)")
-
-          return [horizontal, vertical]
+          return marks
         },
       }
 
@@ -114,10 +114,30 @@ module.exports = library.export(
       }
     }
 
+    function enumerate(items) {
+      var enumerated = ""
+
+      for(var i=0; i<items.length; i++) {
+
+        var isFirst = i == 0
+        var isLast = !isFirst && i == items.length-1
+
+        if (isLast) {
+          enumerated += ", and "
+        } else if (!isFirst) {
+          enumerated += ", "
+        }
+
+        enumerated +=  items[i]
+      }
+
+      return enumerated
+    }
+
     var stepTitle = element.template(
       ".step-title",
       element.style({
-        "margin": "12pt 0",
+        "margin": "24pt 0 12pt 0",
         "font-size": "1.5em",
         "line-height": "1em",
       }),

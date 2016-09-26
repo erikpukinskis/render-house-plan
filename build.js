@@ -3,7 +3,7 @@ var library = require("nrtv-library")(require)
 module.exports = library.export(
   "build",
   ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./build_face_wall", "./send_instructions"],
-  function(BrowserBridge, element, buildFloor, buildFaceWall, sendInstructions) {
+  function(BrowserBridge, element, buildFloor, buildWall, sendInstructions) {
 
     var body = element.style("body, a", {
       "font-family": "sans-serif",
@@ -17,7 +17,7 @@ module.exports = library.export(
     var builders = {
       "floor-left": buildFloor,
       "floor-right": buildFloor,
-      "back-wall-left": buildFaceWall,
+      "back-wall-left": buildWall,
     }
 
 

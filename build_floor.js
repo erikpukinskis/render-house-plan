@@ -13,10 +13,7 @@ module.exports = library.export(
       var steps = new Steps()
 
       var joists = materials.list(
-        "joist-A",
-        "joist-B",
-        "joist-C",
-        "joist-D"
+        "joist-*"
       )
 
       steps.add("cut steel track", function(cut) {
@@ -30,24 +27,22 @@ module.exports = library.export(
 
       steps.add("cut joists", function(cut) {
 
-        cut(materials.list(
-          "joist-A", "joist-B", "joist-C", "joist-D"
-        ))
+        cut(joists)
 
       })
 
-      steps.add("cut sheathing", function(cut, chalkLines) {
+      steps.add("cut sheathing", function(cut, studMarks, task) {
 
         cut(materials.list("sheathing"))
 
-        chalkLines("right", joists)
+        task("sheathing-lines", "Chalk lines "+studMarks(joists, options, "right"))
       })
 
-      steps.add("cut subfloor", function(cut, chalkLines) {
+      steps.add("cut subfloor", function(cut, studMarks, task) {
 
         cut(materials.list("subfloor"))
 
-        chalkLines("left", joists)
+        task("subfloor-lines", "Chalk  lines "+studMarks(joists, options, "left"))
 
       })
 
@@ -104,8 +99,6 @@ module.exports = library.export(
 
         task("insulate", "cut and add insulation between the joists")
 
-        cut(materials.list("insulation-A", "insulation-B", "insulation-C"))
-
       })
 
       steps.add("attach subfloor", function(task) {
@@ -116,13 +109,27 @@ module.exports = library.export(
 
       })
 
-      steps.add("flooring", function(task) {
-
-        task("install-flooring", "Glue down flooring to cover the entire subflooor")
-
-      })
-
       return steps
+    }
+
+    function enumerate(items) {
+      var enumerated = ""
+
+      for(var i=0; i<items.length; i++) {
+
+        var isFirst = i == 0
+        var isLast = !isFirst && i == items.length-1
+
+        if (isLast) {
+          enumerated += ", and "
+        } else if (!isFirst) {
+          enumerated += ", "
+        }
+
+        enumerated +=  items[i]
+      }
+
+      return enumerated
     }
 
     return buildFloor
