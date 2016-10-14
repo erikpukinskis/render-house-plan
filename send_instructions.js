@@ -2,18 +2,25 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["browser-bridge", "web-element", "./dimension_text", "./module_universe", "./doable"],
+  ["browser-bridge", "web-element", "./dimension_text", "module-universe", "./doable"],
   function(BrowserBridge, element, dimensionText, ModuleUniverse, doable) {
 
     var universe = new ModuleUniverse(
       "houses",
+      library,
       ["doable"],
       function(doable) {
         // begin
       }
     )
 
-    universe.replayRemote(function() {
+    universe.persistToS3({
+      key: process.env.AWS_ACCESS_KEY_ID,
+      secret: process.env.AWS_SECRET_ACCESS_KEY,
+      bucket: "ezjs"
+    })
+
+    universe.loadFromS3(function(){
       console.log("OK! "+doable.count+" tasks done")
     })
 

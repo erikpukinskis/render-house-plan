@@ -4,11 +4,6 @@ module.exports = library.export(
   "doable",
   ["make-request"],
   function(makeRequest) {
-    function Task(text, id, universe, bridge) {
-      this.text = text
-      this.id = id
-      this.__universe = universe
-    }
 
     var completed = {}
 

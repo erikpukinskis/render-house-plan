@@ -11,7 +11,7 @@ module.exports = library.export(
       Viewer.defineHandlersOn(bridge)
 
       return function(request, response) {
-        var viewer = new Viewer(request.params.view, "back-wall-left")
+        var viewer = new Viewer(request.params.view)
 
         var page = viewer.render(plan)
 

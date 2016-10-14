@@ -18,6 +18,7 @@ module.exports = library.export(
       "floor-left": buildFloor,
       "floor-right": buildFloor,
       "back-wall-left": buildWall,
+      "left-wall-A": buildWall,
     }
 
 

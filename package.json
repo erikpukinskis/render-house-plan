@@ -9,7 +9,8 @@
     "browser-bridge": "*",
     "function-call": "*",
     "make-request": "*",
-    "knox": "*"
+    "knox": "*",
+    "module-universe": "*"
   },
   "scripts": {
     "start": "env $(cat CREDENTIALS | xargs) node server",

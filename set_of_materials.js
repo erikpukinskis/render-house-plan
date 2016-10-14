@@ -150,7 +150,7 @@ module.exports = library.export(
         var constraint = cut == "cross" ? "length" : "width"
 
         if (material[constraint] < size) {
-          throw new Error("not enough material")
+          throw new Error("Tried to cut "+size+" from "+material.description+" "+constraint+" but the max you can cut is "+material[constraint])
         }
 
         var scrap = {

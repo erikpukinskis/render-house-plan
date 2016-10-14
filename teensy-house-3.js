@@ -160,59 +160,69 @@ module.exports = library.export(
         slope: SLOPE,
       })
 
+      var wallHang = HousePlan.parts.stud.DEPTH + HousePlan.parts.plywood.THICKNESS
+
+      var interiorWidth = 48 - wallHang
+
+      var height = BACK_WALL_INSIDE_HEIGHT + HousePlan.verticalSlice(0.75, SLOPE) + interiorWidth*SLOPE
+
       plan.add(sideWall, {
         name: "left-wall-A",
         xPos: 0,
         yPos: FLOOR_TOP,
-        zPos: 0,
-        width: 48,
-        backWallHeight: BACK_WALL_INSIDE_HEIGHT,
-        overhangs: "wall/join",
-        innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
+        zPos: wallHang,
+        width: 48 - wallHang,
+        height: height,
+        joins: "right top",
+        leftOverhang: wallHang,
+        bottomOverhang: floorSection.HEIGHT,
+        topOverhang: HousePlan.verticalSlice(roof.RAFTER_HEIGHT - 0.75, SLOPE),
         whichSide: "left",
         slope: SLOPE,
       })
 
-      plan.add(sideWall, {
-        name: "left-wall-B",
-        xPos: 0,
-        yPos: FLOOR_TOP,
-        zPos: 48 - HousePlan.parts.plywood.THICKNESS,
-        width: 24+HousePlan.parts.plywood.THICKNESS*2,
-        backWallHeight: BACK_WALL_INSIDE_HEIGHT,
-        overhangs: "join/wall",
-        innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
-        whichSide: "left",
-        slope: SLOPE,
-      })
+      // plan.add(sideWall, {
+      //   name: "left-wall-B",
+      //   xPos: 0,
+      //   yPos: FLOOR_TOP,
+      //   zPos: 48 - HousePlan.parts.plywood.THICKNESS,
+      //   width: 24+HousePlan.parts.plywood.THICKNESS*2,
+      //   backWallHeight: BACK_WALL_INSIDE_HEIGHT,
+      //   overhangs: "join/wall",
+      //   innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
+      //   whichSide: "left",
+      //   slope: SLOPE,
+      // })
 
-      var rightWallOffset = 96 - HousePlan.parts.stud.DEPTH
+      // var rightWallOffset = 96 - HousePlan.parts.stud.DEPTH
 
-      plan.add(sideWall, {
-        name: "right-wall-A",
-        xPos: rightWallOffset,
-        yPos: FLOOR_TOP,
-        zPos: -HousePlan.parts.plywood.THICKNESS,
-        width: 48,
-        backWallHeight: BACK_WALL_INSIDE_HEIGHT,
-        overhangs: "wall/join",
-        innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
-        whichSide: "right",
-        slope: SLOPE,
-      })
+      // plan.add(sideWall, {
+      //   name: "right-wall-A",
+      //   xPos: rightWallOffset,
+      //   yPos: FLOOR_TOP,
+      //   zPos: -HousePlan.parts.plywood.THICKNESS,
+      //   width: 48,
+      //   backWallHeight: BACK_WALL_INSIDE_HEIGHT,
+      //   overhangs: "wall/join",
+      //   innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
+      //   whichSide: "right",
+      //   slope: SLOPE,
+      // })
 
-      plan.add(sideWall, {
-        name: "right-wall-B",
-        xPos: rightWallOffset,
-        yPos: FLOOR_TOP,
-        zPos: 48 - HousePlan.parts.plywood.THICKNESS,
-        width: 24+HousePlan.parts.plywood.THICKNESS*2,
-        backWallHeight: BACK_WALL_INSIDE_HEIGHT,
-        overhangs: "join/wall",
-        innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
-        whichSide: "right",
-        slope: SLOPE,
-      })
+      // plan.add(sideWall, {
+      //   name: "right-wall-B",
+      //   xPos: rightWallOffset,
+      //   yPos: FLOOR_TOP,
+      //   zPos: 48 - HousePlan.parts.plywood.THICKNESS,
+      //   width: 24+HousePlan.parts.plywood.THICKNESS*2,
+      //   backWallHeight: BACK_WALL_INSIDE_HEIGHT,
+      //   overhangs: "join/wall",
+      //   innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
+      //   whichSide: "right",
+      //   slope: SLOPE,
+      // })
+
+
 
       return plan
     }
@@ -252,26 +262,26 @@ module.exports = library.export(
 
       console.log("sheathingBottomOverhang:", dimensionText(floorSection.HEIGHT))
 
-      var sideJoiningStud = {
-        section: joins,
-        part: trim,
-        slope: SLOPE,
-        xSize: stud.DEPTH,
-        yPos: FLOOR_TOP,
-        ySize: -BACK_WALL_INSIDE_HEIGHT - (48 + 0.75 - plywood.THICKNESS - stud.DEPTH)*SLOPE,
-        zPos: 48 - plywood.THICKNESS - 0.75,
-        zSize: 1.5,
-      }
+      // var sideJoiningStud = {
+      //   section: joins,
+      //   part: trim,
+      //   slope: SLOPE,
+      //   xSize: stud.DEPTH,
+      //   yPos: FLOOR_TOP,
+      //   ySize: -BACK_WALL_INSIDE_HEIGHT - (48 + 0.75 - plywood.THICKNESS - stud.DEPTH)*SLOPE,
+      //   zPos: 48 - plywood.THICKNESS - 0.75,
+      //   zSize: 1.5,
+      // }
 
-      sloped(sideJoiningStud, {
-        name: "left-wall-joining-stud",
-        xPos: 0,
-      })
+      // sloped(sideJoiningStud, {
+      //   name: "left-wall-joining-stud",
+      //   xPos: 0,
+      // })
 
-      sloped(sideJoiningStud, {
-        name: "left-wall-joining-stud",
-        xPos: 96 - stud.DEPTH,
-      })
+      // sloped(sideJoiningStud, {
+      //   name: "right-wall-joining-stud",
+      //   xPos: 96 - stud.DEPTH,
+      // })
 
       trim({
         section: joins,

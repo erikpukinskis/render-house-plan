@@ -55,6 +55,7 @@ module.exports = library.export(
         }
       )
 
+
       if (dimensions.length <= 48) {
         console.log(options)
         throw new Error("We don't need a full length of plywood for this piece")
@@ -310,6 +311,16 @@ module.exports = library.export(
 
 
     function lumberDimensions(shape, options) {
+
+      if (Number.isNaN(shape.xSize)) {
+        throw new Error("xSize is NaN")
+      }
+      if (Number.isNaN(shape.ySize)) {
+        throw new Error("ySize is NaN")
+      }
+      if (Number.isNaN(shape.zSize)) {
+        throw new Error("zSize is NaN")
+      }
 
       var xSize = Math.abs(shape.xSize || options.defaultThickness)
       var ySize = Math.abs(shape.ySize || options.defaultThickness)

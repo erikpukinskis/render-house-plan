@@ -70,45 +70,40 @@ module.exports = library.export(
 
       var oppositeOrientation = options.orientation == "north" ? "south" : "north"
 
-      var overhang = {
-        left: options.leftOverhang || 0,
-        right: options.rightOverhang || 0,
-        top: options.topOverhang || 0,
-        bottom: options.bottomOverhang || 0,
-      }
+      var overhangs = getOverhangs(options)
 
       plywood({
         section: wall,
         name: options.name+"-interior",
         sanded: true,
-        xPos: 0 - overhang.left,
-        xSize: options.width + overhang.left + overhang.right,
+        xPos: 0 - overhangs.left,
+        xSize: options.width + overhangs.left + overhangs.right,
         yPos: 0,
         ySize: -options.height,
         zPos: options.orientation == "south" ? -plywood.THICKNESS : stud.DEPTH,
         orientation: oppositeOrientation
       })
 
-      var sheathingHeight = options.height + overhang.bottom + overhang.top
+      var sheathingHeight = options.height + overhangs.bottom + overhangs.top
 
       plywood({
         section: wall,
         name: options.name+"-sheathing",
-        xPos: overhang.left,
-        xSize: options.width + overhang.left + overhang.right,
+        xPos: overhangs.left,
+        xSize: options.width + overhangs.left + overhangs.right,
         ySize: -sheathingHeight,
-        yPos: overhang.bottom,
+        yPos: overhangs.bottom,
         zPos: options.orientation == "south" ? stud.DEPTH : -plywood.THICKNESS,
         orientation: options.orientation
       })
 
-      var sheathingTopOverhang = overhang.top + 1.5
+      var sheathingTopOverhang = overhangs.top + 1.5
 
 
       if (options.name == "back-wall-left") {
-        console.log("base top overhang:", dimensionText(overhang.top))
+        console.log("base top overhang:", dimensionText(overhangs.top))
 
-        console.log("base bottom overhang:", dimensionText(overhang.bottom))
+        console.log("base bottom overhang:", dimensionText(overhangs.bottom))
 
         console.log("sheathingHeight:", dimensionText(sheathingHeight))
         console.log("sheathingTopOverhang:", dimensionText(sheathingTopOverhang))
@@ -116,7 +111,6 @@ module.exports = library.export(
       }
 
       join = getJoinGaps(options)
-      console.log(join)
 
       var plateSize = options.width
 
@@ -227,6 +221,14 @@ module.exports = library.export(
       return joins
     }
 
+    function getOverhangs(options) {
+      return {
+        left: options.leftOverhang || 0,
+        right: options.rightOverhang || 0,
+        top: options.topOverhang || 0,
+        bottom: options.bottomOverhang || 0,
+      }
+    }
     function contains(array, value) {
       if (!Array.isArray(array)) {
         throw new Error("looking for "+JSON.stringify(value)+" in "+JSON.stringify(array)+", which is supposed to be an array. But it's not.")
@@ -242,6 +244,7 @@ module.exports = library.export(
     }
 
     faceWall.getJoinGaps = getJoinGaps
+    faceWall.getOverhangs = getOverhangs
 
     return faceWall
   }

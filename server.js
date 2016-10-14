@@ -1,8 +1,8 @@
 var library = require("nrtv-library")(require)
 
 library.using(
-  ["nrtv-server", "./teensy-house-3", "./allocate_materials", "./buy_materials", "./drawing", "./build"],
-  function(server, teensyHouse, allocateMaterials, buy, draw, build) {
+  ["nrtv-server", "./teensy-house-3", "./allocate_materials", "./buy_materials", "./drawing", "./build", "make-request"],
+  function(server, teensyHouse, allocateMaterials, buy, draw, build, makeRequest) {
     server.start(process.env.PORT||8181)
 
     var house = teensyHouse()
@@ -27,6 +27,8 @@ library.using(
       "get", "/build-section/:name",
       build.section(house, materials, server)
     )
+
+    // makeRequest("http://localhost:8181/build-section/left-wall-A")
 
   }
 )
