@@ -48,7 +48,7 @@ module.exports = library.export(
 
       var overhangs = faceWall.getOverhangs(options)
 
-      var sheathingHeight = options.height + overhangs.top + overhangs.bottom
+      var sheathingHeight = options.height + overhangs.top + overhangs.bottom + overhangs.right*options.slope
 
       var sheathingWidth = options.width + overhangs.left + overhangs.right
 
@@ -227,18 +227,22 @@ module.exports = library.export(
 
       var battenHeightAtZero = studHeightAtWallStart + floorSection.HEIGHT + rafterHeight
 
-      var height = battenHeightAtZero + offset*options.slope
+      if (!joins.left) {
+        var height = battenHeightAtZero + offset*options.slope
 
-      sloped(batten, {
-        name: name+"-batten-A",
-        ySize: -height,
-        zPos: offset,
-        zSize: -width
-      })
+        sloped(batten, {
+          name: name+"-batten-A",
+          ySize: -height,
+          zPos: offset,
+          zSize: -width
+        })
+      }
 
-      var lastBattenOverhang = joins.right ? battenWidth/2 : trim.THICKNESS
+      var lastBattenOverhang = joins.right ? battenWidth/2 : plywood.THICKNESS + trim.THICKNESS
 
-      var maxBattenOffset = options.width + lastBattenOverhang
+      var maxBattenOffset = options.width + overhangs.right + lastBattenOverhang
+
+      var lastBattenWidth = overhangs.right ? battenWidth + trim.THICKNESS : battenWidth
 
       for(var i=1; i<3; i++) {
 
@@ -259,6 +263,7 @@ module.exports = library.export(
           name: name+"-batten-B",
           ySize: -height,
           zPos: offset,
+          zSize: isLastOne ? -lastBattenWidth : -battenWidth
         })
 
         if (bail) { break }

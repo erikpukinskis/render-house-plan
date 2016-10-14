@@ -164,35 +164,45 @@ module.exports = library.export(
 
       var interiorWidth = 48 - wallHang
 
-      var height = BACK_WALL_INSIDE_HEIGHT + HousePlan.verticalSlice(0.75, SLOPE) + interiorWidth*SLOPE
+      var sideHeightA = BACK_WALL_INSIDE_HEIGHT + HousePlan.verticalSlice(0.75, SLOPE) + interiorWidth*SLOPE
+
+      var sideWidthA = 48 - wallHang
+
+      var topOverhang = HousePlan.verticalSlice(roof.RAFTER_HEIGHT - 0.75, SLOPE)
 
       plan.add(sideWall, {
         name: "left-wall-A",
         xPos: 0,
         yPos: FLOOR_TOP,
         zPos: wallHang,
-        width: 48 - wallHang,
-        height: height,
+        width: sideWidthA,
+        height: sideHeightA,
         joins: "right top",
         leftOverhang: wallHang,
         bottomOverhang: floorSection.HEIGHT,
-        topOverhang: HousePlan.verticalSlice(roof.RAFTER_HEIGHT - 0.75, SLOPE),
+        topOverhang: topOverhang,
         whichSide: "left",
         slope: SLOPE,
       })
 
-      // plan.add(sideWall, {
-      //   name: "left-wall-B",
-      //   xPos: 0,
-      //   yPos: FLOOR_TOP,
-      //   zPos: 48 - HousePlan.parts.plywood.THICKNESS,
-      //   width: 24+HousePlan.parts.plywood.THICKNESS*2,
-      //   backWallHeight: BACK_WALL_INSIDE_HEIGHT,
-      //   overhangs: "join/wall",
-      //   innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
-      //   whichSide: "left",
-      //   slope: SLOPE,
-      // })
+      var sideWidthB = 24 - wallHang
+
+      var sideHeightB = sideHeightA + sideWidthB*SLOPE
+
+      plan.add(sideWall, {
+        name: "left-wall-B",
+        xPos: 0,
+        yPos: FLOOR_TOP,
+        zPos: 48,
+        width: sideWidthB,
+        height: sideHeightB,
+        joins: "left top",
+        bottomOverhang: floorSection.HEIGHT,
+        topOverhang: topOverhang,
+        rightOverhang: wallHang,
+        whichSide: "left",
+        slope: SLOPE,
+      })
 
       // var rightWallOffset = 96 - HousePlan.parts.stud.DEPTH
 
