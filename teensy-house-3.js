@@ -170,6 +170,8 @@ module.exports = library.export(
 
       var topOverhang = HousePlan.verticalSlice(roof.RAFTER_HEIGHT - 0.75, SLOPE)
 
+      var rightWallOffset = 96 - HousePlan.parts.stud.DEPTH
+
       plan.add(sideWall, {
         name: "left-wall-A",
         xPos: 0,
@@ -185,6 +187,21 @@ module.exports = library.export(
         slope: SLOPE,
       })
 
+      plan.add(sideWall, {
+        name: "right-wall-A",
+        xPos: rightWallOffset,
+        yPos: FLOOR_TOP,
+        zPos: wallHang,
+        width: sideWidthA,
+        height: sideHeightA,
+        joins: "right top",
+        leftOverhang: wallHang,
+        bottomOverhang: floorSection.HEIGHT,
+        topOverhang: topOverhang,
+        whichSide: "right",
+        slope: SLOPE,
+      })
+      
       var sideWidthB = 24 - wallHang
 
       var sideHeightB = sideHeightA + sideWidthB*SLOPE
@@ -204,33 +221,20 @@ module.exports = library.export(
         slope: SLOPE,
       })
 
-      // var rightWallOffset = 96 - HousePlan.parts.stud.DEPTH
-
-      // plan.add(sideWall, {
-      //   name: "right-wall-A",
-      //   xPos: rightWallOffset,
-      //   yPos: FLOOR_TOP,
-      //   zPos: -HousePlan.parts.plywood.THICKNESS,
-      //   width: 48,
-      //   backWallHeight: BACK_WALL_INSIDE_HEIGHT,
-      //   overhangs: "wall/join",
-      //   innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
-      //   whichSide: "right",
-      //   slope: SLOPE,
-      // })
-
-      // plan.add(sideWall, {
-      //   name: "right-wall-B",
-      //   xPos: rightWallOffset,
-      //   yPos: FLOOR_TOP,
-      //   zPos: 48 - HousePlan.parts.plywood.THICKNESS,
-      //   width: 24+HousePlan.parts.plywood.THICKNESS*2,
-      //   backWallHeight: BACK_WALL_INSIDE_HEIGHT,
-      //   overhangs: "join/wall",
-      //   innerTopOverhang: HousePlan.verticalSlice(0.75, SLOPE),
-      //   whichSide: "right",
-      //   slope: SLOPE,
-      // })
+      plan.add(sideWall, {
+        name: "right-wall-B",
+        xPos: rightWallOffset,
+        yPos: FLOOR_TOP,
+        zPos: 48,
+        width: sideWidthB,
+        height: sideHeightB,
+        joins: "left top",
+        bottomOverhang: floorSection.HEIGHT,
+        topOverhang: topOverhang,
+        rightOverhang: wallHang,
+        whichSide: "right",
+        slope: SLOPE,
+      })
 
 
 
