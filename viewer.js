@@ -257,6 +257,10 @@ module.exports = library.export(
       function(viewOptions) {
         var options = joinObjects(arguments, 1)
 
+        if (options.name == "door-section-stud-A") {
+          debugger
+        }
+
         addPart(this, options)
 
         var size = "0.4em"
@@ -378,6 +382,16 @@ module.exports = library.export(
       var styles = {}
       var isSome = false
 
+      // ;["x", "y", "z"].forEach(function(dim) {
+      //   var size = options[dim+"Size"]
+      //   var pos = options[dim+"Pos"]
+
+      //   if (typeof size != "undefined" && size < 0 && typeof pos == "undefined") {
+      //     console.log("zeroing", options.name)
+      //     options[dim+"Pos"] = 0
+      //   }
+      // })
+
       if (options.color) {
         styles["border-color"] = options.color
       }
@@ -394,97 +408,99 @@ module.exports = library.export(
         el.attributes["data-name"] = options.name
       }
 
-      ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(
-        function(attribute) {
+      ;["top", "bottom", "left", "right", "height", "width", "xPos", "yPos", "zPos", "xSize", "ySize", "zSize"].forEach(handleAttribute)
 
-          var value = options[attribute]
-          if (Number.isNaN(value)) {
-            console.log("offending options:", options)
-            throw new Error("option "+attribute+" is not a number")
-          }
-          var screenAttr
+      function handleAttribute(attribute) {
 
-          var view = viewOptions.view
-
-          if (!view) {
-            throw new Error("what view is this?")
-          }
-
-          if (typeof value != "undefined") {
-
-            if (attribute == "zPos") {
-              screenAttr = {
-                side: "left",
-                top: "top",
-                front: "__ignore"
-              }[view]
-            } else if (attribute == "xPos") {
-              screenAttr = {
-                top: "left",
-                side: "__ignore",
-                front: "left"
-              }[view]
-            } else if (attribute == "yPos") {
-
-              screenAttr = {
-                side: "top",
-                top: "__ignore",
-                front: "top"
-              }[view]
-            } else if (attribute == "xSize") {
-              screenAttr = {
-                top: "width",
-                side: "__ignore",
-                front: "width"
-              }[view]
-            } else if (attribute == "ySize") {
-              screenAttr = {
-                top: "__ignore",
-                side: "height",
-                front: "height"
-              }[view]
-            } else if (attribute == "zSize") {
-              screenAttr = {
-                top: "height",
-                side: "width",
-                front: "__ignore"
-              }[view]
-            }
-
-            if (screenAttr == "__ignore") { return }
-
-            var isPos = attribute.substr(1) == "Pos"
-
-            var isSize = attribute.substr(1) == "Size"
-
-            if (isPos) {
-              var dimension = attribute[0]
-              var sizeAttr = dimension+"Size"
-              if (options[sizeAttr] < 0) {
-
-                screenAttr = reverse(screenAttr)
-                value = -value
-              }
-            }
-
-            if (isSize) {
-              value = Math.abs(value)
-            }
-
-            var attributeToSet = screenAttr || attribute
-
-            styles[screenAttr || attribute] = value+"em"
-            el[attributeToSet] = value
-            isSome = true
-
-          }
+        var value = options[attribute]
+        
+        if (Number.isNaN(value)) {
+          console.log("offending options:", options)
+          throw new Error("option "+attribute+" is not a number")
         }
-      )
+        var view = viewOptions.view
+
+        if (!view) {
+          throw new Error("what view is this?")
+        }
+
+        if (typeof value != "undefined") {
+
+          var screenAttr = toScreenAttribute(attribute, view)
+
+          if (screenAttr == "__ignore") { return }
+
+          var isPos = attribute.substr(1) == "Pos"
+
+          var isSize = attribute.substr(1) == "Size"
+
+          if (isPos) {
+            var dimension = attribute[0]
+            var sizeAttr = dimension+"Size"
+            if (options[sizeAttr] < 0) {
+
+              screenAttr = reverse(screenAttr)
+              value = -value
+            }
+          }
+
+          if (isSize) {
+            value = Math.abs(value)
+          }
+
+          var attributeToSet = screenAttr || attribute
+
+          styles[screenAttr || attribute] = value+"em"
+          el[attributeToSet] = value
+          isSome = true
+
+        }
+      }
 
       if (isSome) {
         el.appendStyles(styles)
       }
 
+    }
+
+    function toScreenAttribute(attribute, view) {
+      if (attribute == "zPos") {
+        return {
+          side: "left",
+          top: "top",
+          front: "__ignore"
+        }[view]
+      } else if (attribute == "xPos") {
+        return {
+          top: "left",
+          side: "__ignore",
+          front: "left"
+        }[view]
+      } else if (attribute == "yPos") {
+        return {
+          side: "top",
+          top: "__ignore",
+          front: "top"
+        }[view]
+      } else if (attribute == "xSize") {
+        return {
+          top: "width",
+          side: "__ignore",
+          front: "width"
+        }[view]
+      } else if (attribute == "ySize") {
+        return {
+          top: "__ignore",
+          side: "height",
+          front: "height"
+        }[view]
+      } else if (attribute == "zSize") {
+        return {
+          top: "height",
+          side: "width",
+          front: "__ignore"
+        }[view]
+      }
     }
 
     function reverse(attr) {
