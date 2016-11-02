@@ -5,6 +5,7 @@ module.exports = library.export(
   ["./house_plan", "./dimension_text"],
   function(HousePlan, dimensionText) {
 
+    var BATTEN_WIDTH = HousePlan.parts.batten.WIDTH
 
     function faceWall(section, plywood, stud, trim, sloped, verticalSlice, insulation, options) {
 
@@ -14,11 +15,15 @@ module.exports = library.export(
 
       var wall = section(options)
 
+      var hasOpening = !!options.openingWidth
+
+      var openingTrimWidth = BATTEN_WIDTH
+
       var topOverhang = options.topOverhang || 0
 
       var bottomOverhang = options.bottomOverhang || 0
 
-      var battenHeight = options.height + topOverhang + bottomOverhang
+      var battenHeight = options.ySize + topOverhang + bottomOverhang
 
       var battenZPos = options.orientation == "south" ? stud.DEPTH + plywood.THICKNESS : -plywood.THICKNESS - trim.THICKNESS
 
@@ -26,7 +31,7 @@ module.exports = library.export(
         section: wall,
         part: trim,
         "z-index": 100,
-        xSize: HousePlan.parts.batten.WIDTH,
+        xSize: BATTEN_WIDTH,
         zSize: trim.THICKNESS,
         yPos: bottomOverhang,
         ySize: -battenHeight,
@@ -44,25 +49,47 @@ module.exports = library.export(
         })
       }
 
-      var maxSegments = (options.width - 12)/24
+      var maxSegments = (options.xSize - 12)/24
       var bottomGap = options.middleBattenBottomGap||0
 
       for (var i=1; i<maxSegments; i++) {
-        var xPos = 24*i - HousePlan.parts.batten.WIDTH/2
-        var yPos = bottomOverhang - bottomGap
-        var ySize = -battenHeight + bottomGap
-        battenGenerator(batten, {
-          name: options.name+"-batten-2",
-          xPos: xPos,
-          yPos: yPos,
-          ySize: ySize,
-        })
+
+        var xPos = 24*i - BATTEN_WIDTH/2
+
+        if (i == 1 && hasOpening) {
+          var ySize = bottomOverhang + options.openingBottom - openingTrimWidth
+          trim(batten, {
+            name: options.name+"-batten-2-below",
+            xPos: xPos,
+            yPos: bottomOverhang,
+            ySize: -ySize,
+          })
+
+          var yPos = options.openingBottom + options.openingHeight - openingTrimWidth
+          var ySize = options.ySize + topOverhang - yPos
+          trim(batten, {
+            name: options.name+"-batten-2-above",
+            xPos: xPos,
+            yPos: -yPos,
+            ySize: -ySize,
+          })
+        } else {
+          var yPos = bottomOverhang - bottomGap
+          var ySize = -battenHeight + bottomGap
+
+          battenGenerator(batten, {
+            name: options.name+"-batten-2",
+            xPos: xPos,
+            yPos: yPos,
+            ySize: ySize,
+          })
+        }
       }
 
       if (typeof options.rightBattenOverhang != "undefined") {
         battenGenerator(batten, {
           name: options.name+"-batten-2",
-          xPos: options.width - HousePlan.parts.batten.WIDTH + options.rightBattenOverhang,
+          xPos: options.xSize - BATTEN_WIDTH + options.rightBattenOverhang,
         })
       }
 
@@ -77,20 +104,20 @@ module.exports = library.export(
         name: options.name+"-interior",
         sanded: true,
         xPos: 0 - overhangs.left,
-        xSize: options.width + overhangs.left + overhangs.right,
+        xSize: options.xSize + overhangs.left + overhangs.right,
         yPos: 0,
-        ySize: -options.height,
+        ySize: -options.ySize,
         zPos: options.orientation == "south" ? -plywood.THICKNESS : stud.DEPTH,
         orientation: oppositeOrientation
       })
 
-      var sheathingHeight = options.height + overhangs.bottom + overhangs.top
+      var sheathingHeight = options.ySize + overhangs.bottom + overhangs.top
 
       plywood({
         section: wall,
         name: options.name+"-sheathing",
         xPos: overhangs.left,
-        xSize: options.width + overhangs.left + overhangs.right,
+        xSize: options.xSize + overhangs.left + overhangs.right,
         ySize: -sheathingHeight,
         yPos: overhangs.bottom,
         zPos: options.orientation == "south" ? stud.DEPTH : -plywood.THICKNESS,
@@ -107,12 +134,12 @@ module.exports = library.export(
 
         console.log("sheathingHeight:", dimensionText(sheathingHeight))
         console.log("sheathingTopOverhang:", dimensionText(sheathingTopOverhang))
-        console.log("interiorPlyHeight:", dimensionText(options.height))
+        console.log("interiorPlyHeight:", dimensionText(options.ySize))
       }
 
       join = getJoinGaps(options)
 
-      var plateSize = options.width
+      var plateSize = options.xSize
 
       stud({
         section: wall,
@@ -123,7 +150,7 @@ module.exports = library.export(
         yPos: -stud.WIDTH - join.bottom
       })
 
-      var studHeight = options.height - join.top - join.bottom
+      var studHeight = options.ySize - join.top - join.bottom
 
       stud({
         section: wall,
@@ -131,7 +158,7 @@ module.exports = library.export(
         orientation: "down-across",
         xPos: 0,
         xSize: plateSize,
-        yPos: -options.height + join.top
+        yPos: -options.ySize + join.top
       })
 
       var wallStud = {
@@ -147,15 +174,129 @@ module.exports = library.export(
         xPos: join.left,
       })
 
-      var maxStudOffset = options.width - join.right - stud.WIDTH
+      var openingRightPos = 0
+
+      if (hasOpening) {
+        var openingLeftPos = Math.max(join.left + stud.WIDTH*2, options.openingLeft)
+
+        var openingRightPos = openingLeftPos + options.openingWidth
+
+        var yPos = options.openingBottom + options.openingHeight
+        var ySize = studHeight - yPos
+        var topStud = {
+          section: wall,
+          orientation: "east",
+          yPos: -yPos,
+          ySize: -ySize,
+        }
+
+        var bottomStud = {
+          section: wall,
+          orientation: "east",
+          yPos: 0,
+          ySize: -options.openingBottom,
+        }
+
+        for(var i=1; i<10; i++) {
+          var tryOffset = i*16 + openingLeftPos
+          var maxOffset = openingRightPos - 2
+
+          if (tryOffset < maxOffset) {
+            stud(bottomStud, {
+              name: options.name+"-below-window-stud-"+i,
+              xPos: tryOffset
+            })
+
+            stud(topStud, {
+              name: options.name+"-above-window-stud-"+i,
+              xPos: tryOffset
+            })
+          }
+        }
+
+        stud(wallStud, {
+          section: wall,
+          name: options.name+"-opening-left-stud",
+          orientation: "west",
+          xPos: openingLeftPos - stud.WIDTH,
+        })
+
+        trim(batten, {
+          name: options.name+"-window-trim-left",
+          xPos: openingLeftPos,
+          xSize: -openingTrimWidth,
+          ySize: -options.openingHeight,
+          yPos: -options.openingBottom,
+        })
+
+        stud(wallStud, {
+          section: wall,
+          name: options.name+"-opening-right-stud",
+          orientation: "east",
+          xPos: openingRightPos,
+        })
+
+        trim(batten, {
+          name: options.name+"-window-trim-left",
+          xPos: openingRightPos,
+          xSize: openingTrimWidth,
+          ySize: -options.openingHeight,
+          yPos: -options.openingBottom,
+        })
+
+        var windowTrack = {
+          section: wall,
+          xPos: openingLeftPos - stud.WIDTH,
+          xSize: options.openingWidth + stud.WIDTH*2,
+        }
+
+        stud(windowTrack, {
+          name: options.name+"-window-bottom-track",
+          orientation: "down-across",
+          yPos: -options.openingBottom,
+        })
+
+        var horizTrimWidth = options.openingWidth + openingTrimWidth*2
+
+        trim(batten, {
+          name: options.name+"-window-trim-bottom",
+          xPos: openingLeftPos - openingTrimWidth,
+          xSize: horizTrimWidth,
+          yPos: -options.openingBottom,
+          ySize: openingTrimWidth,
+        })
+
+        stud(windowTrack, {
+          name: options.name+"-window-top-track",
+          orientation: "up-across",
+          yPos: -options.openingBottom - options.openingHeight - stud.WIDTH,
+        })
+
+        trim(batten, {
+          name: options.name+"-window-trim-top",
+          xPos: openingLeftPos - openingTrimWidth,
+          xSize: horizTrimWidth,
+          yPos: -options.openingBottom - options.openingHeight,
+          ySize: -openingTrimWidth,
+        })
+
+        var minStudOffset = openingRightPos + 2
+      }
+
+      var maxStudOffset = options.xSize - join.right - stud.WIDTH
       var insulated = 0
 
-      for(var i=1; i<8; i++){
+
+      var next = Math.floor(openingRightPos/16) + 1
+
+      for(var i=next; i<8; i++){
         var tryOffset = 16*i - stud.WIDTH/2
 
         if (tryOffset + 3 > maxStudOffset) {
           var offset = maxStudOffset
           var bail = true
+        } else if (minStudOffset && tryOffset < minStudOffset) {
+          continue
         } else {
           var offset = tryOffset
           var bail = false
@@ -165,7 +306,7 @@ module.exports = library.export(
           trim({
             section: wall,
             name: options.name+"-joining-stud",
-            xPos: options.width - 0.75,
+            xPos: options.xSize - 0.75,
             xSize: 1.5,
             zSize: stud.DEPTH,
             yPos: -join.bottom,

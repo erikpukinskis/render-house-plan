@@ -48,17 +48,17 @@ module.exports = library.export(
 
       var overhangs = faceWall.getOverhangs(options)
 
-      var sheathingHeight = options.height + overhangs.top + overhangs.bottom + overhangs.right*options.slope
+      var sheathingHeight = options.ySize + overhangs.top + overhangs.bottom + overhangs.right*options.slope
 
-      var sheathingWidth = options.width + overhangs.left + overhangs.right
+      var sheathingWidth = options.zSize + overhangs.left + overhangs.right
 
-      var interiorWidth = options.width
+      var interiorWidth = options.zSize
 
-      var interiorHeight = options.height
+      var interiorHeight = options.ySize
 
       verticalSlice(0.75, options.slope) + (options.zPos + interiorWidth)*options.slope
 
-      describePly("sheathing height", options.width, sheathingHeight)
+      describePly("sheathing height", options.zSize, sheathingHeight)
 
       console.log("zPos:", options.zPos, "leftHang:", overhangs.left)
       sloped({
@@ -91,7 +91,7 @@ module.exports = library.export(
         yPos: 0
       })
 
-      var studHeightAtZero = options.height - options.width*options.slope - verticalSlice(joins.top, options.slope) - joins.bottom
+      var studHeightAtZero = options.ySize - options.zSize*options.slope - verticalSlice(joins.top, options.slope) - joins.bottom
 
       var sideStud = {
         part: stud,
@@ -131,9 +131,7 @@ module.exports = library.export(
         console.log(name+": "+dimensionText(dimension))
       }
 
-
-
-      var maxOffset = options.width - joins.right - stud.WIDTH
+      var maxOffset = options.zSize - joins.right - stud.WIDTH
 
       var distance = 0
 
@@ -174,14 +172,14 @@ module.exports = library.export(
         if (bail) { break }
       }
 
-      describe("side wall bottom plate", options.width)
+      describe("side wall bottom plate", options.zSize)
       stud({
         section: wall,
         name: name+"-bottom-plate",
         orientation: "up",
         yPos: -stud.WIDTH,
         zPos: 0,
-        zSize: options.width,
+        zSize: options.zSize,
       })
 
       describe("side wall sheathing corner overhang", overhangs.left)
@@ -195,10 +193,10 @@ module.exports = library.export(
         ySize: stud.WIDTH,
         yPos: -studHeightAtZero,
         zPos: 0,
-        zSize: options.width,
+        zSize: options.zSize,
       })
 
-      var plateLength = options.width
+      var plateLength = options.zSize
       var rise = plateLength*options.slope
       var topLength = Math.sqrt(rise*rise+plateLength*plateLength)
       describe("side wall top plate", topLength)
@@ -219,7 +217,7 @@ module.exports = library.export(
       var offset = -overhangs.left + plywood.THICKNESS + trim.THICKNESS
       var width = battenWidth + trim.THICKNESS
 
-      var insideHeightAtBackWall = options.height - options.width*options.slope
+      var insideHeightAtBackWall = options.ySize - options.zSize*options.slope
 
       var studHeightAtWallStart = insideHeightAtBackWall - verticalSlice(joins.top, options.slope)
 
@@ -240,7 +238,7 @@ module.exports = library.export(
 
       var lastBattenOverhang = joins.right ? battenWidth/2 : plywood.THICKNESS + trim.THICKNESS
 
-      var maxBattenOffset = options.width + overhangs.right + lastBattenOverhang
+      var maxBattenOffset = options.zSize + overhangs.right + lastBattenOverhang
 
       var lastBattenWidth = overhangs.right ? battenWidth + trim.THICKNESS : battenWidth
 

@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["browser-bridge", "web-element", "./dimension_text", "module-universe", "./doable"],
-  function(BrowserBridge, element, dimensionText, ModuleUniverse, doable) {
+  ["browser-bridge", "web-element", "./dimension_text", "module-universe", "./doable", "./house_plan"],
+  function(BrowserBridge, element, dimensionText, ModuleUniverse, doable, HousePlan) {
 
     var universe = new ModuleUniverse(
       "houses",
@@ -71,12 +71,20 @@ module.exports = library.export(
           return element(".cut_instructions", scraps.map(scrapToTask))
         },
         studMarks: function(studs, options, direction) {
-          var originX = options.xPos||0
+
+          var origin = 0
+
+          if (options.zSize) {
+            var offsetDimension = "zPos"
+          } else {
+            var offsetDimension = "xPos"
+          }
 
           var marks = enumerate(studs.map(toAlignment))
 
           function toAlignment(stud) {
-            var fromLeft = stud.destination.xPos - originX
+            var fromLeft = stud.destination[offsetDimension] - origin + HousePlan.parts.stud.WIDTH/2
+
 
             return "<strong>"+dimensionText(fromLeft)+"</strong> from "+direction
           }
@@ -88,7 +96,20 @@ module.exports = library.export(
       function scrapToTask(scrap) {
         var material = scrap.material
 
-        var text = scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong> from "+material.description+" #"+material.number
+        if (scrap.slope) {
+          if (scrap.cut != "cross") {
+            console.log("scrap:", scrap)
+            throw new Error("Trying to rip on a diagonal. Not sure how to do that")
+          }
+
+          var shortSide = scrap.size - scrap.slope*scrap.material.width
+
+          var text = scrap.cut+" cut a diagonal <strong>"+dimensionText(scrap.size)+"</strong> to <strong>"+dimensionText(shortSide)+"</strong>"
+        } else {
+          var text = scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong>"
+        }
+
+        text += " from "+material.description+" #"+material.number
   
         var id = "cut-"+scrap.name+"-from-"+toSlug(material.description)+"-no"+material.number
 
@@ -155,7 +176,7 @@ module.exports = library.export(
 
     var em = element.style("strong", {
       "font-weight": "bold",
-      "font-size": "1.15em",
+      "font-size": "18pt",
       "line-height": "1em",
     })
 

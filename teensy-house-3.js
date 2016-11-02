@@ -64,35 +64,35 @@ module.exports = library.export(
         join: "left"
       })
 
-      // plan.add(faceWall, {
-      //   name: "back-wall-left",
-      //   zPos: 0,
-      //   yPos: FLOOR_TOP,
-      //   width: 48,
-      //   height: BACK_WALL_INSIDE_HEIGHT,
-      //   topOverhang: backPlateLeftHeight - HousePlan.parts.plywood.THICKNESS*SLOPE,
-      //   bottomOverhang: floorSection.HEIGHT,
-      //   joins: "right top-full",
-      //   leftBattenOverhang: HousePlan.parts.plywood.THICKNESS,
-      //   rightBattenOverhang: 0.75,
-      //   orientation: "north",
-      //   slope: SLOPE,
-      // })
+      plan.add(faceWall, {
+        name: "back-wall-left",
+        zPos: 0,
+        yPos: FLOOR_TOP,
+        xSize: 48,
+        ySize: BACK_WALL_INSIDE_HEIGHT,
+        topOverhang: backPlateLeftHeight - HousePlan.parts.plywood.THICKNESS*SLOPE,
+        bottomOverhang: floorSection.HEIGHT,
+        joins: "right top-full",
+        leftBattenOverhang: HousePlan.parts.plywood.THICKNESS,
+        rightBattenOverhang: 0.75,
+        orientation: "north",
+        slope: SLOPE,
+      })
 
-      // plan.add(faceWall, {
-      //   name: "back-wall-right",
-      //   xPos: 48,
-      //   zPos: 0,
-      //   yPos: FLOOR_TOP,
-      //   width: 48,
-      //   height: BACK_WALL_INSIDE_HEIGHT,
-      //   topOverhang: backPlateLeftHeight,
-      //   bottomOverhang: floorSection.HEIGHT,
-      //   joins: "left top-full",
-      //   rightBattenOverhang: HousePlan.parts.plywood.THICKNESS,
-      //   orientation: "north",
-      //   slope: SLOPE,
-      // })
+      plan.add(faceWall, {
+        name: "back-wall-right",
+        xPos: 48,
+        zPos: 0,
+        yPos: FLOOR_TOP,
+        xSize: 48,
+        ySize: BACK_WALL_INSIDE_HEIGHT,
+        topOverhang: backPlateLeftHeight,
+        bottomOverhang: floorSection.HEIGHT,
+        joins: "left top-full",
+        rightBattenOverhang: HousePlan.parts.plywood.THICKNESS,
+        orientation: "north",
+        slope: SLOPE,
+      })
 
       plan.add(joins)
 
@@ -100,21 +100,6 @@ module.exports = library.export(
       var frontWallWidth = (96 - doors.OPENING_WIDTH)/2
 
       var frontWallPosition = 48+24 - HousePlan.parts.stud.DEPTH
-
-      plan.add(faceWall, {
-        name: "front-wall-right",
-        zPos: frontWallPosition,
-        xPos: 48,
-        yPos: FLOOR_TOP,
-        height: headerRafterIntersection.yPos,
-        width: 48,
-        height: doors.OPENING_HEIGHT + 0.75,
-        bottomOverhang: floorSection.HEIGHT,
-        joins: "top",
-        rightBattenOverhang: HousePlan.parts.plywood.THICKNESS,
-        orientation: "south",
-        slopeBattens: false,
-      })
 
       // var headerHeight = doorFramingTop - headerRafterIntersection.yPos - 0.75
 
@@ -135,12 +120,31 @@ module.exports = library.export(
         ySize: frontWallHeight
       })
 
-      // plan.add(roof, {
-      //   name: "roof",
-      //   zPos: rafterStart.zPos,
-      //   yPos: rafterStart.yPos,
-      //   slope: SLOPE,
-      // })
+      plan.add(faceWall, {
+        name: "front-wall-right",
+        zPos: frontWallPosition,
+        xPos: 48,
+        yPos: FLOOR_TOP,
+        ySize: frontWallHeight,
+        xSize: 48,
+        openingWidth: 24,
+        openingHeight: 48,
+        openingBottom: 39-12,
+        openingLeft: 6,
+        bottomOverhang: floorSection.HEIGHT,
+        topOverhang: roof.RAFTER_HEIGHT,
+        joins: "top-full left",
+        rightBattenOverhang: HousePlan.parts.plywood.THICKNESS,
+        orientation: "south",
+        slopeBattens: false,
+      })
+
+      plan.add(roof, {
+        name: "roof",
+        zPos: rafterStart.zPos,
+        yPos: rafterStart.yPos,
+        slope: SLOPE,
+      })
 
       var wallHang = HousePlan.parts.stud.DEPTH + HousePlan.parts.plywood.THICKNESS
 
@@ -159,8 +163,8 @@ module.exports = library.export(
         xPos: 0,
         yPos: FLOOR_TOP,
         zPos: wallHang,
-        width: sideWidthA,
-        height: sideHeightA,
+        zSize: sideWidthA,
+        ySize: sideHeightA,
         joins: "right top",
         leftOverhang: wallHang,
         bottomOverhang: floorSection.HEIGHT,
@@ -174,8 +178,8 @@ module.exports = library.export(
         xPos: rightWallOffset,
         yPos: FLOOR_TOP,
         zPos: wallHang,
-        width: sideWidthA,
-        height: sideHeightA,
+        zSize: sideWidthA,
+        ySize: sideHeightA,
         joins: "right top",
         leftOverhang: wallHang,
         bottomOverhang: floorSection.HEIGHT,
@@ -193,8 +197,8 @@ module.exports = library.export(
         xPos: 0,
         yPos: FLOOR_TOP,
         zPos: 48,
-        width: sideWidthB,
-        height: sideHeightB,
+        zSize: sideWidthB,
+        ySize: sideHeightB,
         joins: "left top",
         bottomOverhang: floorSection.HEIGHT,
         topOverhang: topOverhang,
@@ -208,8 +212,8 @@ module.exports = library.export(
         xPos: rightWallOffset,
         yPos: FLOOR_TOP,
         zPos: 48,
-        width: sideWidthB,
-        height: sideHeightB,
+        zSize: sideWidthB,
+        ySize: sideHeightB,
         joins: "left top",
         bottomOverhang: floorSection.HEIGHT,
         topOverhang: topOverhang,

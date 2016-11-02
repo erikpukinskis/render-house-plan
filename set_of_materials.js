@@ -155,6 +155,7 @@ module.exports = library.export(
 
         var scrap = {
           cut: cut,
+          slope: options.slope,
           name: name,
           material: material,
           size: size,

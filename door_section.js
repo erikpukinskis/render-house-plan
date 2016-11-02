@@ -12,7 +12,10 @@ module.exports = library.export(
 
     var OPENING_WIDTH = HousePlan.parts.trim.THICKNESS*2 + HousePlan.parts.door.WIDTH*2 + DOOR_GAP*2
 
-    var TRIM_WIDTH = 3.5
+    var TRIM_WIDTH = 3.5 
+    var BATTEN_WIDTH = HousePlan.parts.batten.WIDTH
+
+    console.log("door trim width:", TRIM_WIDTH)
 
     function doors(section, door, trim, plywood, stud, sloped, verticalSlice, options) {
 
@@ -24,7 +27,11 @@ module.exports = library.export(
 
       var jambWidth = plywood.THICKNESS*2 + stud.DEPTH + 0.5
 
-      var rightWallWidth = stud.WIDTH*2 + joins.right
+      var rightWallExtra = TRIM_WIDTH - trim.THICKNESS - DOOR_GAP - stud.WIDTH - 0.75 + BATTEN_WIDTH/2
+
+      console.log("extra:", rightWallExtra)
+
+      var rightWallWidth = TRIM_WIDTH - trim.THICKNESS - DOOR_GAP - BATTEN_WIDTH/2
 
       var doorOpeningWidth = door.WIDTH + trim.THICKNESS*2 + DOOR_GAP*2
 
@@ -99,11 +106,11 @@ module.exports = library.export(
         orientation: "east",
       })
 
-      stud(fullHeightStud, {
-        name: options.name+"-stud-D",
+      trim(fullHeightStud, {
+        name: options.name+"-joining-stud",
         xPos: options.xSize - joins.right,
-        xSize: -stud.WIDTH,
-        orientation: "west",
+        xSize: 1.5,
+        zSize: -stud.DEPTH,
       })
 
       door({
@@ -195,7 +202,7 @@ module.exports = library.export(
         background: bg2,
         xPos: leftWallWidth + DOOR_GAP + trim.THICKNESS,
         xSize: door.WIDTH,
-        ySize: floorSection.HEIGHT + trim.THICKNESS,
+        ySize: TRIM_WIDTH,
         yPos: -trim.THICKNESS,
         zPos: plywood.THICKNESS
       })
@@ -211,30 +218,29 @@ module.exports = library.export(
         zPos: plywood.THICKNESS
       })
 
-      var sideTrimHeight = door.HEIGHT + trim.THICKNESS + floorSection.HEIGHT + TRIM_WIDTH
+      var sideTrimHeight = door.HEIGHT +TRIM_WIDTH*2
 
-      trim({
+      var sideTrim = {
         section: opening,
-        name: "left-door-trim",
         background: bg2,
         xSize: -TRIM_WIDTH,
         xPos: leftWallWidth + DOOR_GAP + trim.THICKNESS,
-        yPos: floorSection.HEIGHT,
+        yPos: TRIM_WIDTH - trim.THICKNESS,
         ySize: -sideTrimHeight,
         zPos: plywood.THICKNESS
+      }
+
+      trim(sideTrim, {
+        name: "left-door-trim",
+        xSize: -TRIM_WIDTH,
+        xPos: leftWallWidth + DOOR_GAP + trim.THICKNESS,
       })
 
-      trim({
-        section: opening,
+      trim(sideTrim, {
         name: "right-door-trim",
-        background: bg2,
         xSize: TRIM_WIDTH,
         xPos: leftWallWidth + DOOR_GAP + trim.THICKNESS + door.WIDTH,
-        yPos: floorSection.HEIGHT,
-        ySize: -sideTrimHeight,
-        zPos: plywood.THICKNESS,
       })
-
 
       var batten = {
         section: opening,
@@ -249,23 +255,32 @@ module.exports = library.export(
         xPos: -plywood.THICKNESS,
       })
 
-      trim(batten, {
-        name: options.name+"-right-batten",
-        xPos: options.xSize - HousePlan.parts.batten.WIDTH/2,
-      })
+      // trim(batten, {
+      //   name: options.name+"-right-batten",
+      //   xPos: options.xSize - HousePlan.parts.batten.WIDTH/2,
+      // })
 
       var yPos = options.ySize + overhangs.top
 
       var ySize = yPos - trim.THICKNESS - door.HEIGHT - TRIM_WIDTH
 
-      trim({
+      var miniBatten = {
         section: opening,
-        name: options.name+"-mini-batten",
-        xPos: options.xSize/2,
         xSize: HousePlan.parts.batten.WIDTH,
         yPos: -yPos,
         ySize: ySize,
         zPos: plywood.THICKNESS,
+      }
+
+      trim(miniBatten, {
+        name: options.name+"-middle-mini-batten",
+        xPos: options.xSize/2,
+
+      })
+
+      trim(miniBatten, {
+        name: options.name+"-right-mini-batten",
+        xPos: options.xSize - BATTEN_WIDTH/2,
       })
 
 

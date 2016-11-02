@@ -41,6 +41,7 @@ module.exports = library.export(
           topDoorContainer,
           basicDoor,
           doorKnob,
+          doorWindow,
           doorBox,
           doorSwing,
           slopeWrapper,
@@ -733,6 +734,9 @@ module.exports = library.export(
 
           addPart(this, options)
 
+          if (viewOptions.view == "front") {
+            this.addChild(doorWindow())
+          }
           addStylesFromOptions(options, this, viewOptions)
         }
       )
@@ -743,7 +747,7 @@ module.exports = library.export(
         "z-index": "10",
         "content": "\\00a0",
         "width": "2em",
-        "height": "2.5em",
+        "height": "2em",
         "box-sizing": "border-box",
         "border-radius": "1em",
         "border": "0.4em solid black",
@@ -752,6 +756,17 @@ module.exports = library.export(
         "left": "1.2em",
         "top": door.HEIGHT/2+"em"
       }
+    )
+
+    var doorWindow = element.template(
+      ".door-window",
+      element.style({
+        "width": "21em",
+        "margin": "5em",
+        "height": "65em",
+        "border": "0.5em solid #ccc",
+        "box-sizing": "border-box",
+      })
     )
 
 

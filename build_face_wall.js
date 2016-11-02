@@ -15,11 +15,20 @@ module.exports = library.export(
 
       steps.add("cut sheathing", function(cut, task, studMarks) {
           var sheathing = materials.get("sheathing")
+
           cut(sheathing)
 
-          task("sheathing-lines", "Chalk or mark lines "+studMarks(studs.slice(1), options, "left"))
+          task("sheathing-lines", "mark lines "+studMarks(studs, options, "left"))
 
-          task("sheathing-screw-spacing", "Cross those lines with a mark approximately every 10 inches")
+          var overhangs = faceWall.getOverhangs(options)
+
+          var trackFromTop = overhangs.top + STUD_WIDTH/2
+
+          var trackFromBottom = overhangs.bottom + STUD_WIDTH/2
+
+          task("sheathing-track-lines", "mark horizontal lines "+dimensionText(trackFromTop)+" from the top and "+dimensionText(trackFromBottom)+" from the bottom")
+
+          task("sheathing-screw-spacing", "cross all lines with a mark approximately every 10 inches")
 
           // cut notches in the plywood
         }
