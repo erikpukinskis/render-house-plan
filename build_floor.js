@@ -35,14 +35,14 @@ module.exports = library.export(
 
         cut(materials.list("sheathing"))
 
-        task("sheathing-lines", "Chalk lines "+studMarks(joists, options, "right"))
+        task("sheathing-lines", "Chalk lines "+studMarks(joists, options)+" from the right")
       })
 
       steps.add("cut subfloor", function(cut, studMarks, task) {
 
         cut(materials.list("subfloor"))
 
-        task("subfloor-lines", "Chalk  lines "+studMarks(joists, options, "left"))
+        task("subfloor-lines", "Chalk  lines "+studMarks(joists, options)+" from the left")
 
       })
 

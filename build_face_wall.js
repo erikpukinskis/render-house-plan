@@ -18,7 +18,7 @@ module.exports = library.export(
 
           cut(sheathing)
 
-          task("sheathing-lines", "mark lines "+studMarks(studs, options, "left"))
+          task("sheathing-lines", "mark lines "+studMarks(studs, options, "sheathing")+" from the left")
 
           var overhangs = faceWall.getOverhangs(options)
 
@@ -52,9 +52,9 @@ module.exports = library.export(
 
           cut(materials.list("*-track"))
 
-          var marks = studMarks(studs, options, "left")
+          var marks = studMarks(studs, options)
 
-          task("mark-track", "Lay the two pieces of track together so they form a square tube. Mark them with a wax pencil at "+marks+" putting an ✗ to the right of each mark")
+          task("mark-track", "Lay the two pieces of track together so they form a square tube. Mark them with a wax pencil at "+marks+" from the left putting an ✗ to the right of each mark")
 
           task("label-track", "Label the top one top and the bottom one bottom.")
 

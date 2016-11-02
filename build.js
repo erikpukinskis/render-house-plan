@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "build",
-  ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./build_face_wall", "./send_instructions"],
-  function(BrowserBridge, element, buildFloor, buildWall, sendInstructions) {
+  ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./build_face_wall", "./build_instructions_page"],
+  function(BrowserBridge, element, buildFloor, buildWall, buildInstructionsPage) {
 
     var body = element.style("body, a", {
       "font-family": "sans-serif",
@@ -71,7 +71,9 @@ module.exports = library.export(
         var bridge = new BrowserBridge()
         bridge.addToHead(element.stylesheet(body).html())
 
-        sendInstructions(steps, materials, bridge, server, name)(request, response)
+        var handler = buildInstructionsPage(steps, materials, bridge, server, name)
+
+        handler(request, response)
       }
     }
 

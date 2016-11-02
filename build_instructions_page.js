@@ -2,8 +2,8 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["browser-bridge", "web-element", "./dimension_text", "module-universe", "./doable", "./house_plan"],
-  function(BrowserBridge, element, dimensionText, ModuleUniverse, doable, HousePlan) {
+  ["browser-bridge", "web-element", "./dimension_text", "module-universe", "./doable", "./house_plan", "./face_wall"],
+  function(BrowserBridge, element, dimensionText, ModuleUniverse, doable, HousePlan, faceWall) {
 
     var universe = new ModuleUniverse(
       "houses",
@@ -24,7 +24,7 @@ module.exports = library.export(
       console.log("OK! "+doable.count+" tasks done")
     })
 
-    function sendInstructions(steps, materials, bridge, server, sectionName) {
+    function buildInstructionsPage(steps, materials, bridge, server, sectionName) {
 
       var saveCompletion = doable.complete.defineOn(server, bridge, universe)
 
@@ -70,24 +70,30 @@ module.exports = library.export(
           }
           return element(".cut_instructions", scraps.map(scrapToTask))
         },
-        studMarks: function(studs, options, direction) {
+        studMarks: function(studs, sectionOptions, side) {
 
           var origin = 0
 
-          if (options.zSize) {
+          if (sectionOptions.zSize) {
             var offsetDimension = "zPos"
           } else {
             var offsetDimension = "xPos"
           }
 
-          var marks = enumerate(studs.map(toAlignment))
+          var overhangs = faceWall.getOverhangs(sectionOptions)
 
           function toAlignment(stud) {
             var fromLeft = stud.destination[offsetDimension] - origin + HousePlan.parts.stud.WIDTH/2
 
+            if (side == "sheathing") {
+              fromLeft += overhangs.left
+            }
 
-            return "<strong>"+dimensionText(fromLeft)+"</strong> from "+direction
+
+            return "<strong>"+dimensionText(fromLeft)+"</strong>"
           }
+
+          var marks = enumerate(studs.map(toAlignment))
 
           return marks
         },
@@ -241,6 +247,6 @@ module.exports = library.export(
       return string.toLowerCase().replace(/[^0-9a-z]+/g, "-")
     }
 
-    return sendInstructions
+    return buildInstructionsPage
   }
 )

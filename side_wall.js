@@ -24,29 +24,13 @@ module.exports = library.export(
 
       var innerTopOverhang = HousePlan.verticalSlice(joins.top, options.slope)
 
-
-
-      // var overhangs = options.overhangs.split("/")
-
-      // if (overhangs[0] == "wall") {
-      //   var outerShortHang = wallHang
-      //   var innerShortHang = 0    
-      // } else {
-      //   var outerShortHang = joinHang
-      //   var innerShortHang = joinHang
-      // }
-
-      // if (overhangs[1] == "wall") {
-      //   var outerTallHang = wallHang
-      //   var innerTallHang = 0
-      // } else {
-      //   var outerTallHang = joinHang
-      //   var innerTallHang = joinHang
-      // }
-
       var wallThickness = stud.DEPTH + plywood.THICKNESS
 
       var overhangs = faceWall.getOverhangs(options)
+
+      if (options.name == "left-wall-A") {
+        console.log("side wall overhang: ", overhangs.left)
+      }
 
       var sheathingHeight = options.ySize + overhangs.top + overhangs.bottom + overhangs.right*options.slope
 
@@ -137,7 +121,8 @@ module.exports = library.export(
 
       for(var i=1; i<4; i++) {
 
-        var tryOffset = offset = 16*i - stud.WIDTH/2 - stud.WIDTH - plywood.THICKNESS
+        var tryOffset = offset = 16*i - stud.WIDTH/2 - overhangs.left
+
         var bail = false
         if (tryOffset + stud.WIDTH + 1 > maxOffset) {
           offset = maxOffset
