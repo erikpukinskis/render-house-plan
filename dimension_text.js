@@ -24,5 +24,5 @@ module.exports = function dimensionText(number) {
     text = integer.toString()+"\""+text
   }
 
-  return " <strong>"+text+"</strong> "
+  return "<strong>"+text+"</strong>"
 }

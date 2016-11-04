@@ -110,7 +110,7 @@ module.exports = library.export(
 
           var shortSide = scrap.size - scrap.slope*scrap.material.width
 
-          var text = scrap.cut+" cut a diagonal <strong>"+dimensionText(scrap.size)+"</strong> to <strong>"+dimensionText(shortSide)+"</strong>"
+          var text = scrap.cut+" cut a diagonal "+dimensionText(scrap.size)+" to "+dimensionText(shortSide)
         } else {
           var text = scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong>"
         }

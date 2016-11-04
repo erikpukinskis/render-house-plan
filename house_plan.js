@@ -36,6 +36,7 @@ module.exports = library.export(
 
     var helpers = HousePlan.helpers = {
       verticalSlice: verticalSlice,
+      sliceToNormal: sliceToNormal,
       slopeToDegrees: slopeToDegrees,
       slopeToRadians: slopeToRadians,
     }
@@ -126,16 +127,29 @@ module.exports = library.export(
       }
 
     function verticalSlice(thickness, slope) {
-      if (!slope) {
-        throw new Error("verticalSlice takes a thickness and a slope. You didn't provide a slope")
+      if (typeof slope == "undefined") {
+        throw new Error("verticalSlice takes a thickness and a slope. ou only provided one")
       }
+
       var angle = slopeToRadians(slope)
-      return thickness/Math.cos(angle)
+      var slice = thickness/Math.cos(angle)
+
+      return slice
+    }
+
+    function sliceToNormal(slice, slope) {
+      if (typeof slope == "undefined") {
+        throw new Error("verticalSliceToNormal takes a thickness and a slope. You only provided one")
+      }
+
+      var angle = slopeToRadians(slope)
+      var normal = slice*Math.cos(angle)
+
+      return normal
     }
 
     function slopeToDegrees(slope) {
-      var degrees = 180*slopeToRadians(slope)/Math.PI
-      return degrees
+      return 180*slopeToRadians(slope)/Math.PI
     }
 
     function slopeToRadians(slope) {

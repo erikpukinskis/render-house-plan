@@ -12,17 +12,17 @@ module.exports = library.export(
 
       var steps = new Steps()
       var studs = materials.list("stud-*")
+      var overhangs = faceWall.getOverhangs(options)
+      var joins = faceWall.getJoinGaps(options)
 
       steps.add("cut sheathing", function(cut, task, studMarks) {
           var sheathing = materials.get("sheathing")
 
           cut(sheathing)
 
-          task("sheathing-lines", "mark lines "+studMarks(studs, options, "sheathing")+" from the left")
+          task("sheathing-stud-lines", "mark lines "+studMarks(studs, options, "sheathing")+"<wbr>from the left")
 
-          var overhangs = faceWall.getOverhangs(options)
-
-          var trackFromTop = overhangs.top + STUD_WIDTH/2
+          var trackFromTop = HousePlan.helpers.sliceToNormal(overhangs.top, options.slope) + joins.top + STUD_WIDTH/2
 
           var trackFromBottom = overhangs.bottom + STUD_WIDTH/2
 
@@ -34,10 +34,19 @@ module.exports = library.export(
         }
       )
 
-      steps.add("cut interior", function(cut) {
+      steps.add("cut interior", function(cut, task, studMarks) {
           var interior = materials.get("interior")
           cut(interior)
-          // add screw lines
+
+          task("interior-stud-lines", "mark lines "+studMarks(studs, options, "interior")+"<wbr>from the right")
+
+          var trackFromTop = joins.top + STUD_WIDTH/2
+
+          var trackFromBottom = STUD_WIDTH/2
+
+          task("interiod-track-lines", "mark horizontal lines "+dimensionText(trackFromTop)+" from the top and "+dimensionText(trackFromBottom)+" from the bottom")
+
+          task("interior-screw-spacing", "cross all lines with a mark approximately every 10 inches")
         }
       )
 
@@ -101,7 +110,7 @@ module.exports = library.export(
 
           task("square-top-left", "Move the top left corner so that it is square with the stud and use your tri-square to check the top track is <strong>"+dimensionText(joinGaps.top)+"</strong> from the edge of the plywood at every point.")
 
-          task("screw-top-left", "Put a screw <strong>"+dimensionRound(joinGaps.top+5/8)+"</strong> from the top and <strong>"+dimensionRound(firstInset)+"</strong> from the left")
+          task("screw-top-left", "Put a screw "+dimensionRound(joinGaps.top+5/8)+" from the top and "+dimensionRound(firstInset)+" from the left")
 
           task("screw-top-left", "Put a screw <strong>"+dimensionRound(joinGaps.top+5/8)+"</strong> from the top and <strong>"+dimensionRound(secondInset)+"</strong> from the right")
 

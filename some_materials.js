@@ -57,6 +57,7 @@ module.exports = {
   },
   "8ft steel stud": {
     length: 96,
+    width: 1.25,
     price: 357,
     extra: 2,
   },
