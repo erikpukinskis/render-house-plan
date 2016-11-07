@@ -14,15 +14,23 @@ module.exports = library.export(
       var studs = materials.list("stud-*")
       var overhangs = faceWall.getOverhangs(options)
       var joins = faceWall.getJoinGaps(options)
+      var spanDimension = options.zSize ? "z" : "x"
 
-      steps.add("cut sheathing", function(cut, task, studMarks) {
+      var halfStud = HousePlan.parts.stud.WIDTH/2
+
+      steps.add("cut sheathing", function(cut, task, marks) {
           var sheathing = materials.get("sheathing")
 
           cut(sheathing)
 
-          task("sheathing-stud-lines", "mark lines "+studMarks(studs, options, "sheathing")+"<wbr>from the left")
+          var marks = marks(studs, {
+            dimension: spanDimension,
+            extra: faceWall.getOverhangs(options).left + halfStud,
+          })
 
-          var trackFromTop = HousePlan.helpers.sliceToNormal(overhangs.top, options.slope) + joins.top + STUD_WIDTH/2
+          task("sheathing-stud-lines", "mark lines "+marks+"<wbr> from the left")
+
+          var trackFromTop   = HousePlan.helpers.sliceToNormal(overhangs.top, options.slope) + joins.top + STUD_WIDTH/2
 
           var trackFromBottom = overhangs.bottom + STUD_WIDTH/2
 
@@ -34,11 +42,16 @@ module.exports = library.export(
         }
       )
 
-      steps.add("cut interior", function(cut, task, studMarks) {
+      steps.add("cut interior", function(cut, task, marks) {
           var interior = materials.get("interior")
           cut(interior)
 
-          task("interior-stud-lines", "mark lines "+studMarks(studs, options, "interior")+"<wbr>from the right")
+          var marks = marks(studs, {
+            dimension: spanDimension,
+            extra: halfStud,
+          })
+
+          task("interior-stud-lines", "mark lines "+marks+"<wbr>from the right")
 
           var trackFromTop = joins.top + STUD_WIDTH/2
 
@@ -57,15 +70,38 @@ module.exports = library.export(
       )
 
       steps.add("cut track",
-        function(cut, task, studMarks) {
+        function(cut, task, marks) {
 
-          cut(materials.list("*-track"))
+          cut(materials.get("top-track"), "top")
 
-          var marks = studMarks(studs, options)
+          if (options.slope) {
+            // we want the marks to be a little further back so that when we line them up at the end of the flange, they'll hit the web at the right spot
+            var extra = -options.slope*STUD_WIDTH
+          } else {
+            var extra = 0
+          }
 
-          task("mark-track", "Lay the two pieces of track together so they form a square tube. Mark them with a wax pencil at "+marks+" from the left putting an ✗ to the right of each mark")
+          taskForMarking(
+            marks(studs, {
+              dimension: spanDimension,
+              slope: options.slope,
+              extra: extra
+            }),
+            "top"
+          )
 
-          task("label-track", "Label the top one top and the bottom one bottom.")
+          function taskForMarking(marks, label) {
+            task("mark-"+label+"-track", "With the flanges facing towards you, mark the "+label.toUpperCase()+" track with a wax pencil at "+marks+"<wbr> from the left, putting an ✗ to the right of each mark")
+          }
+
+          cut(materials.get("bottom-track"), "bottom")
+
+          taskForMarking(
+            marks(studs, {
+              dimension: spanDimension,
+            }),
+            "bottom"
+          )
 
           task("transfer-track-marks", "Transfer the marks to other sides of each piece of track")
         }

@@ -953,15 +953,15 @@ module.exports = library.export(
 
         var zDepth = options.zDepth
         var zIntersect = zDepth - originZ
-        var boost = zIntersect * options.slope
+        var boost = zIntersect * options.tilt
 
         // section.origin.zPos + options.zPos + zTravel = zDepth
 
         var zTravel = zDepth - options.section.origin.zPos - options.zPos||0
 
-        var newYPos = options.yPos - zTravel*options.slope
+        var newYPos = options.yPos - zTravel*options.tilt
 
-        var newYSize = verticalSlice(options.ySize, options.slope)
+        var newYSize = verticalSlice(options.ySize, options.tilt)
 
         if (maxZ < zDepth || minZ > zDepth) {
           return
@@ -976,19 +976,19 @@ module.exports = library.export(
       }
 
       if (typeof options.ySize == "undefined") {
-        throw new Error("sloped parts need to specify a ySize")
+        throw new Error("tilted parts need to specify a ySize")
       }
       if (typeof options.zPos == "undefined") {
-        throw new Error("sloped parts need to specify a zPos")
+        throw new Error("tilted parts need to specify a zPos")
       }
-      var height = verticalSlice(options.ySize, options.slope)
+      var height = verticalSlice(options.ySize, options.tilt)
 
 
-      var drop = options.slope*options.zPos
+      var drop = options.tilt*options.zPos
 
       var yPos = options.yPos - drop
       
-      var radians = slopeToRadians(options.slope)
+      var radians = slopeToRadians(options.tilt)
 
       // cos(angle) = floorWidth/ceilingWidth
 
@@ -1001,7 +1001,7 @@ module.exports = library.export(
 
       el.appendStyles({
         "transform-origin": options.zPos+"em 0",
-        "transform": "skewY(-"+slopeToDegrees(options.slope)+"deg)",
+        "transform": "skewY(-"+slopeToDegrees(options.tilt)+"deg)",
       })
 
     }

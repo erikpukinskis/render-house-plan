@@ -30,7 +30,7 @@ module.exports = library.export(
 
       var completeTask = bridge.defineFunction(
         [saveCompletion],
-        function(save, id) {
+        function completeTask(save, id) {
 
           var el = document.querySelector(".task-"+id)
 
@@ -64,45 +64,64 @@ module.exports = library.export(
           page.addChild(stepEl)
         },
         task: task,
-        cut: function(scraps) {
+        cut: function(scraps, labels) {
           if (!Array.isArray(scraps)) {
             scraps = [scraps]
+            labels = [labels]
+          } else if (!labels) {
+            labels = []
           }
-          return element(".cut_instructions", scraps.map(scrapToTask))
+          return element(".cut_instructions", zip(scraps, labels, scrapToTask))
         },
-        studMarks: function(studs, sectionOptions, side) {
+        marks: function(scraps, options, side) {
 
-          var origin = 0
-
-          if (sectionOptions.zSize) {
-            var offsetDimension = "zPos"
-          } else {
-            var offsetDimension = "xPos"
+          if (options.name) {
+            throw new Error("boop")
+          } else if (side) {
+            throw new Error("boop")
           }
 
-          var overhangs = faceWall.getOverhangs(sectionOptions)
-
-          function toAlignment(stud) {
-            var fromLeft = stud.destination[offsetDimension] - origin + HousePlan.parts.stud.WIDTH/2
-
-            if (side == "sheathing") {
-              fromLeft += overhangs.left
-            }
-
-
-            return "<strong>"+dimensionText(fromLeft)+"</strong>"
+          if (!options.dimension) {
+            throw new Error("marks needs a dimension along which to mark")
           }
 
-          var marks = enumerate(studs.map(toAlignment))
+          // dimension: sectionOptions.zSize ? "z" : "x"
+
+          // extra: faceWall.getOverhangs(sectionOptions).left
+
+          var offsetProperty = options.dimension+"Pos"
+
+          var extra = options.extra || 0
+          var slope = options.slope || 0
+
+          function toAlignment(scrap) {
+            var fromLeft = extra + scrap.destination[offsetProperty]
+
+            var rise = fromLeft*slope
+
+            var fromEnd = Math.sqrt(
+              fromLeft*fromLeft + rise*rise
+            )
+
+            return "<strong>"+dimensionText(fromEnd)+"</strong>"
+          }
+
+          var marks = enumerate(scraps.map(toAlignment))
 
           return marks
         },
       }
 
-      function scrapToTask(scrap) {
+      function scrapToTask(scrap, label) {
         var material = scrap.material
 
-        if (scrap.slope) {
+        if (scrap.tilt) {
+          var differential = scrap.material.width*scrap.tilt
+
+          var text = "cut "+dimensionText(scrap.size)+" on a "+dimensionText(differential)+" tilt "
+
+        } else if (scrap.slope) {
+
           if (scrap.cut != "cross") {
             console.log("scrap:", scrap)
             throw new Error("Trying to rip on a diagonal. Not sure how to do that")
@@ -111,11 +130,19 @@ module.exports = library.export(
           var shortSide = scrap.size - scrap.slope*scrap.material.width
 
           var text = scrap.cut+" cut a diagonal "+dimensionText(scrap.size)+" to "+dimensionText(shortSide)
+
+          if (scrap.slopeHint) {
+            text += ", "+scrap.slopeHint+","
+          }
         } else {
           var text = scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong>"
         }
 
-        text += " from "+material.description+" #"+material.number
+        text += "<wbr> from "+material.description+" #"+material.number
+
+        if (label) {
+          text += ". Label it "+label.toUpperCase()
+        }
   
         var id = "cut-"+scrap.name+"-from-"+toSlug(material.description)+"-no"+material.number
 
@@ -245,6 +272,15 @@ module.exports = library.export(
 
     function toSlug(string) {
       return string.toLowerCase().replace(/[^0-9a-z]+/g, "-")
+    }
+
+    function zip(a, b, func) {
+      var out = []
+      for(var i=0; i<a.length; i++) {
+        var result = func(a[i], b[i])
+        out.push(result)
+      }
+      return out
     }
 
     return buildInstructionsPage

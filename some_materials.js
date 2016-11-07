@@ -63,6 +63,7 @@ module.exports = {
   },
   "10ft steel track": {
     length: 120,
+    width: 1.25,
     price: 433,
     extra: 1,
   },

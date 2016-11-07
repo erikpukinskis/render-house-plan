@@ -21,7 +21,7 @@ module.exports = library.export(
       var rafter = {
         part: trim,
         section: roof,
-        slope: options.slope,
+        tilt: options.slope,
         xSize: RAFTER_WIDTH,
         yPos: -RAFTER_HEIGHT + backOverhang*options.slope,
         ySize: RAFTER_HEIGHT,
@@ -53,7 +53,7 @@ module.exports = library.export(
       var roofCap = {
         part: trim,
         section: roof,
-        slope: options.slope,
+        tilt: options.slope,
         xSize: 7.5,
         yPos: -verticalSlice(RAFTER_HEIGHT + trim.THICKNESS, options.slope) + backOverhang*options.slope,
         ySize: trim.THICKNESS,
@@ -81,7 +81,7 @@ module.exports = library.export(
       var roofPanel = {
         part: twinWall,
         section: roof,
-        slope: options.slope,
+        tilt: options.slope,
         yPos: -RAFTER_HEIGHT - plywood.THICKNESS*options.slope + backOverhang*options.slope,
         ySize: HousePlan.parts.twinWall.THICKNESS,
         zPos: -backOverhang,
@@ -110,7 +110,7 @@ module.exports = library.export(
       var shadeRail = {
         part: trim,
         section: roof,
-        slope: options.slope,
+        tilt: options.slope,
         xSize: 1.5,
         yPos: (plywood.THICKNESS + stud.DEPTH - RAFTER_WIDTH)*options.slope,
         ySize: -1,
@@ -138,10 +138,10 @@ module.exports = library.export(
       }
 
 
-      var shadeRail = {
+      var ceilingShade = {
         section: roof,
         part: shade,
-        slope: options.slope,
+        tilt: options.slope,
         xSize: 44.5,
         ySize: -0.5,
         yPos: -1,
@@ -149,12 +149,12 @@ module.exports = library.export(
         zPos: 0,
       }
 
-      tilted(shadeRail, {
+      tilted(ceilingShade, {
         name: "left-ceiling-shade",
         xPos: 2,
       })
 
-      tilted(shadeRail, {
+      tilted(ceilingShade, {
         name: "right-ceiling-shade",
         xPos: 49,
       })

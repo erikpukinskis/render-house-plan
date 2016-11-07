@@ -160,7 +160,7 @@ module.exports = library.export(
       describe("side wall bottom plate", options.zSize)
       stud({
         section: wall,
-        name: name+"-bottom-plate",
+        name: name+"-bottom-track",
         orientation: "up",
         yPos: -stud.WIDTH,
         zPos: 0,
@@ -172,8 +172,8 @@ module.exports = library.export(
       tilted({
         section: wall,
         part: stud,
-        slope: options.slope,
-        name: name+"-top-plate",
+        tilt: options.slope,
+        name: name+"-top-track",
         orientation: "down",
         ySize: stud.WIDTH,
         yPos: -studHeightAtZero,

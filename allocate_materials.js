@@ -173,7 +173,21 @@ module.exports = library.export(
 
       var steel = materials.reserve(description, "cross", dimensions.length)
 
-      materials.cut(steel, "cross", dimensions.length, options)
+      var scrap = materials.cut(steel, "cross", dimensions.length, options)
+
+      if (options.slope) {
+        switch(options.orientation) {
+          case "north":
+            scrap.slopeHint = "sloping down from the web"
+            break
+          case "south":
+            scrap.slopeHint = "sloping up from the web"
+            break
+          default:
+            throw new Error("don't know how to slope a stud with orientation "+options.orientation)
+        }
+      }
+
     }
 
     function twinWall(materials) {
@@ -254,16 +268,20 @@ module.exports = library.export(
         throw new Error("can't tilt a part without a zSize")
       }
 
-      var rise = options.slope * options.zSize
+      var rise = options.tilt * options.zSize
 
       var newZSize = Math.sqrt(
         Math.pow(options.zSize, 2) + Math.pow(rise, 2)
       )
 
-      options.part(merge(options, {
-        zSize: newZSize
-      }))
+      var builder = options.part
 
+      options = merge(
+        options,
+        {zSize: newZSize}
+      )
+
+      builder(options)
     }
 
     function joinObjects(iterable, start) {
@@ -334,37 +352,50 @@ module.exports = library.export(
       }
 
       if (xSize == minDimension) {
-        var thickness = xSize
-        if (ySize <= options.maxWidth) {
-          var width = ySize
-          var length = zSize
-        } else {
-          var length = ySize
-          var width = zSize
-        }
+        var thicknessDimension = "x"
       } else if (ySize == minDimension) {
-        var thickness = ySize
-        if (xSize <= options.maxWidth) {
-          var width = xSize
-          var length = zSize
-        } else {
-          var length = xSize
-          var width = zSize
-        }      
+        var thicknessDimension = "y"
       } else if (zSize == minDimension) {
-        var thickness = zSize
-        if (xSize <= options.maxWidth) {
-          var width = xSize
-          var length = ySize
-        } else {
-          var length = xSize
-          var width = ySize
-        }            
+        var thicknessDimension = "z"
+      }
+
+      switch(thicknessDimension) {
+        case "x":
+          var thickness = xSize
+          if (ySize <= options.maxWidth) {
+            var width = ySize
+            var length = zSize
+          } else {
+            var length = ySize
+            var width = zSize
+          }
+          break
+        case "y":
+          var thickness = ySize
+          if (xSize <= options.maxWidth) {
+            var width = xSize
+            var length = zSize
+          } else {
+            var length = xSize
+            var width = zSize
+          }
+          break
+        case "z":
+          var thickness = zSize
+          if (xSize <= options.maxWidth) {
+            var width = xSize
+            var length = ySize
+          } else {
+            var length = xSize
+            var width = ySize
+          }            
+          break
       }
 
       if (typeof thickness == "undefined") {
-        debugger
+        throw new Error("no thickness")
       }
+
       return {
         length: length,
         width: width,

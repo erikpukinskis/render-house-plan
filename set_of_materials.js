@@ -142,7 +142,9 @@ module.exports = library.export(
     SetOfMaterials.prototype.cut =
       function(material, cut, size, options) {
         var name = options.name
-
+        if (name == "left-wall-A-top-track") {
+          console.log("left-wall-A-top-track", options)
+        }
         if (material.cut && cut != material.cut) {
           throw new Error("trying to cut material the wrong way")
         }
@@ -156,11 +158,13 @@ module.exports = library.export(
         var scrap = {
           cut: cut,
           slope: options.slope,
+          tilt: options.tilt,
           name: name,
           material: material,
           size: size,
           destination: toDestination(options)
         }
+        
         if (!name) {
           console.log(scrap)
           throw new Error("every scrap needs a name")
