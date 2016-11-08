@@ -85,16 +85,12 @@ module.exports = library.export(
             throw new Error("marks needs a dimension along which to mark")
           }
 
-          // dimension: sectionOptions.zSize ? "z" : "x"
-
-          // extra: faceWall.getOverhangs(sectionOptions).left
-
           var offsetProperty = options.dimension+"Pos"
 
           var extra = options.extra || 0
           var slope = options.slope || 0
 
-          function toAlignment(scrap) {
+          function toAlignment(scrap, i) {
             var fromLeft = extra + scrap.destination[offsetProperty]
 
             var rise = fromLeft*slope
@@ -103,7 +99,9 @@ module.exports = library.export(
               fromLeft*fromLeft + rise*rise
             )
 
-            return "<strong>"+dimensionText(fromEnd)+"</strong>"
+            var lastOne = (i == scraps.length - 1)
+
+            return dimensionText(fromEnd, {wordBreak: lastOne})
           }
 
           var marks = enumerate(scraps.map(toAlignment))
@@ -129,7 +127,9 @@ module.exports = library.export(
 
           var shortSide = scrap.size - scrap.slope*scrap.material.width
 
-          var text = scrap.cut+" cut a diagonal "+dimensionText(scrap.size)+" to "+dimensionText(shortSide)
+          var wordBreak = scrap.slopeHint ? false : true
+
+          var text = scrap.cut+" cut a diagonal "+dimensionText(scrap.size)+" to "+dimensionText(shortSide, {wordBreak: wordBreak})
 
           if (scrap.slopeHint) {
             text += ", "+scrap.slopeHint+","
@@ -138,7 +138,7 @@ module.exports = library.export(
           var text = scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong>"
         }
 
-        text += "<wbr> from "+material.description+" #"+material.number
+        text += " from "+material.description+" #"+material.number
 
         if (label) {
           text += ". Label it "+label.toUpperCase()
@@ -198,7 +198,7 @@ module.exports = library.export(
     var stepTitle = element.template(
       ".step-title",
       element.style({
-        "margin": "24pt 0 12pt 0",
+        "margin": "34pt 0 12pt 0",
         "font-size": "1.5em",
         "line-height": "1em",
       }),
@@ -207,10 +207,13 @@ module.exports = library.export(
       }
     )
 
-    var em = element.style("strong", {
+    var em = element.style(".dimension", {
+      "display": "inline",
       "font-weight": "bold",
       "font-size": "18pt",
       "line-height": "1em",
+      "background-color": "##66c",
+      "color": "#eef",
     })
 
     var checkMark = element.template(
@@ -228,7 +231,7 @@ module.exports = library.export(
     var checkBox = element.template(
       "button.toggle-button",
       element.style({
-        "border": "2px solid #bef",
+        "border": "0.1em solid #bef",
         "vertical-align": "middle",
         "background": "transparent",
         "width": "1.15em",
@@ -254,8 +257,10 @@ module.exports = library.export(
     var taskTemplate = element.template(
       ".task",
       element.style({
-        "margin-bottom": "0.5em",
+        "margin-bottom": "0.8em",
         "cursor": "pointer",
+        "text-indent": "-1.95em",
+        "margin-left": "1.95em",
       }),
       function(text, id, complete, bridge) {
         var isCompleted = doable.isCompleted(id)

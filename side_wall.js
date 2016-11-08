@@ -15,11 +15,6 @@ module.exports = library.export(
       var whichSide = options.whichSide
       var flip = whichSide == "right"
 
-
-      // SPE CU LA TION:
-
-      options.joins // top right
-
       var joins = faceWall.getJoinGaps(options)
 
       var innerTopOverhang = HousePlan.verticalSlice(joins.top, options.slope)
@@ -87,9 +82,9 @@ module.exports = library.export(
 
       var studRise = options.slope*stud.WIDTH
 
-      var offset = 0
+      var offset = joins.left
       var firstStudHeight = studHeightAtZero + offset*options.slope + studRise
-      describeStud(1, firstStudHeight)
+
       sloped(sideStud, {
         section: wall,
         name: name+"-stud-1",
@@ -97,6 +92,8 @@ module.exports = library.export(
         zPos: offset,
         ySize: -firstStudHeight,
       })
+
+      describeStud(1, firstStudHeight)
 
       function describeStud(name, height) {
         if (options.name != "left-wall-A") {return}
@@ -251,6 +248,24 @@ module.exports = library.export(
 
         if (bail) { break }
       }
+
+      if (joins.right > 0) {
+        var ySize = studHeightAtZero + (options.zSize + 0.75)*options.slope
+
+        sloped({
+          name: options.name+"-joining-stud",
+          section: wall,
+          part: trim,
+          xPos: 0,
+          xSize: stud.DEPTH,
+          zPos: options.zSize - 0.75,
+          zSize: 1.5,
+          yPos: 0,
+          ySize: -ySize,
+          slope: options.slope,
+        })
+      }
+          
     }
 
     function pick(object) {

@@ -19,6 +19,12 @@ module.exports = {
     price: 2723,
     extra: 1,
   },
+  "8ft 2x3": {
+    length: 96,
+    width: 2.5,
+    price: 321,
+    extra: 1,
+  },
   "8ft 2x4": {
     length: 96,
     width: 3.5,

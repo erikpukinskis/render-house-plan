@@ -9,7 +9,7 @@ module.exports = library.export(
       "font-family": "sans-serif",
       "line-height": "1.5em",
       "font-size": "1.15em",
-      "color": "#def",
+      "color": "#dff",
       "background": "#48e",
       "-webkit-font-smoothing": "antialiased",
     })

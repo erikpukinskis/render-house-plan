@@ -1,28 +1,33 @@
-module.exports = function dimensionText(number) {
+module.exports = function dimensionText(number, options) {
   var integer = Math.floor(number)
   var remainder = number - integer
   var sixteenths = Math.round(remainder*16)
 
   if (sixteenths == 16) {
     integer++
-    var text = ""
   } else if (sixteenths == 0) {
-    var text = ""
+    // nothing
   } else if (sixteenths == 8) {
-    var text = " 1/2"
+    var fraction = "1/2"
   } else if (sixteenths % 4 == 0) {
-    var text = " "+(sixteenths/4)+"/4"
+    var fraction = (sixteenths/4)+"/4"
   } else if (sixteenths % 2 == 0) {
-    var text = " "+(sixteenths/2)+"/8"
+    var fraction = (sixteenths/2)+"/8"
   } else {
-    var text = " "+sixteenths+"/16"
+    var fraction = sixteenths+"/16"
   }
 
   if (integer == 0 && sixteenths != 0) {
-    text = text+"\""
+    var inches = fraction+"\""
   } else {
-    text = integer.toString()+"\""+text
+    var inches = integer.toString()
+    if (fraction) {
+      inches += "&nbsp;"+fraction
+    }
+    inches += "\""
   }
 
-  return "<strong>"+text+"</strong>"
+  var wbr = options && options.wordBreak === false ? "" : "<wbr>"
+
+  return "<div class=\"dimension\">"+inches+"</div>"+wbr
 }

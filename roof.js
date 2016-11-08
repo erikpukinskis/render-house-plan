@@ -50,18 +50,20 @@ module.exports = library.export(
 
       var roofHeight = RAFTER_HEIGHT - stud.DEPTH*options.slope
 
+      var CAP_WIDTH = 7.25
+
       var roofCap = {
         part: trim,
         section: roof,
         tilt: options.slope,
-        xSize: 7.5,
+        xSize: CAP_WIDTH,
         yPos: -verticalSlice(RAFTER_HEIGHT + trim.THICKNESS, options.slope) + backOverhang*options.slope,
         ySize: trim.THICKNESS,
         zPos: -backOverhang,
         zSize: roofLength
       }
 
-      var overhang = 4.5
+      var overhang = 4.25
 
       tilted(roofCap, {
         xPos: -overhang,
@@ -69,12 +71,12 @@ module.exports = library.export(
       })
 
       tilted(roofCap, {
-        xPos: centerLine - 7.5/2,
+        xPos: centerLine - CAP_WIDTH/2,
         name: "center-roof-cap",
       })
 
       tilted(roofCap, {
-        xPos: 96 - plywood.THICKNESS * 2 - 7.5 + overhang,
+        xPos: 96 - plywood.THICKNESS * 2 - CAP_WIDTH + overhang,
         name: "right-roof-cap",
       })
 

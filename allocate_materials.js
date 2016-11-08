@@ -109,13 +109,13 @@ module.exports = library.export(
         throw new Error("no trim pieces "+dimensions.thickness+"in thick")
       }
 
-      var crossCut = dimensions.length < 48
+      var crossCut = true
 
       if (dimensions.width == 1.5 && dimensions.thickness == 0.75) {
         description = "8ft furring strip"
         crossCut = true
 
-      } else if (dimensions.width > 7.5) {
+      } else if (dimensions.width > 7.25) {
         throw new Error(dimensions.width+" is too wide!")
       } else if (dimensions.width > 5.5) {
         description = description+"8"
@@ -123,6 +123,8 @@ module.exports = library.export(
         description = description+"6"
       } else if (dimensions.width > 2.5) {
         description = description+"4"
+      } else if (dimensions.width == 2.5) {
+        description = description+"3"
       } else if (!crossCut && dimensions.width > 1.5) {
         description = description+"6"
       } else {

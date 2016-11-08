@@ -28,9 +28,9 @@ module.exports = library.export(
             extra: faceWall.getOverhangs(options).left + halfStud,
           })
 
-          task("sheathing-stud-lines", "mark lines "+marks+"<wbr> from the left")
+          task("sheathing-stud-lines", "mark lines "+marks+" from the left")
 
-          var trackFromTop   = HousePlan.helpers.sliceToNormal(overhangs.top, options.slope) + joins.top + STUD_WIDTH/2
+          var trackFromTop = HousePlan.helpers.sliceToNormal(overhangs.top, options.slope) + joins.top + STUD_WIDTH/2
 
           var trackFromBottom = overhangs.bottom + STUD_WIDTH/2
 
@@ -51,7 +51,7 @@ module.exports = library.export(
             extra: halfStud,
           })
 
-          task("interior-stud-lines", "mark lines "+marks+"<wbr>from the right")
+          task("interior-stud-lines", "mark lines "+marks+"from the right")
 
           var trackFromTop = joins.top + STUD_WIDTH/2
 
@@ -63,9 +63,11 @@ module.exports = library.export(
         }
       )
 
+      var LETTERS = ["A", "B", "C", "D", "E", "F"]
+
       steps.add("cut studs",
         function(cut) {
-          cut(studs)
+          cut(studs, LETTERS)
         }
       )
 
@@ -81,27 +83,27 @@ module.exports = library.export(
             var extra = 0
           }
 
-          taskForMarking(
-            marks(studs, {
+          var topMarks = marks(
+            studs, {
               dimension: spanDimension,
               slope: options.slope,
               extra: extra
-            }),
-            "top"
+            }
           )
 
-          function taskForMarking(marks, label) {
-            task("mark-"+label+"-track", "With the flanges facing towards you, mark the "+label.toUpperCase()+" track with a wax pencil at "+marks+"<wbr> from the left, putting an ✗ to the right of each mark")
-          }
+          task("mark-top-track", "With the flanges facing towards you, mark the TOP track with a wax pencil at "+topMarks+" from the left, putting an ✗ to the right of each mark")
+
 
           cut(materials.get("bottom-track"), "bottom")
 
-          taskForMarking(
-            marks(studs, {
+          var bottomMarks = marks(
+            studs, {
               dimension: spanDimension,
-            }),
-            "bottom"
+            }
           )
+
+          task("mark-bottom-track", "With the flanges facing away from you, mark the BOTTOM track with a wax pencil at "+bottomMarks+" from the left, putting an ✗ to the right of each mark")
+
 
           task("transfer-track-marks", "Transfer the marks to other sides of each piece of track")
         }
@@ -109,57 +111,61 @@ module.exports = library.export(
 
       steps.add("lay out framing",
         function(task) {
-          task("lay-out-framing", "Space the two pieces of track <strong>"+dimensionText(studs[0].size)+"</strong> apart. Set the studs inside the tracks on the X side of each mark. Studs should face in.")
+          var spacing = Math.ceil(options.ySize/12)
+
+
+          task("lay-out-framing", "Space the two pieces of track <strong>"+spacing+" feet</strong> apart. Set the studs inside the tracks on the X side of each mark. Studs should face in.")
           task("crimp", "At each stud-track intersection, have one person press the stud securely up into the track, while another person crimps the two together.")
           task("flip-framing", "Gently flip the frame over")
           task("crimp-other-side", "Crimp the other side")
         }
       )
 
-      var joinGaps = faceWall.getJoinGaps(options)
+      if (joins.right > 0) {
 
-      if (joinGaps.right != 0) {
-        var alignmentStud = "leftmost"
-        var firstSide = "left"
-        var secondSide = "right"
-        var firstInset = 2
-        var secondInset = 1
-      } else if (joinGaps.left != 0) {
-        var alignmentStud = "rightmost"
-        var firstSide = "right"
-        var secondSide = "left"
-        var firstInset = 2
-        var secondInset = 2
+        // we're going to start from the leftmost stud, but since the panel starts off flipped, it will be on the right
+        var interiorAlignmentSide = "right"
+
+        var interiorAlignmentInset = halfStud
+
+        var interiorOppositeSide = "left"
+
+        // we don't care exactly what this is, we're just trying to clear the joining stud, so anything over 3/4" should work
+        var interiorOppositeInset = 2 + overhangs.left
+
+      } else if (joins.left > 0) {
+        var interiorAlignmentSide = "left"
+        var interiorAlignmentInset = halfStud
+        var interiorOppositeSide = "right"
+        var interiorOppositeInset = 2 + overhang
+      } else {
+        throw new Error("no joins?")
       }
 
       steps.add("square interior",
         function(task) {
           task("position-interior", "Lay the interior (sanded) plywood on the framing, sanded face up, factory edge roughly lined up with the bottom track. If the plywood is bowed, put something heavy in the middle.") 
 
-          task("square-first-corner", "using a tri-square, make sure the plywood is vertically aligned with the "+alignmentStud+" stud and the bottom track")
+          task("square-first-corner", "using a tri-square, align the plywood vertically with the "+interiorAlignmentSide+"most stud and the bottom track")
 
-          task("first-corner-screw", "Put a self-driving screw about <strong>"+dimensionText(1/2)+"</strong> from the bottom and about <strong>"+dimensionText(firstInset)+"</strong> from the "+firstSide)
+          task("first-corner-screw", "Put a self-driving screw about "+dimensionText(1/2)+" from the bottom and about "+dimensionText(interiorAlignmentInset)+" from the "+interiorAlignmentSide)
 
           // http://www.carpentry-tips-and-tricks.com/Carpenter-square.html
 
-          task("square-bottom-side", "Square the bottom "+secondSide+" corner the same way, and put a self-driving screw in <strong>"+dimensionText(1/2)+"</strong> from the bottom and <strong>"+dimensionText(secondInset)+"</strong> from the "+secondSide)
+          task("square-bottom-side", "Square the bottom "+interiorOppositeSide+" corner the same way, and put a self-driving screw in "+dimensionText(1/2)+" from the bottom and "+dimensionText(interiorOppositeInset)+" from the "+interiorOppositeSide)
 
-          task("square-top-left", "Move the top left corner so that it is square with the stud and use your tri-square to check the top track is <strong>"+dimensionText(joinGaps.top)+"</strong> from the edge of the plywood at every point.")
+          task("square-top-left", "Move the top left corner so that it is square with the stud and use your tri-square to check the top track is "+dimensionText(joins.top)+" from the edge of the plywood at every point.")
 
-          task("screw-top-left", "Put a screw "+dimensionRound(joinGaps.top+5/8)+" from the top and "+dimensionRound(firstInset)+" from the left")
+          task("screw-top-left", "Put a screw "+dimensionRound(joins.top+5/8)+" from the top and "+dimensionRound(interiorAlignmentInset)+" from the left")
 
-          task("screw-top-left", "Put a screw <strong>"+dimensionRound(joinGaps.top+5/8)+"</strong> from the top and <strong>"+dimensionRound(secondInset)+"</strong> from the right")
+          task("screw-top-left", "Put a screw "+dimensionRound(joins.top+5/8)+" from the top and "+dimensionRound(interiorOppositeInset)+" from the right")
 
         }
       )
 
       steps.add("attach interior",
         function(task) {
-          task("screw-track", "Put a self-driving at the middle of each track, and halfway between the middle and the corner screws")
-
-          task("screw-lines", "Put a screw on your stud lines every 10 inches")
-
-          task("screw-edge", "Put a self-driving screw every 10 inches along the "+firstSide+" side")
+          task("screw-stud-and-track", "Put a self-driving every 10 inches or so on the stud and track lines")
         }
       )
 
@@ -170,20 +176,40 @@ module.exports = library.export(
         }
       )
 
+      if (joins.right > 0) {
+
+        // Now the panel is flipped, but we want to start squaring from the join side, so alignment still starts from the right
+        var sheathingAlignmentSide = "right"
+
+        // again we want to clear the joining stud
+        var sheathingAlignmentInset = 2
+
+        var sheathingOppositeSide = "left"
+
+        var sheathingOppositeInset = overhangs.left + halfStud
+
+      } else if (joins.left > 0) {
+        var sheathingAlignmentSide = "left"
+        var sheathingAlignmentInset = 2
+        var sheathingOppositeSide = "right"
+        var sheathingOppositeInset = 2 + overhang
+      } else {
+        throw new Error("no joins?")
+      }
+
+
+
       steps.add("align sheathing", function(task) {
 
           task("lay-sheathing", "Lay the sheathing on the frame, with the factory edge toward the bottom.")
 
           var bottomOverhang = options.bottomOverhang||0
 
-          var topOverhang = options.topOverhang||0 + joinGaps.top
+          var topOverhang = HousePlan.helpers.sliceToNormal(overhangs.top, options.slope) + joins.top
 
-          task("square-first-sheathing-corner", "Align the sheathing so that the bottom edge is uniformly <strong>"+dimensionText(bottomOverhang)+"</strong> past the framing, and the "+secondSide+" edge is square with the plywood on the other side. Put a screw on the track line <strong>"+dimensionText(secondInset)+"</strong> from the "+secondSide)
+          task("square-sheathing-join-corner", "Align the sheathing so that the bottom edge is uniformly "+dimensionText(bottomOverhang)+" past the framing, and the "+sheathingAlignmentSide+" edge is square with the interior plywood that's face down. Put a screw on the track line "+dimensionText(sheathingAlignmentInset)+" from the "+sheathingAlignmentSide)
 
-          task("square-mirror-sheathing-corner", "Align the top "+secondSide+" corner next, so that the top edge extends <strong>"+dimensionText(topOverhang)+"</strong> beyond the underlying framing. Put a screw on the track line <strong>"+dimensionText(secondInset)+"</strong> from the "+secondSide)
-
-          task("screw-opposite-side-sheaething", "Put screws on the top and bottom track lines <strong>"+dimensionText(firstInset)+"</strong> from the "+firstSide)
-
+          task("square-sheathing-opposite-corner", "Align the top "+sheathingOppositeSide+" corner next, so that the top edge of the plywood extends "+dimensionText(topOverhang)+" past the top track, and the left edge extends "+dimensionText(overhangs[sheathingOppositeSide])+" past the left stud. Put a screw on the track line "+dimensionText(sheathingOppositeInset)+" from the "+sheathingOppositeSide)
         }
       )
 
@@ -192,6 +218,16 @@ module.exports = library.export(
           task("attach-sheathing", "Put screws on the stud and track lines every 10 inches as with the interior plywood")
         }
       )
+
+      if (joins.right > 0) {
+        steps.add("joining stud",
+          function(task, cut) {
+            cut(materials.get("joining-stud"))
+            task("add-joining-stud", "slide the stud into the right side of the panel, so that "+dimensionText(0.75)+" is sticking out.")
+            task("screw-joining-stud", "Add a screw about every 10 inches, "+dimensionText(0.5)+" from the edge")
+          }
+        )
+      }
 
       return steps
     }
