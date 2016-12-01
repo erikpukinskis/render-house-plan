@@ -21,7 +21,22 @@ module.exports = library.export(
       steps.add("cut sheathing", function(cut, task, marks) {
           var sheathing = materials.get("sheathing")
 
-          cut(sheathing)
+          cut(sheathing, "sheathing")
+
+          var length = Math.abs(sheathing.destination.ySize)
+          var isFullLength = length == 96
+
+          if (sheathing.cut == "rip" && !isFullLength) {
+            cut({
+              cut: "cross",
+              size: length,
+              slope: sheathing.slope,
+              material: {
+                description: "the sheathing",
+                width: sheathing.size,
+              }
+            })
+          }
 
           var marks = marks(studs, {
             dimension: spanDimension,
@@ -137,7 +152,7 @@ module.exports = library.export(
         var interiorAlignmentSide = "left"
         var interiorAlignmentInset = halfStud
         var interiorOppositeSide = "right"
-        var interiorOppositeInset = 2 + overhang
+        var interiorOppositeInset = 2 + overhangs.right
       } else {
         throw new Error("no joins?")
       }
@@ -186,13 +201,13 @@ module.exports = library.export(
 
         var sheathingOppositeSide = "left"
 
-        var sheathingOppositeInset = overhangs.left + halfStud
+        var sheathingOppositeInset = halfStud + overhangs.left
 
       } else if (joins.left > 0) {
         var sheathingAlignmentSide = "left"
         var sheathingAlignmentInset = 2
         var sheathingOppositeSide = "right"
-        var sheathingOppositeInset = 2 + overhang
+        var sheathingOppositeInset = 2 + overhangs.right
       } else {
         throw new Error("no joins?")
       }

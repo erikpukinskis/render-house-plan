@@ -31,6 +31,10 @@ module.exports = library.export(
 
       var sheathingWidth = options.zSize + overhangs.left + overhangs.right
 
+      if (sheathingWidth == 24) {
+        sheathingWidth = 23.875
+      }
+      
       var interiorWidth = options.zSize
 
       var interiorHeight = options.ySize
@@ -265,7 +269,7 @@ module.exports = library.export(
           slope: options.slope,
         })
       }
-          
+
     }
 
     function pick(object) {

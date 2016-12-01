@@ -2,7 +2,7 @@ var library = require("nrtv-library")(require)
 
 module.exports = library.export(
   "build",
-  ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./build_face_wall", "./build_instructions_page"],
+  ["nrtv-browser-bridge", "nrtv-element", "./build_floor", "./build-wall", "./build_instructions_page"],
   function(BrowserBridge, element, buildFloor, buildWall, buildInstructionsPage) {
 
     var body = element.style("body, a", {
@@ -19,6 +19,7 @@ module.exports = library.export(
       "floor-right": buildFloor,
       "back-wall-left": buildWall,
       "left-wall-A": buildWall,
+      "left-wall-B": buildWall,
     }
 
 
@@ -26,6 +27,8 @@ module.exports = library.export(
       var bridge = new BrowserBridge()
 
       var page = element()
+
+      page.addChild(element("h2", "Plans"))
 
       page.addChild(element(
         element("a", "Top view", {href: "/drawing/top"})
@@ -39,11 +42,15 @@ module.exports = library.export(
         element("a", "Front view", {href: "/drawing/front"})
       ))
 
+      page.addChild(element.raw("<br/>"))
+
       page.addChild(element(
         element("a", "Materials", {href: "/buy"})
       ))
 
       page.addChild(element.raw("<br/>"))
+
+      page.addChild(element("h2", "Instructions"))
 
       for(var name in builders) {
         var link = element(

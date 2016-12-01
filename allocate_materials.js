@@ -77,7 +77,7 @@ module.exports = library.export(
 
       var description = dimensions.thickness+"in "+finish+" plywood"
 
-      if (dimensions.width > 45) {
+      if (dimensions.width == 48) {
         var sheet = materials.reserve(description, "cross", dimensions.length)
 
         materials.cut(sheet, "cross", dimensions.length, options)
@@ -85,7 +85,7 @@ module.exports = library.export(
       } else {
         var sheet = materials.reserve(description, "rip", dimensions.width)
 
-        materials.cut(sheet, "rip", dimensions.width, options)
+        var scrap = materials.cut(sheet, "rip", dimensions.width, options)
       }
     }
 

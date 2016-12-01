@@ -118,12 +118,7 @@ module.exports = library.export(
 
           var text = "cut "+dimensionText(scrap.size)+" on a "+dimensionText(differential)+" tilt "
 
-        } else if (scrap.slope) {
-
-          if (scrap.cut != "cross") {
-            console.log("scrap:", scrap)
-            throw new Error("Trying to rip on a diagonal. Not sure how to do that")
-          }
+        } else if (scrap.cut == "cross" && scrap.slope) {
 
           var shortSide = scrap.size - scrap.slope*scrap.material.width
 
@@ -138,7 +133,10 @@ module.exports = library.export(
           var text = scrap.cut+" cut <strong>"+dimensionText(scrap.size)+"</strong>"
         }
 
-        text += " from "+material.description+" #"+material.number
+        text += " from "+material.description
+        if (material.number) {
+          text += " #"+material.number
+        }
 
         if (label) {
           text += ". Label it "+label.toUpperCase()
