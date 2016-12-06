@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "description": "Build a very small house",
   "dependencies": {
-    "nrtv-library": "*",
+    "module-library": "*",
     "web-element": "*",
-    "nrtv-server": "*",
+    "web-site": "*",
     "browser-bridge": "*",
     "function-call": "*",
     "make-request": "*",
     "knox": "*",
-    "module-universe": "*"
+    "tell-the-universe": "*"
   },
   "scripts": {
     "start": "env $(cat CREDENTIALS | xargs) node server",

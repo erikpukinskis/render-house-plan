@@ -1,32 +1,30 @@
-var library = require("nrtv-library")(require)
+var library = require("module-library")(require)
 
 module.exports = library.export(
   "send-instructions",
-  ["browser-bridge", "web-element", "./dimension_text", "module-universe", "./doable", "./house_plan", "./face_wall"],
-  function(BrowserBridge, element, dimensionText, ModuleUniverse, doable, HousePlan, faceWall) {
+  ["browser-bridge", "web-element", "./dimension_text", "tell-the-universe", "./doable", "./house_plan", "./face_wall"],
+  function(BrowserBridge, element, dimensionText, tellTheUniverse, doable, HousePlan, faceWall) {
 
-    var universe = new ModuleUniverse(
-      "houses",
-      library,
-      ["doable"],
-      function(doable) {
-        // begin
-      }
-    )
+    tellTheUniverse = tellTheUniverse
+      .called("houses")
+      .onLibrary(library)
+      .withNames({
+        doable: "doable"
+      })
 
-    universe.persistToS3({
+    tellTheUniverse.persistToS3({
       key: process.env.AWS_ACCESS_KEY_ID,
       secret: process.env.AWS_SECRET_ACCESS_KEY,
       bucket: "ezjs"
     })
 
-    universe.loadFromS3(function(){
+    tellTheUniverse.loadFromS3(function(){
       console.log("OK! "+doable.count+" tasks done")
     })
 
     function buildInstructionsPage(steps, materials, bridge, server, sectionName) {
 
-      var saveCompletion = doable.complete.defineOn(server, bridge, universe)
+      var saveCompletion = doable.complete.defineOn(server, bridge, tellTheUniverse)
 
       var completeTask = bridge.defineFunction(
         [saveCompletion],
@@ -163,7 +161,7 @@ module.exports = library.export(
       }
 
       return function(request, response) {
-        if (!universe.isReady()) {
+        if (!tellTheUniverse.isReady()) {
           throw new Error("server not ready yet")
         }
 

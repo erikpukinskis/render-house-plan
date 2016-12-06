@@ -1,4 +1,4 @@
-var library = require("nrtv-library")(require)
+var library = require("module-library")(require)
 
 module.exports = library.export(
   "doable",
@@ -20,7 +20,7 @@ module.exports = library.export(
     }
 
     doable.complete.defineOn =
-      function(server, bridge, universe) {
+      function(server, bridge, tellTheUniverse) {
         if (!server.__toggleTaskRoute) {
           server.addRoute("post", "/tasks/:id/complete",
             handleRequest)
@@ -44,7 +44,7 @@ module.exports = library.export(
 
           doable.complete(request.params.id)
 
-          universe.do("doable.complete", request.params.id)
+          tellTheUniverse("doable.complete", request.params.id)
 
           response.json({status: "ok"})
         }
