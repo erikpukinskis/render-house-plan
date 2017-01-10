@@ -2,6 +2,7 @@
   "name": "teensy-house",
   "version": "0.0.0",
   "description": "Build a very small house",
+  "main": "server.js",
   "dependencies": {
     "module-library": "*",
     "web-element": "*",
@@ -10,7 +11,9 @@
     "function-call": "*",
     "make-request": "*",
     "knox": "*",
-    "tell-the-universe": "*"
+    "tell-the-universe": "*",
+    "house-panels": "*",
+    "house-plan": "*"
   },
   "scripts": {
     "start": "env $(cat CREDENTIALS | xargs) node server",

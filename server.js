@@ -1,34 +1,26 @@
 var library = require("module-library")(require)
 
-library.using(
-  ["web-site", "./teensy-house-3", "./allocate_materials", "./buy_materials", "./drawing", "./build", "make-request"],
-  function(server, teensyHouse, allocateMaterials, buy, draw, build, makeRequest) {
-    site.start(process.env.PORT||8181)
+module.exports = library.export(
+  "house-plan-server",
+  ["./teensy-house-3", "./render-house-plan", "browser-bridge"],
+  function(teensyHouse, renderHousePlan, BrowserBridge) {
 
-    var house = teensyHouse()
-    var materials = allocateMaterials(house)
+    return function(site) {
 
-    site.addRoute(
-      "get", "/buy",
-      buy(materials)
-    )
+      var house = teensyHouse()
 
-    site.addRoute(
-      "get", "/drawing/:view",
-      draw(house)
-    )
+      site.addRoute(
+        "get",
+        "/house-plan/:view",
+        function(request, response) {
+          var bridge = new BrowserBridge()
+          var view = request.params.view || "side"
+          var page = renderHousePlan(bridge, house, {view: view})
 
-    site.addRoute(
-      "get", "/build",
-      build.index()
-    )
-
-    site.addRoute(
-      "get", "/build-section/:name",
-      build.section(house, materials, server)
-    )
-
-    // makeRequest("http://localhost:8181/build-section/left-wall-A")
+          bridge.sendPage(page)(request, response)
+        }
+      )
+    }
 
   }
 )

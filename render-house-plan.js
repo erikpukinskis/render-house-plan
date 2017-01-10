@@ -2,8 +2,8 @@ var library = require("module-library")(require)
 
 
 module.exports = library.export(
-  "house-plan-viewer",
-  ["./house_plan", "nrtv-element"],
+  "render-house-plan",
+  ["house-plan", "web-element"],
   function(HousePlan, element) {
 
     var verticalSlice = HousePlan.helpers.verticalSlice
@@ -15,6 +15,12 @@ module.exports = library.export(
       top: 20
     }
 
+    function renderHousePlan(bridge, plan, options) {
+      var viewer = new Viewer(options.view)
+      defineOn(bridge)
+      var el = viewer.render(plan)
+      return el
+    }
 
     function Viewer(view, sectionName) {
       this.view = view
@@ -80,7 +86,7 @@ module.exports = library.export(
     }
 
 
-    Viewer.defineHandlersOn = function(bridge) {
+    function defineOn(bridge) {
 
       var ViewerClient = bridge.defineSingleton(
         "ViewerClient",
@@ -233,6 +239,9 @@ module.exports = library.export(
 
 
     }
+
+
+
 
     function joinObjects(iterable) {
       var joined = {}
@@ -1141,7 +1150,6 @@ module.exports = library.export(
       sloped: sloped,
     }
 
-
     var sectionBefore = element.style(
       ".section::before",
       {
@@ -1520,6 +1528,7 @@ module.exports = library.export(
       return false;
     }
 
-    return Viewer
+    return renderHousePlan
+
   }
 )
