@@ -1,7 +1,7 @@
 {
   "name": "render-house-plan",
   "version": "0.0.0",
-  "description": "Draw the materials that make up a house",
+  "description": "Draw the stuff that makes up a house",
   "main": "server.js",
   "dependencies": {
     "module-library": "*",
@@ -11,12 +11,8 @@
     "web-site": "*",
     "browser-bridge": "*"
   },
-  "scripts": {
-    "start": "env $(cat CREDENTIALS | xargs) node start",
-    "debug": "env $(cat CREDENTIALS | xargs) node debug start"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/erikpukinskis/house-plans.git"
+    "url": "https://github.com/erikpukinskis/render-house-plan.git"
   }
 }
