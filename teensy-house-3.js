@@ -6,9 +6,6 @@ module.exports = library.export(
   ["house-plan", "house-panels"],
   function(HousePlan, housePanels) {
 
-    // We need to export: faceWall, doors, floorSection, roof, sideWall, doorSection
-
-
     function teensyHouse() {
 
       var plan = new HousePlan()

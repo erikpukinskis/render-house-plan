@@ -1,23 +1,19 @@
 {
-  "name": "teensy-house",
+  "name": "render-house-plan",
   "version": "0.0.0",
-  "description": "Build a very small house",
+  "description": "Draw the materials that make up a house",
   "main": "server.js",
   "dependencies": {
     "module-library": "*",
+    "house-plan": "*",
+    "house-panels": "*",
     "web-element": "*",
     "web-site": "*",
-    "browser-bridge": "*",
-    "function-call": "*",
-    "make-request": "*",
-    "knox": "*",
-    "tell-the-universe": "*",
-    "house-panels": "*",
-    "house-plan": "*"
+    "browser-bridge": "*"
   },
   "scripts": {
-    "start": "env $(cat CREDENTIALS | xargs) node server",
-    "debug": "env $(cat CREDENTIALS | xargs) node debug server"
+    "start": "env $(cat CREDENTIALS | xargs) node start",
+    "debug": "env $(cat CREDENTIALS | xargs) node debug start"
   },
   "repository": {
     "type": "git",
