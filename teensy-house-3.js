@@ -25,6 +25,7 @@ module.exports = library.export(
           xPos: 0,
           yPos: FLOOR_TOP,
           zPos: 0,
+          zSize: 96,
         }
       )
 
@@ -35,6 +36,7 @@ module.exports = library.export(
           xPos: 48,
           yPos: FLOOR_TOP,
           zPos: 0,
+          zSize: 96,
         }
       )
 
@@ -59,35 +61,6 @@ module.exports = library.export(
 
       var frontWallPosition = 48+24 - HousePlan.parts.stud.DEPTH
 
-      housePanels.addTo(plan,
-        "door section",
-        {
-          name: "door-section",
-          xPos: 0,
-          yPos: FLOOR_TOP,
-          zPos: 72,
-        }
-      )
-
-      housePanels.addTo(plan,
-        "window section",
-        {
-        name: "front-wall-right",
-        xPos: 48,
-        yPos: FLOOR_TOP,
-        zPos: frontWallPosition,
-        }
-      )
-
-      housePanels.addTo(plan,
-        "roof",
-        {
-          name: "roof",
-          yPos: rafterStart.yPos,
-          zPos: rafterStart.zPos,
-        }
-      )
-
       var wallHang = HousePlan.parts.stud.DEPTH + HousePlan.parts.plywood.THICKNESS
 
       var rightWallOffset = 96 - HousePlan.parts.stud.DEPTH
@@ -100,6 +73,7 @@ module.exports = library.export(
           xPos: 0,
           yPos: FLOOR_TOP,
           zPos: wallHang,
+          slope: 0,
         }
       )
 
@@ -110,6 +84,7 @@ module.exports = library.export(
           xPos: rightWallOffset,
           yPos: FLOOR_TOP,
           zPos: wallHang,
+          slope: 0,
         }
       )
 
@@ -120,16 +95,18 @@ module.exports = library.export(
           xPos: 0,
           yPos: FLOOR_TOP,
           zPos: 48,
+          slope: 0,
         }
       )
 
       housePanels.addTo(plan,
         "side wall extension",
         {
-          name: "left-wall-B",
+          name: "right-wall-B",
           xPos: 0,
           yPos: FLOOR_TOP,
           zPos: 48,
+          slope: 0,
         }
       )
 

@@ -851,8 +851,7 @@ module.exports = library.export(
       }
 
 
-      if (!options.slope) {
-        debugger
+      if (typeof options.slope != "number") {
         throw new Error("You need to pass a slope option when you create a sloped piece.")
       }
 
