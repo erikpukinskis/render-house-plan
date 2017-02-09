@@ -12,14 +12,19 @@ module.exports = library.export(
 
     var PLAN_ORIGIN = {
       left: 36,
-      top: 20
+      top: 0
     }
 
     function renderHousePlan(bridge, plan, options) {
+
       var viewer = new Viewer(options.view)
-      defineOn(bridge)
-      var el = viewer.render(plan)
-      return el
+
+      return [
+        element("a.breadcrumb", {href: "/house-plan/side"}, "Side"),
+        element("a.breadcrumb", {href: "/house-plan/top"}, "Top"),
+        element("a.breadcrumb", {href: "/house-plan/front"}, "Front"),
+        viewer.render(plan),
+      ]
     }
 
     function Viewer(view, sectionName) {
@@ -36,6 +41,7 @@ module.exports = library.export(
 
       el.addChild(
         element.stylesheet(
+          breadcrumb,
           planTemplate,
           stud,
           plywood,
@@ -86,163 +92,6 @@ module.exports = library.export(
     }
 
 
-    function defineOn(bridge) {
-
-      var ViewerClient = bridge.defineSingleton(
-        "ViewerClient",
-        function() {
-          function ViewerClient() {
-            var resetZDepth = false
-
-            if (resetZDepth || !localStorage.zDepth) {
-              this.zDepth = 72
-            } else {
-              this.zDepth = parseFloat(localStorage.zDepth)
-            }
-
-            if (localStorage.zoomFactor) {
-              this.zoomFactor = parseFloat(localStorage.zoomFactor)
-            } else {
-              this.zoomFactor = 0.39
-            }
-
-            if (localStorage.showSection) {
-              var showSection = JSON.parse(localStorage.showSection)
-            } else {
-              var showSection = {}
-            }
-
-            var toggles
-            var togglesAdded = {}
-                      var startXPixels
-            var startZDepth
-
-
-            this.zoom(this.zoomFactor)
-          }
-
-          function setZDepth(d) {
-            if (d != zDepth) {
-              localStorage.zDepth = d
-            }
-
-            zDepth = d
-
-            var left = zDepthToLeft(d)
-
-            document.querySelector(".depth-slider").style.left = left+"em"
-          }
-
-          function dragZ(event) {
-            if (event.screenX == 0) { return }
-            var dx = event.screenX - startXPixels
-            var newZDepth = startZDepth + dx / (16*zoomFactor)
-            setZDepth(newZDepth)
-          }
-
-          function zDragStart(event) {
-            startXPixels = event.screenX
-            startZDepth = zDepth
-          }
-
-          function zoom(setZDepth, planSelector, by) {
-            if (by == "default") {
-              zoomFactor = 0.39
-            } else {
-              zoomFactor = zoomFactor*by
-            }
-            localStorage.zoomFactor = zoomFactor
-            document.querySelector(planSelector).style["font-size"] = zoomFactor+"em"
-            setZDepth(zDepth)
-          }
-
-
-          function setView(newView, draw) {
-            if (!newView) { return }
-
-            view = newView
-            localStorage.view = newView
-            throw new Error("view?")
-            sideView = frontView = topView = false
-            if (view == "side") {
-              sideView = true
-            } else if (view == "front") {
-              frontView = true
-            } else if (view == "top") {
-              topView = true
-            } else {
-              throw new Error(view+" is not a valid view")
-            }
-
-            if (draw !== false) { redraw() }
-          }
-
-          function ensureToggle(name) {
-            if (!name) { return }
-
-            if (!togglesAdded[name]) {
-              togglesAdded[name] = true
-
-              var show = showSection[name] !== false
-              showSection[name] = show
-
-              var link = element("a.section-toggle.button", name, {
-                href: "javascript: plan.toggleSection(\""+name+"\")"
-              })
-              if (show) {
-                link.classes.push("on")
-              }
-              link.classes.push("toggle-"+name)
-              addHtml.inside(toggles, link.html())
-            }
-          }
-
-          function toggleSection(name) {
-            if (drawing) { return }
-
-            var on = !showSection[name]
-
-            showSection[name] = on
-            localStorage.showSection = JSON.stringify(showSection)
-            
-            var toggle = document.querySelector(".toggle-"+name)
-
-            if (on) {
-              toggle.classList.add("on")
-            } else {
-              toggle.classList.remove("on")
-            }
-
-            emptyNode(container)
-
-            if (drawing) { return }
-            setTimeout(redraw, 0)
-            drawing = true
-          }
-
-          function emptyNode(node) {
-            while (node.firstChild) {
-              node.removeChild(node.firstChild)
-            }
-          }
-
-
-
-          function zDepthToLeft(depth) {
-            return (zDepth + PLAN_ORIGIN.left)*zoomFactor - 0.5
-          }
-
-
-          return ViewerClient
-        }
-      )
-
-
-    }
-
-
-
-
     function joinObjects(iterable) {
       var joined = {}
 
@@ -254,6 +103,14 @@ module.exports = library.export(
 
       return joined
     }
+
+    var breadcrumb = element.style(".breadcrumb", {
+      "font-family": "sans-serif",
+      "font-size": "1.2em",
+      "display": "inline-block",
+      "padding": "20px",
+      "color": "#99d",
+    })
 
     var stud = element.template(
       ".stud",
