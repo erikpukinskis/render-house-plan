@@ -37,6 +37,7 @@ module.exports = library.export(
         view: this.view,
         zDepth: 65,
       }
+
       plan.generate(getPartGenerator.bind(null, el, viewOptions))
 
       el.addChild(

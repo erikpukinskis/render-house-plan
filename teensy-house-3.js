@@ -12,23 +12,51 @@ module.exports = library.export(
 
       var BACK_WALL_INSIDE_HEIGHT = 80
       var FLOOR_TOP = 96
+      var FLOOR_HEIGHT = 3.5
 
       var rafterStart = {
         zPos: HousePlan.parts.stud.DEPTH + HousePlan.parts.plywood.THICKNESS,
         yPos: FLOOR_TOP - BACK_WALL_INSIDE_HEIGHT
       }
 
-      housePanels.addTo(plan,
-        "base floor section",
-        {
-          name: "floor-left",
-          xPos: 0,
-          yPos: FLOOR_TOP,
-          zPos: 0,
-          zSize: 96,
-        }
-      )
+      plan.add(themDoors, {
+        name: "doors",
+        xPos: 0,
+        xSize: 30,
+        yPos: FLOOR_TOP,
+        ySize: 96,
+        zPos: 96,
+      })
 
+      var GAP = 1/4
+
+      function themDoors(section, trim, options) {
+
+        var doors = section(
+          pick(options, "name", "xPos", "yPos", "zPos")
+        )
+
+
+        trim({
+          section: doors,
+          xSize: 3.5,
+          zSize: 0.75,
+          ySize: -options.ySize,
+          yPos: FLOOR_HEIGHT,
+        })
+      }
+
+      function pick(object) {
+        var keys = Array.prototype.slice.call(arguments, 1)
+        var light = {}
+        keys.forEach(function(key) {
+          light[key] = object[key]
+        })
+        return light
+      }
+
+
+      
       housePanels.addTo(plan,
         "floor extension",
         {

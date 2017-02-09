@@ -5,7 +5,7 @@ library.using(
   function(host, teensyHouse, renderHousePlan, BrowserBridge, element) {
 
     var house = teensyHouse()
-
+    
     host.onSite(prepareSite)
 
     function prepareSite(site) {
