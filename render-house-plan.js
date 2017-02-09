@@ -10,14 +10,9 @@ module.exports = library.export(
     var slopeToDegrees = HousePlan.helpers.slopeToDegrees
     var slopeToRadians = HousePlan.helpers.slopeToRadians
 
-    var PLAN_ORIGIN = {
-      left: 36,
-      top: 0
-    }
-
     function renderHousePlan(bridge, plan, options) {
 
-      var viewer = new Viewer(options.view)
+      var viewer = new Viewer(options)
 
       return [
         element("a.breadcrumb", {href: "/house-plan/side"}, "Side"),
@@ -27,12 +22,29 @@ module.exports = library.export(
       ]
     }
 
-    function Viewer(view, sectionName) {
-      this.view = view
-      focus = sectionName
+    function Viewer(options) {
+      this.zoom = options.zoom||0.39
+      this.left = options.left||36
+      this.top = options.top||0
+      this.view = options.view
+      focus = options.sectionName
     }
+
     Viewer.prototype.render = function(plan) {
-      var el = element(".plan")
+
+      var styles = {}
+      if (this.zoom) {
+        styles["font-size"] = this.zoom.toString()+"em"
+      }
+      if (this.left) {
+        styles["left"] = this.left.toString()+"em"
+      }
+      if (this.top) {
+        styles["top"] = this.top.toString()+"em"
+      }
+
+      var el = element(".plan", element.style(styles))
+
       var viewOptions = {
         view: this.view,
         zDepth: 65,
@@ -895,16 +907,11 @@ module.exports = library.export(
       }
     )
 
-
-
-
     var planTemplate = element.template(
       ".plan",
       element.style({
         "z-index": "10",
         "position": "relative",
-        "left": PLAN_ORIGIN.left+"em",
-        "top": PLAN_ORIGIN.top+"em",
         "min-width": "120em",
         "min-height": "120em",
         "margin": "0",
@@ -927,20 +934,6 @@ module.exports = library.export(
         light[key] = object[key]
       })
       return light
-    }
-
-    function contains(array, value) {
-      if (!Array.isArray(array)) {
-        throw new Error("looking for "+JSON.stringify(value)+" in "+JSON.stringify(array)+", which is supposed to be an array. But it's not.")
-      }
-      var index = -1;
-      var length = array.length;
-      while (++index < length) {
-        if (array[index] == value) {
-          return true;
-        }
-      }
-      return false;
     }
 
     return renderHousePlan

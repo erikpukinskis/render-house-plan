@@ -15,8 +15,15 @@ library.using(
         function(request, response) {
           var bridge = new BrowserBridge()
 
-          var view = request.params.view || "side"
-          var page = renderHousePlan(bridge, house, {view: view})
+          var options = {
+            view: request.params.view || "side",
+            zoom: request.query.zoom,
+            left: request.query.left,
+            top: request.query.top,
+          }
+          console.log(options)
+
+          var page = renderHousePlan(bridge, house, options)
 
           bridge.forResponse(response).send(page)
         }
