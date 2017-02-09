@@ -32,10 +32,7 @@ module.exports = library.export(
 
       function themDoors(section, trim, options) {
 
-        var doors = section(
-          pick(options, "name", "xPos", "yPos", "zPos")
-        )
-
+        var doors = section(pick(options, "name", "xPos", "yPos", "zPos"))
 
         trim({
           section: doors,
@@ -48,10 +45,13 @@ module.exports = library.export(
 
       function pick(object) {
         var keys = Array.prototype.slice.call(arguments, 1)
+
         var light = {}
+
         keys.forEach(function(key) {
           light[key] = object[key]
         })
+
         return light
       }
 
@@ -108,10 +108,11 @@ module.exports = library.export(
       housePanels.addTo(plan,
         "side wall extension",
         {
-          name: "right-wall-A",
-          xPos: rightWallOffset,
+          name: "left-wall-B",
+          xPos: 0,
           yPos: FLOOR_TOP,
-          zPos: wallHang,
+          zPos: 48,
+          zSize: 48,
           slope: 0,
         }
       )
@@ -119,10 +120,10 @@ module.exports = library.export(
       housePanels.addTo(plan,
         "side wall",
         {
-          name: "left-wall-B",
-          xPos: 0,
+          name: "right-wall-A",
+          xPos: rightWallOffset,
           yPos: FLOOR_TOP,
-          zPos: 48,
+          zPos: wallHang,
           slope: 0,
         }
       )
@@ -134,6 +135,7 @@ module.exports = library.export(
           xPos: 0,
           yPos: FLOOR_TOP,
           zPos: 48,
+          zSize: 48,
           slope: 0,
         }
       )
