@@ -14,19 +14,44 @@ module.exports = library.export(
 
       var viewer = new Viewer(options)
 
-      return [
+      var page = [
+        element("a.breadcrumb.button", "⇦", moveBy(-1,0)),
+        element("a.breadcrumb.button", "⬆", moveBy(0,-1)),
+        element("a.breadcrumb.button", "⬇", moveBy(0,1)),
+        element("a.breadcrumb.button", "⇨", moveBy(1,0)),
+        element("a.breadcrumb.button", "+", zoomBy(1), element.style({"font-size": "1.5em"})),
+        element("a.breadcrumb.button", "-", zoomBy(-1), element.style({"font-size": "2em", "vertical-align": "-0.1em"})),
         element("a.breadcrumb", {href: "/house-plan/side"}, "Side"),
         element("a.breadcrumb", {href: "/house-plan/top"}, "Top"),
         element("a.breadcrumb", {href: "/house-plan/front"}, "Front"),
         viewer.render(plan),
       ]
+
+      return page
+    }
+
+    var zoom
+    var left
+    var top
+    var view
+
+    function moveBy(x,y) {
+      return {
+        href: "/house-plan/"+view+"?zoom="+zoom+"&top="+(top+y*10)+"&left="+(left+x*10)
+      }
+    }
+
+    function zoomBy(depth) {
+      return {
+        href: "/house-plan/"+view+"?zoom="+(zoom+depth*0.3)+"&top="+top+"&left="+left
+      }
     }
 
     function Viewer(options) {
-      this.zoom = options.zoom||0.39
-      this.left = options.left||36
-      this.top = options.top||0
-      this.view = options.view
+      zoom = this.zoom = typeof options.zoom == "string" ? parseFloat(options.zoom) : 0.39
+      left = this.left = typeof options.left == "string" ? parseFloat(options.left) : 36
+      top = this.top = typeof options.top == "string" ? parseFloat(options.top) : 0
+      view = this.view = options.view
       focus = options.sectionName
     }
 
@@ -55,6 +80,8 @@ module.exports = library.export(
       el.addChild(
         element.stylesheet(
           breadcrumb,
+          breadcrumbHover,
+          button,
           planTemplate,
           stud,
           plywood,
@@ -108,6 +135,14 @@ module.exports = library.export(
       "display": "inline-block",
       "padding": "20px",
       "color": "#99d",
+    })
+
+    var breadcrumbHover = element.style(".breadcrumb:hover", {
+      "background-color": "#f0f0ff",
+    })
+
+    var button = element.style(".button", {
+      "text-decoration": "none",
     })
 
     var stud = element.template(
@@ -910,7 +945,7 @@ module.exports = library.export(
     var planTemplate = element.template(
       ".plan",
       element.style({
-        "z-index": "10",
+        "z-index": "-1",
         "position": "relative",
         "min-width": "120em",
         "min-height": "120em",

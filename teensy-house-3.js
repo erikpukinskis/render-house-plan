@@ -36,10 +36,12 @@ module.exports = library.export(
 
         trim({
           section: doors,
+          xPos: wallHang,
           xSize: 3.5,
-          zSize: 0.75,
           ySize: -options.ySize,
           yPos: FLOOR_HEIGHT,
+          zPos: -0.75,
+          zSize: 0.75,
         })
       }
 
