@@ -8,7 +8,7 @@
     "house-plan": "*",
     "house-panels": "*",
     "web-element": "*",
-    "web-site": "*",
+    "web-host": "*",
     "browser-bridge": "*"
   },
   "repository": {
