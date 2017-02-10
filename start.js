@@ -21,7 +21,6 @@ library.using(
             left: request.query.left,
             top: request.query.top,
           }
-          console.log(options)
 
           var page = renderHousePlan(bridge, house, options)
 

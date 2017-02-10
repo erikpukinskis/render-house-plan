@@ -21,28 +21,114 @@ module.exports = library.export(
 
       plan.add(themDoors, {
         name: "doors",
-        xPos: 0,
+        xPos: HousePlan.parts.plywood.THICKNESS + HousePlan.parts.stud.DEPTH,
         xSize: 30,
         yPos: FLOOR_TOP,
         ySize: 96,
         zPos: 96,
       })
 
-      var GAP = 1/4
+
+      plan.add(housePanels.faceWall, {
+        name: "front wall",
+        xPos: 64,
+        xSize: 32,
+        ySize: 96,
+        joins: "top-full",
+        bottomOverhang: FLOOR_HEIGHT,
+        rightOverhang: 3.5,
+        orientation: "north",        
+      })
 
       function themDoors(section, trim, options) {
 
         var doors = section(pick(options, "name", "xPos", "yPos", "zPos"))
 
-        trim({
+        var windowWidth = 24
+
+        var doorTrim = {
           section: doors,
-          xPos: wallHang,
           xSize: 3.5,
           ySize: -options.ySize,
           yPos: FLOOR_HEIGHT,
           zPos: -0.75,
           zSize: 0.75,
+        }
+
+
+        // Left door
+
+        trim(doorTrim, {
+          name: "left-door-west-front-jamb",
+          xPos: 0,
+          zPos: -0.75,
         })
+
+        trim(doorTrim, {
+          name: "left-door-west-back-jamb",
+          xPos: 0,
+          zPos: -1.5,
+        })
+
+        trim(doorTrim, {
+          name: "left-door-east-front-jamb",
+          xPos: 3.5 + windowWidth,
+          xSize: 5.5,
+        })
+
+        trim(doorTrim, {
+          name: "left-door-east-back-jamb",
+          xPos: 3.5 + windowWidth,
+          zPos: -1.5,
+        })
+
+
+        // Post
+
+        trim(doorTrim, {
+          name: "post-front",
+          xPos: 3.5 + windowWidth + 5.5,
+          zPos: -0.75,
+        })
+
+        trim(doorTrim, {
+          name: "post-back",
+          zPos: -1.5,
+          xPos: 3.5 + windowWidth + 3.5,
+        })
+
+
+
+        // Right door
+
+        var rightDoor = 3.5 + windowWidth + 3.5 + 3.5
+
+        trim(doorTrim, {
+          name: "right-door-west-front-jamb",
+          xPos: rightDoor + 2,
+          zPos: -0.75,
+          xSize: 3.5,
+        })
+
+        trim(doorTrim, {
+          name: "right-door-west-back-jamb",
+          zPos: -1.5,
+          xPos: rightDoor,
+          xSize: 5.5,
+        })
+
+        trim(doorTrim, {
+          name: "right-door-east-front-jamb",
+          xPos: rightDoor + 5.5 + windowWidth,
+        })
+
+        trim(doorTrim, {
+          name: "right-door-east-back-jamb",
+          xPos: rightDoor + 5.5 + windowWidth,
+          zPos: -1.5,
+        })
+
+
       }
 
       function pick(object) {

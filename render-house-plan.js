@@ -30,25 +30,31 @@ module.exports = library.export(
       return page
     }
 
-    var zoom
+    var zoom = 0.4
     var left
     var top
     var view
 
     function moveBy(x,y) {
       return {
-        href: "/house-plan/"+view+"?zoom="+zoom+"&top="+(top+y*10)+"&left="+(left+x*10)
+        href: "/house-plan/"+view+"?zoom="+zoom.toFixed(1)+"&top="+(top+y*10)+"&left="+(left+x*10)
       }
     }
 
     function zoomBy(depth) {
+      var newZoom = zoom+depth*0.3
+
+      if (depth < 0) {
+        depth = 0
+      }
+
       return {
-        href: "/house-plan/"+view+"?zoom="+(zoom+depth*0.3)+"&top="+top+"&left="+left
+        href: "/house-plan/"+view+"?zoom="+(newZoom).toFixed(1)+"&top="+top+"&left="+left
       }
     }
 
     function Viewer(options) {
-      zoom = this.zoom = typeof options.zoom == "string" ? parseFloat(options.zoom) : 0.39
+      zoom = this.zoom = typeof options.zoom == "string" ? parseFloat(options.zoom) : 0.4
       left = this.left = typeof options.left == "string" ? parseFloat(options.left) : 36
       top = this.top = typeof options.top == "string" ? parseFloat(options.top) : 0
       view = this.view = options.view
@@ -59,7 +65,10 @@ module.exports = library.export(
 
       var styles = {}
       if (this.zoom) {
-        styles["font-size"] = this.zoom.toString()+"em"
+
+        var zoomString = (this.zoom*39/40).toFixed(1)
+
+        styles["font-size"] = zoomString+"em"
       }
       if (this.left) {
         styles["left"] = this.left.toString()+"em"
@@ -914,7 +923,10 @@ module.exports = library.export(
       flooring: flooring,
       tilted: tilted,
       sloped: sloped,
+      batten: noop,
     }
+
+    function noop() {}
 
     var sectionBefore = element.style(
       ".section::before",
