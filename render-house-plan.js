@@ -179,6 +179,10 @@ module.exports = library.export(
 
         var o = options.orientation
 
+        if (!o) {
+          throw new Error("Every part needs an orientation: north, south, east, west, horizontal-north, horizontal-south, horizontal-east, horizontal-west, up, down, up-across, or down-across")
+        }
+
         var horizontal = false
         var vertical = false
         var flat = false
@@ -969,6 +973,10 @@ module.exports = library.export(
     function addPart(el, options) {
       if (!el.html) {
         throw new Error("trying to add part to section, but it's not an element")
+      }
+
+      if (!options.section) {
+        throw new Error("Every house plan parts needs a section:\n\nfunction(stud, section) {\n  var floor = section({name: \"floor\"})\n  stud({section: floor})\n}\n")
       }
 
       options.section.addChild(el)

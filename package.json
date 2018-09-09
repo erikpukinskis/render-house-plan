@@ -8,8 +8,8 @@
     "house-plan": "*",
     "house-panels": "*",
     "web-element": "*",
-    "web-host": "*",
-    "browser-bridge": "*"
+    "web-site": "*",
+    "browser-bridge": "*",
   },
   "repository": {
     "type": "git",
